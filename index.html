@@ -140,6 +140,16 @@ tr:hover{background:#f8f9fa}
 .calc-grid button.op{background:#e3f2fd;color:var(--p)}
 .calc-grid button.eq{background:var(--a);color:#fff}
 .calc-grid button.cl{background:#ffebee;color:#c62828}
+.calc-fab{position:fixed;bottom:24px;left:24px;width:56px;height:56px;border-radius:50%;background:var(--p);color:#fff;border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:9998;display:flex;align-items:center;justify-content:center}
+.calc-panel{display:none;position:fixed;bottom:90px;left:24px;width:280px;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:9998;overflow:hidden}
+.calc-panel.open{display:block}
+.calc-display{padding:16px;background:var(--p);color:#fff;font-size:1.8rem;text-align:right;font-weight:600;min-height:60px}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e0e0e0}
+.calc-grid button{padding:16px;border:none;background:#fff;font-size:1.1rem;cursor:pointer;font-weight:600}
+.calc-grid button:hover{background:#f0f7ff}
+.calc-grid button.op{background:#e3f2fd;color:var(--p)}
+.calc-grid button.eq{background:var(--a);color:#fff}
+.calc-grid button.cl{background:#ffebee;color:#c62828}
 @media print{.sidebar{display:none}.content{padding:0}.card{box-shadow:none;border:1px solid #ddd}.export-row{display:none}.bl{display:none}.sidebar-toggle{display:none}}
 </style>
 </head>
@@ -169,6 +179,30 @@ tr:hover{background:#f8f9fa}
 <div id="main"><div class="sidebar" id="sb"></div><div class="content" id="mc"></div></div>
 </div>
 <div id="toast"></div><button class="calc-fab" onclick="toggleCalc()">&#129518;</button>
+<div class="calc-panel" id="calcPanel">
+<div class="calc-display" id="calcDisplay">0</div>
+<div class="calc-grid">
+<button class="cl" onclick="calcClear()">C</button>
+<button onclick="calcDel()">&#9003;</button>
+<button class="op" onclick="calcOp('%')">%</button>
+<button class="op" onclick="calcOp('/')">&#247;</button>
+<button onclick="calcNum('7')">7</button>
+<button onclick="calcNum('8')">8</button>
+<button onclick="calcNum('9')">9</button>
+<button class="op" onclick="calcOp('*')">&#215;</button>
+<button onclick="calcNum('4')">4</button>
+<button onclick="calcNum('5')">5</button>
+<button onclick="calcNum('6')">6</button>
+<button class="op" onclick="calcOp('-')">&#8722;</button>
+<button onclick="calcNum('1')">1</button>
+<button onclick="calcNum('2')">2</button>
+<button onclick="calcNum('3')">3</button>
+<button class="op" onclick="calcOp('+')">+</button>
+<button onclick="calcNum('0')" style="grid-column:span 2">0</button>
+<button onclick="calcNum('.')">,</button>
+<button class="eq" onclick="calcEq()">=</button>
+</div>
+</div><button class="calc-fab" onclick="toggleCalc()">&#129518;</button>
 <div class="calc-panel" id="calcPanel">
 <div class="calc-display" id="calcDisplay">0</div>
 <div class="calc-grid">
@@ -355,7 +389,7 @@ if(!s[u.id])s[u.id]='magil2026';
 });
 var us=cacheDados['usuarios']||[];
 us.forEach(function(u){
-if(u.id&&u.senha)s[u.id]=String(u.senha);
+if(u.id&&u.senha&&String(u.senha).length>0)s[u.id]=String(u.senha);
 });
 return s;
 }
@@ -494,16 +528,37 @@ var sel=document.getElementById('lu').value;
 var pwd=document.getElementById('lp').value;
 if(!sel){toast('Selecione um perfil','error');return}
 if(!pwd){toast('Digite a senha','error');return}
-sincronizar('usuarios');
-loadNiveis();
-loadNomes();
 var senhas=loadSenhas();
-if(senhas[sel]!==pwd){toast('Senha incorreta!','error');return}
+if(senhas[sel]!==pwd){
+sincronizar('usuarios');
+setTimeout(function(){
+var s2=loadSenhas();
+if(s2[sel]!==pwd){toast('Senha incorreta!','error');return}
+completarLogin(sel);
+},2000);
+return;
+}
+completarLogin(sel);
+}
+
+function completarLogin(sel){
 var user=USU.find(function(u){return u.id===sel});
 if(!user){
 var nv=loadNovosVend().find(function(u){return u.id===sel});
 if(!nv){toast('Perfil nao encontrado','error');return}
 user=nv;
+}
+currentUser=user;
+localStorage.setItem('mc_user',JSON.stringify(user));
+document.getElementById('ls').style.display='none';
+document.getElementById('app').style.display='block';
+var b=document.getElementById('ub');
+b.textContent=getNome(user.id)+' - '+getNivel(user.id);
+b.className='badge'+(user.isM?' mg':'');
+initSidebar();
+sincronizar('usuarios');
+['vendas','clientes','metas','atividades'].forEach(function(k){sincronizar(k)});
+toast('Bem-vindo, '+getNome(user.id)+'!','success');
 }
 currentUser=user;
 localStorage.setItem('mc_user',JSON.stringify(user));
