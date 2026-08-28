@@ -215,7 +215,6 @@ items=[
 {id:'vendestado',label:'Vend. por Estado',ico:'🗺'},
 {id:'vendseg',label:'Vend. por Segmento',ico:'📦'},
 {id:'cruzamentos',label:'Cruzamentos',ico:'🔍'},
-{id:'analisecli',label:'Analise de Clientes',ico:'🛒'},
 {sep:'RELATORIOS'},
 {id:'relatividades',label:'Rel. Atividades',ico:'📋'},
 {id:'relatorios',label:'Relatorios Gerais',ico:'📑'},
@@ -231,6 +230,34 @@ items=[
 {id:'comissao',label:'Comissao',ico:'🧮'},
 {id:'meuscli',label:'Meus Clientes',ico:'🏢'}
 ];
+}
+var firstId='';
+items.forEach(function(it){
+if(it.sep){
+var title=document.createElement('div');
+title.className='nav-title';
+title.textContent=it.sep;
+sb.appendChild(title);
+return;
+}
+if(!firstId)firstId=it.id;
+var el=document.createElement('div');
+el.className='nav-item'+(it.id===firstId?' act':'');
+el.innerHTML='<span class="nav-ico">'+(it.ico||'')+'</span> '+it.label;
+el.onclick=function(){
+document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('act')});
+document.querySelectorAll('.tc').forEach(function(x){x.classList.remove('act')});
+el.classList.add('act');
+document.getElementById('tc-'+it.id).classList.add('act');
+renderTab(it.id);
+};
+sb.appendChild(el);
+var tc=document.createElement('div');
+tc.className='tc'+(it.id===firstId?' act':'');
+tc.id='tc-'+it.id;
+mc.appendChild(tc);
+});
+if(firstId)renderTab(firstId);
 }
 var firstId='';
 var currentSection=null;
