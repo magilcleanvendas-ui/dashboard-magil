@@ -1497,6 +1497,66 @@ taxa=faixas[i].taxa;
 break;
 }
 }
+var faixaHtml='<table><thead><tr><th>Faixa de Vendas</th><th>Taxa</th></tr></thead><tbody>';
+faixas.forEach(function(f){
+var ativa=(total>=f.min&&total<=f.max);
+faixaHtml+='<tr'+(ativa?' style="background:#e8f5e9;font-weight:600"':'')+'>'+
+'<td>'+(ativa?'>> ':'')+(f.max>=999999999?'Acima de R$ '+fmtBRL(f.min):'R$ '+fmtBRL(f.min)+' ate R$ '+fmtBRL(f.max))+'</td>'+
+'<td class="tcc">'+(f.taxa*100).toFixed(2)+'%</td></tr>';
+});
+faixaHtml+='</tbody></table>';
+var html='<div class="card" style="margin-top:16px"><h3>Tabela de Comissoes - '+nivel+'</h3>'+
+'<div class="sg">'+
+'<div class="sc"><div class="lb">Vendedor</div><div class="vl" style="font-size:1.2rem">'+getNome(vid)+'</div></div>'+
+'<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ '+fmtBRL(total)+'</div></div>'+
+'<div class="sc w"><div class="lb">Taxa Base</div><div class="vl">'+(taxa*100).toFixed(2)+'%</div></div>'+
+'</div>'+faixaHtml+'</div>';
+html+='<div class="card"><h3>Acelerador por Positivacao</h3>'+
+'<p style="font-size:.85rem;color:var(--m);margin-bottom:12px">0,05% por semana de meta de positivacao atingida (maximo 0,20% com as 4 semanas). Cliente contabilizado apenas uma vez no mes. Valido apenas para pedidos aprovados.</p>'+
+'<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">';
+for(var s=1;s<=4;s++){
+html+='<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px;background:#f8f9fa;border-radius:8px">'+
+'<input type="checkbox" id="cm-sem'+s+'" onchange="calcComissaoFinal(\''+vid+'\')" style="width:20px;height:20px;cursor:pointer">'+
+'<span style="font-weight:600;color:var(--p)">Semana '+s+'</span> - Atingiu a meta?</label>';
+}
+html+='</div>'+
+'<button class="btn btn-p btn-f" onclick="calcComissaoFinal(\''+vid+'\')" style="margin-top:8px">Calcular Comissao</button>'+
+'<div id="cm-resultado" style="margin-top:16px"></div></div>';
+var div=document.getElementById('cm-result');
+if(div)div.innerHTML=html;
+}
+
+function calcComissaoFinal(vid){
+var vendas=loadData('vendas');
+var vV=vendas.filter(function(v){return v.vendedor===vid});
+var total=vV.reduce(function(s,v){return s+(parseFloat(v.total)||0)},0);
+var nivel=getNivel(vid);
+var faixas=COM[nivel]||COM['Junior'];
+var taxa=0;
+for(var i=0;i<faixas.length;i++){
+if(total>=faixas[i].min&&total<=faixas[i].max){
+taxa=faixas[i].taxa;
+break;
+}
+}
+var semanasBatidas=0;
+for(var s=1;s<=4;s++){
+var cb=document.getElementById('cm-sem'+s);
+if(cb&&cb.checked)semanasBatidas++;
+}
+var acelerador=semanasBatidas*ACELERADOR_POR_SEMANA;
+var taxaFinal=taxa+acelerador;
+var comissao=total*taxaFinal;
+var html='<div class="cr">'+
+'<div class="dt">Comissao Calculada</div>'+
+'<div class="am">R$ '+fmtBRL(comissao)+'</div>'+
+'<div class="dt">Taxa base: '+(taxa*100).toFixed(2)+'% | Acelerador: +'+(acelerador*100).toFixed(2)+'% | Taxa final: '+(taxaFinal*100).toFixed(2)+'%</div>'+
+'<div class="dt" style="margin-top:8px">'+semanasBatidas+' semana(s) batida(s) de 4</div>'+
+'</div>';
+var div=document.getElementById('cm-resultado');
+if(div)div.innerHTML=html;
+}
+}
 var comissao=total*taxa;
 var html='<div class="sg">'+
 '<div class="sc"><div class="lb">Vendedor</div><div class="vl" style="font-size:1.2rem">'+getNome(vid)+'</div></div>'+
