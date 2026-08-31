@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="favicon.png">
 <title>Dashboard Comercial Magil Clean</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -287,7 +288,6 @@ function deleteDoc(k,docId){db.collection(k).doc(docId).delete().catch(function(
 function getNivel(id){var us=cacheDados['usuarios']||[];var u=us.find(function(x){return x.id===id});if(u&&u.nivel)return String(u.nivel);var usu=USU.find(function(x){return x.id===id});return usu?usu.nivel:'Junior'}
 function getNome(id){var us=cacheDados['usuarios']||[];var u=us.find(function(x){return x.id===id});if(u&&u.nome)return String(u.nome);var usu=USU.find(function(x){return x.id===id});return usu?usu.nome:id}
 function loadSenhas(){var s={};var us=cacheDados['usuarios']||[];us.forEach(function(u){if(u.id&&u.senha)s[u.id]=String(u.senha)});USU.forEach(function(u){if(!s[u.id])s[u.id]='magil2026'});return s}
-function loadNovosVend(){return[]}
 function getVendedores(){return USU.filter(function(u){return !u.isM})}
 function fmtBRL(v){return parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function getClienteByCod(cod){var clientes=loadData('clientes');var codStr=String(cod).trim();return clientes.find(function(c){return String(c.cod).trim()===codStr})}
@@ -298,7 +298,7 @@ function getMinhasVendas(){var vendas=loadData('vendas');if(currentUser.isM)retu
 function toast(msg,type){var t=document.createElement('div');t.className='tm '+(type||'info');t.textContent=(type==='success'?'OK: ':type==='error'?'ERRO: ':'INFO: ')+msg;document.getElementById('toast').appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(100%)';setTimeout(function(){t.remove()},300)},3500)}
 function progressBar(label,atual,meta,pct){var cls=pct>=80?'hi':pct>=50?'mi':'lo';var fa=parseFloat(atual||0);var fm=parseFloat(meta||0);var da=fa>100?'R$ '+fmtBRL(fa):fa;var dm=fm>100?'R$ '+fmtBRL(fm):fm;return '<div class="pw"><div class="pl"><span>'+label+'</span><span>'+da+' / '+dm+' ('+Math.round(pct)+'%)</span></div><div class="pb"><div class="pf '+cls+'" style="width:'+Math.max(2,Math.min(100,pct))+'%">'+Math.round(pct)+'%</div></div></div>'}
 function updateLoginNomes(){var sel=document.getElementById('lu');if(!sel)return;sel.innerHTML='<option value="">Selecione...</option>';USU.forEach(function(u){var nm=getNome(u.id);var opt=document.createElement('option');opt.value=u.id;opt.textContent=u.isM?nm+' (Gerente)':nm;sel.appendChild(opt)})}
-function syncUsuarios(){USU.forEach(function(u){db.collection('usuarios').doc(u.id).set({id:u.id,nome:u.nome,nivel:u.nivel,senha:'magil2026'},{merge:true}).catch(function(e){console.log('Sync user error:',e)})})}
+function syncUsuarios(){USU.forEach(function(u){db.collection('usuarios').doc(u.id).get().then(function(doc){if(!doc.exists){db.collection('usuarios').doc(u.id).set({id:u.id,nome:u.nome,nivel:u.nivel,senha:'magil2026'}).catch(function(e){console.log('Sync user error:',e)})}}).catch(function(e){console.log('Sync check error:',e)})})}
 function toggleDarkMode(){document.body.classList.toggle('dark');var isDark=document.body.classList.contains('dark');localStorage.setItem('mc_dark',isDark?'1':'0');var btn=document.getElementById('dm-toggle');if(btn)btn.innerHTML=isDark?'&#9728;':'&#127769;'}
 function initDarkMode(){if(localStorage.getItem('mc_dark')==='1'){document.body.classList.add('dark');var btn=document.getElementById('dm-toggle');if(btn)btn.innerHTML='&#9728;'}}
 function doLogin(){var sel=document.getElementById('lu').value;var pwd=document.getElementById('lp').value;if(!sel){toast('Selecione um perfil','error');return}if(!pwd){toast('Digite a senha','error');return}var senhas=loadSenhas();if(senhas[sel]!==pwd){toast('Senha incorreta!','error');return}completarLogin(sel)}
