@@ -181,6 +181,12 @@ tr:hover td{background:#f5f8fa}
 .action-btns{display:flex;gap:6px;flex-wrap:wrap}
 .edit-btn{background:#eaf6f8;color:var(--acc);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
 .del-btn{background:#fdecec;color:var(--err);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
+/* ===== NIVEL DO CLIENTE ===== */
+.nivel-badge{display:inline-block;padding:3px 12px;border-radius:980px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#fff}
+.nivel-badge.ouro{background:linear-gradient(135deg,#f5b301,#d48806);box-shadow:0 1px 4px rgba(212,136,6,.4)}
+.nivel-badge.prata{background:linear-gradient(135deg,#b0bec5,#90a4ae);box-shadow:0 1px 4px rgba(144,164,174,.4)}
+.nivel-badge.bronze{background:linear-gradient(135deg,#cd7f32,#a05a1c);box-shadow:0 1px 4px rgba(160,90,28,.4)}
+.nivel-badge.sem{background:#e0e0e0;color:#757575}
 /* ===== MODO ESCURO (tema HubSpot) ===== */
 body.dark{background:#1f2a36;color:#e6edf3}
 body.dark .card,body.dark .sc,body.dark .vc,body.dark .pc,body.dark .com-stat,body.dark .lc{background:#2a3744;border-color:#3a4a5a;box-shadow:0 1px 3px rgba(0,0,0,.3)}
@@ -209,6 +215,7 @@ body.dark .com-week.checked{background:#1e3a44;border-color:#00a4bd}
 body.dark .search-box .ico{color:#7c98b6}
 body.dark .tipo-badge.venda{background:#1e3a44;color:#00a4bd}
 body.dark .tipo-badge.bonificacao{background:#3a2a1e;color:#ffb300}
+body.dark .nivel-badge.sem{background:#3a4a5a;color:#9db0c0}
 @media(max-width:768px){.sidebar{display:none}.content{padding:18px}.sg{grid-template-columns:repeat(2,1fr)}.vg{grid-template-columns:1fr}.fr{grid-template-columns:1fr}.pe{grid-template-columns:1fr;gap:6px}.pc{flex-direction:column;gap:10px;align-items:stretch}.filtros,.date-filter{flex-direction:column}.com-week-grid{grid-template-columns:repeat(2,1fr)}#hd{padding:10px 16px}}
 @media print{.sidebar{display:none}.content{padding:0}.card{box-shadow:none}.icon-btn,.sidebar-toggle{display:none}}
 </style>
@@ -420,6 +427,7 @@ function initListener(k) {
         row.cidade = String(row.cidade || '');
         row.estado = String(row.estado || '');
         row.segmento = String(row.segmento || '');
+        row.nivel = String(row.nivel || '').toLowerCase();
         row.vendedorId = String(row.vendedorId || '');
         if (!row.origem) { row.origem = 'importado'; }
       });
@@ -1154,7 +1162,7 @@ function delVendedor(id) {
   renderTab('vendedores');
 }
 
-// ===== IMPORTACAO DE PLANILHA =====
+// ===== IMPORTACAO DE PLANILHA (com nivel) =====
 function importClientes() { document.getElementById('import-file').click(); }
 
 function handleImportFile(event) {
@@ -1175,6 +1183,8 @@ function handleImportFile(event) {
         var razao = String(row['Razão Social'] || row['Razao Social'] || row['RazaoSocial'] || row['razao'] || '').trim();
         if (!cod || !razao) { ignorados++; return; }
         var vendedorId = currentUser.isM ? (String(row['Vendedor'] || row['vendedor'] || '').trim() || currentUser.id) : currentUser.id;
+        var nivelRaw = String(row['Nivel'] || row['Nível'] || row['nivel'] || '').toLowerCase().trim();
+        var nivel = (nivelRaw === 'ouro' || nivelRaw === 'prata' || nivelRaw === 'bronze') ? nivelRaw : '';
         var cliente = {
           cod: cod, razao: razao,
           contato: String(row['Contato'] || row['contato'] || '').trim(),
@@ -1184,6 +1194,7 @@ function handleImportFile(event) {
           cidade: String(row['Cidade'] || row['cidade'] || '').trim(),
           estado: String(row['UF'] || row['Estado'] || row['uf'] || '').trim(),
           segmento: String(row['Segmento'] || row['segmento'] || '').trim(),
+          nivel: nivel,
           vendedorId: vendedorId,
           origem: 'importado'
         };
@@ -1200,17 +1211,21 @@ function handleImportFile(event) {
   event.target.value = '';
 }
 
-// ===== CLIENTES =====
+// ===== CLIENTES (com Nivel + filtro) =====
 function renderClientes(isGerente) {
   var clientes = isGerente ? loadData('clientes') : getMeusClientes();
   var segOpts = SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
   var ufOpts = UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('');
   var vendOpts = getVendedores().map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
+  var nivelOpts = '<option value="">Todos</option><option value="ouro">Ouro</option><option value="prata">Prata</option><option value="bronze">Bronze</option><option value="sem">Sem Nivel</option>';
+  var nivelFormOpts = '<option value="">Sem Nivel</option><option value="ouro">Ouro</option><option value="prata">Prata</option><option value="bronze">Bronze</option>';
   var tabela = clientes.length
-    ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
+    ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th><th>Nivel</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
       clientes.map(function (c, i) {
         var transferirHtml = isGerente ? '<td><select class="inp-sm" style="width:120px" onchange="transferirCliente(\'' + c.cod + '\',this.value)"><option value="">--</option>' + vendOpts + '</select></td>' : '';
-        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="editCliente(' + i + ',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + i + ',' + isGerente + ')">Excluir</button></div></td></tr>';
+        var nivel = c.nivel || 'sem';
+        var nivelHtml = '<span class="nivel-badge ' + nivel + '">' + (nivel === 'sem' ? 'Sem' : nivel.charAt(0).toUpperCase() + nivel.slice(1)) + '</span>';
+        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td><td>' + nivelHtml + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="editCliente(' + i + ',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + i + ',' + isGerente + ')">Excluir</button></div></td></tr>';
       }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhum cliente.</p></div>';
   var importCard = '<div class="card"><h3>Importar Planilha</h3>' +
@@ -1225,25 +1240,39 @@ function renderClientes(isGerente) {
     '<div class="fg"><label>Cidade</label><input type="text" id="cl-cidade" placeholder="Cidade"></div>' +
     '<div class="fg"><label>Estado</label><select id="cl-estado"><option value="">--</option>' + ufOpts + '</select></div>' +
     '<div class="fg"><label>Segmento</label><select id="cl-segmento"><option value="">--</option>' + segOpts + '</select></div>' +
+    '<div class="fg"><label>Nivel</label><select id="cl-nivel">' + nivelFormOpts + '</select></div>' +
     (isGerente ? '<div class="fg"><label>Vendedor</label><select id="cl-vend">' + vendOpts + '</select></div>' : '') +
     '</div><button class="btn btn-p" onclick="saveCliente(' + isGerente + ')">Salvar Cliente</button></div>';
   var rotacaoCard = isGerente ? '<div class="card" style="border-left:4px solid var(--warn)"><h3>🔄 Rodizio de 3 Meses</h3><p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">O rodizio completo (carteiras por vendedor) esta na aba <strong>Rodizio (3 Meses)</strong> no menu.</p><button class="btn btn-a" onclick="renderTab(\'rodizio\')">Ir para o Rodizio</button></div>' : '';
-  var filtroHtml = '<div class="card"><h3>Buscar Cliente</h3><div class="search-box"><span class="ico">🔍</span><input type="text" id="cl-busca" placeholder="Buscar por nome, codigo ou telefone..." oninput="filtrarClientes(' + isGerente + ')"></div><div id="cl-lista">' + tabela + '</div></div>';
+  var filtroHtml = '<div class="card"><h3>Buscar Cliente</h3><div class="search-box"><span class="ico">🔍</span><input type="text" id="cl-busca" placeholder="Buscar por nome, codigo ou telefone..." oninput="filtrarClientes(' + isGerente + ')"></div>' +
+    '<div class="filtros" style="margin-top:12px"><div class="fg"><label>Filtrar por Nivel</label><select id="cl-filtro-nivel" onchange="filtrarClientes(' + isGerente + ')">' + nivelOpts + '</select></div></div>' +
+    '<div id="cl-lista">' + tabela + '</div></div>';
   return '<h2 class="st2">' + (isGerente ? 'Clientes' : 'Meus Clientes') + '</h2>' + importCard + rotacaoCard + formHtml + filtroHtml;
 }
 
 function filtrarClientes(isGerente) {
   var clientes = isGerente ? loadData('clientes') : getMeusClientes();
   var termo = document.getElementById('cl-busca').value.toLowerCase().trim();
-  var filtrados = termo ? clientes.filter(function (c) {
-    return (c.razao || '').toLowerCase().indexOf(termo) >= 0 || (c.cod || '').toLowerCase().indexOf(termo) >= 0 || (c.celular || '').indexOf(termo) >= 0 || (c.telefone || '').indexOf(termo) >= 0;
-  }) : clientes;
+  var nivelFiltro = document.getElementById('cl-filtro-nivel').value;
+  var filtrados = clientes.filter(function (c) {
+    if (nivelFiltro) {
+      var cn = c.nivel || 'sem';
+      if (nivelFiltro === 'sem' && cn !== 'sem') { return false; }
+      if (nivelFiltro !== 'sem' && cn !== nivelFiltro) { return false; }
+    }
+    if (termo) {
+      return (c.razao || '').toLowerCase().indexOf(termo) >= 0 || (c.cod || '').toLowerCase().indexOf(termo) >= 0 || (c.celular || '').indexOf(termo) >= 0 || (c.telefone || '').indexOf(termo) >= 0;
+    }
+    return true;
+  });
   var vendOpts = getVendedores().map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
   var html = filtrados.length
-    ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
+    ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th><th>Nivel</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
       filtrados.map(function (c) {
         var transferirHtml = isGerente ? '<td><select class="inp-sm" style="width:120px" onchange="transferirCliente(\'' + c.cod + '\',this.value)"><option value="">--</option>' + vendOpts + '</select></td>' : '';
-        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="editCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Excluir</button></div></td></tr>';
+        var nivel = c.nivel || 'sem';
+        var nivelHtml = '<span class="nivel-badge ' + nivel + '">' + (nivel === 'sem' ? 'Sem' : nivel.charAt(0).toUpperCase() + nivel.slice(1)) + '</span>';
+        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td><td>' + nivelHtml + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="editCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Excluir</button></div></td></tr>';
       }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhum cliente encontrado.</p></div>';
   var div = document.getElementById('cl-lista');
@@ -1275,6 +1304,7 @@ function saveCliente(isGerente) {
     cidade: document.getElementById('cl-cidade').value.trim(),
     estado: document.getElementById('cl-estado').value,
     segmento: document.getElementById('cl-segmento').value,
+    nivel: document.getElementById('cl-nivel').value,
     vendedorId: isGerente ? document.getElementById('cl-vend').value : currentUser.id
   };
   var clientes = loadData('clientes');
@@ -1315,6 +1345,7 @@ function editCliente(i, isGerente) {
   document.getElementById('cl-cidade').value = cli.cidade || '';
   document.getElementById('cl-estado').value = cli.estado || '';
   document.getElementById('cl-segmento').value = cli.segmento || '';
+  document.getElementById('cl-nivel').value = cli.nivel || '';
   if (isGerente && document.getElementById('cl-vend')) { document.getElementById('cl-vend').value = cli.vendedorId || ''; }
   toast('Editando: ' + cli.razao, 'info');
 }
@@ -1334,7 +1365,11 @@ function renderRodizio() {
     var meus = clientes.filter(function (c) { return c.vendedorId === v.id; });
     var destOpts = vAtivos.filter(function (d) { return d.id !== v.id; }).map(function (d) { return '<option value="' + d.id + '">' + getNome(d.id) + '</option>'; }).join('');
     var corpo = meus.length
-      ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th></tr></thead><tbody>' + meus.map(function (c) { return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td></tr>'; }).join('') + '</tbody></table>'
+      ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Nivel</th></tr></thead><tbody>' + meus.map(function (c) {
+        var nivel = c.nivel || 'sem';
+        var nivelHtml = '<span class="nivel-badge ' + nivel + '">' + (nivel === 'sem' ? 'Sem' : nivel.charAt(0).toUpperCase() + nivel.slice(1)) + '</span>';
+        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + nivelHtml + '</td></tr>';
+      }).join('') + '</tbody></table>'
       : '<div class="es"><div class="ic">SEM</div><p>Sem clientes atribuidos a este vendedor.</p></div>';
     html += '<div class="card"><div class="com-hero" style="margin-bottom:12px;cursor:pointer" onclick="toggleCarteira(\'' + v.id + '\')">' +
       '<div><div class="com-name">' + getNome(v.id) + ' <span id="rd-arrow-' + v.id + '" style="font-size:.9rem;opacity:.7">▾</span></div><div class="com-nivel">' + getNivel(v.id) + ' — ' + meus.length + ' clientes</div></div>' +
@@ -2168,11 +2203,14 @@ function updateClienteInfo() {
   if (!div) { return; }
   if (!cod) { div.innerHTML = ''; return; }
   if (!c) { div.innerHTML = '<div class="client-info" style="border-left-color:var(--err)"><div class="ci-label">Cliente</div><div class="ci-value" style="color:var(--err)">Nao encontrado com o codigo: ' + cod + '</div></div>'; return; }
+  var nivel = c.nivel || 'sem';
+  var nivelHtml = '<span class="nivel-badge ' + nivel + '">' + (nivel === 'sem' ? 'Sem' : nivel.charAt(0).toUpperCase() + nivel.slice(1)) + '</span>';
   div.innerHTML = '<div class="client-info"><div style="display:flex;gap:20px;flex-wrap:wrap">' +
     '<div><div class="ci-label">Razao Social</div><div class="ci-value">' + c.razao + '</div></div>' +
     '<div><div class="ci-label">Cidade</div><div class="ci-value">' + (c.cidade || '--') + '</div></div>' +
     '<div><div class="ci-label">Estado</div><div class="ci-value">' + (c.estado || '--') + '</div></div>' +
     '<div><div class="ci-label">Segmento</div><div class="ci-value">' + (c.segmento || '--') + '</div></div>' +
+    '<div><div class="ci-label">Nivel</div><div class="ci-value">' + nivelHtml + '</div></div>' +
     '<div><div class="ci-label">Vendedor</div><div class="ci-value">' + getNome(c.vendedorId || currentUser.id) + '</div></div></div></div>';
 }
 
