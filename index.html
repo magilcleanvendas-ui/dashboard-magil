@@ -366,13 +366,13 @@ var MARCAS = [
   { nome: 'Super Clean-DEX', cods: ['39', '40', '41'] }
 ];
 
-// ===== COMISSOES =====
+// ===== COMISSOES (corrigidas conforme imagem anexada) =====
 var COM = {
   'Junior': [
     { min: 0, max: 50000, taxa: 0.20 },
     { min: 50001, max: 100000, taxa: 0.25 },
     { min: 100001, max: 150000, taxa: 0.30 },
-    { min: 150001, max: 999999999, taxa: 0.35 }
+    { min: 150001, max: 200000, taxa: 0.35 }
   ],
   'Pleno': [
     { min: 0, max: 200000, taxa: 0.40 },
@@ -1683,7 +1683,7 @@ function limparFiltroMinhasVendas() {
   filtrarMinhasVendas();
 }
 
-// ===== RELATORIO DE ATIVIDADES =====
+// ===== RELATORIO DE ATIVIDADES (linha corrigida) =====
 function renderRelAtividades() {
   var atividades = loadData('atividades');
   var vAtivos = getVendedores();
@@ -1741,7 +1741,7 @@ function filtrarRelAtiv() {
   if (div) { div.innerHTML = html; }
 }
 
-// ===== VENDAS POR VENDEDOR =====
+// ===== VENDAS POR VENDEDOR (com periodo Mensal/Anual + 1 calendario + Limpar) =====
 function renderVendVendedor() {
   var vendas = loadData('vendas');
   var vAtivos = getVendedores();
@@ -1753,10 +1753,12 @@ function renderVendVendedor() {
     return '<tr><td>' + getNome(v.id) + '</td><td class="tcc">' + vV.length + '</td><td class="tcc">' + qtd + '</td><td class="tcr">R$ ' + fmtBRL(tot) + '</td></tr>';
   }).join('');
   return '<h2 class="st2">Vendas por Vendedor</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="filtros"><div class="fg"><label>Vendedor</label><select id="vv-vend"><option value="">Todos</option>' + vendOpts + '</select></div>' +
-    '<div class="fg"><label>Periodo</label><select id="vv-periodo"><option value="todos">Todos</option><option value="diario">Diario</option><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>' +
-    '<div class="fg"><label>Data</label><input type="date" id="vv-data"></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendVendedor()">OK</button></div></div></div>' +
+    '<div class="card"><h3>Filtros</h3><div class="filtros">' +
+    '<div class="fg"><label>Vendedor</label><select id="vv-vend"><option value="">Todos</option>' + vendOpts + '</select></div>' +
+    '<div class="fg"><label>Periodo</label><select id="vv-periodo"><option value="todos">Todos</option><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>' +
+    '<div class="fg"><label>Data de Referencia</label><input type="date" id="vv-data"></div>' +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendVendedor()">OK</button>' +
+    '<button class="btn btn-a btn-s" onclick="limparFiltroVendVendedor()">Limpar</button></div></div></div>' +
     '<div class="card"><h3>Resumo</h3><table id="vv-tabela"><thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead><tbody>' + tabela + '</tbody></table></div>' +
     '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVV"></canvas></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVV\',\'vendas-vendedor.png\')">Exportar PNG</button><button class="btn btn-p btn-s" onclick="exportVendVendedorPDF()">Exportar PDF</button></div></div>';
 }
@@ -1771,7 +1773,6 @@ function filtrarVendVendedor() {
     if (dataRef) {
       var dV = new Date(v.data);
       var dR = new Date(dataRef);
-      if (periodo === 'diario' && dV.toDateString() !== dR.toDateString()) { return false; }
       if (periodo === 'mensal' && (dV.getMonth() !== dR.getMonth() || dV.getFullYear() !== dR.getFullYear())) { return false; }
       if (periodo === 'anual' && dV.getFullYear() !== dR.getFullYear()) { return false; }
     }
@@ -1791,6 +1792,13 @@ function filtrarVendVendedor() {
   if (ctx) {
     charts.vv = new Chart(ctx, { type: 'bar', data: { labels: vAtivos.map(function (v) { return getNome(v.id); }), datasets: [{ label: 'Total', data: vAtivos.map(function (v) { return filtradas.filter(function (x) { return x.vendedor === v.id; }).reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0); }), backgroundColor: CORES, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
   }
+}
+
+function limparFiltroVendVendedor() {
+  document.getElementById('vv-vend').value = '';
+  document.getElementById('vv-periodo').value = 'todos';
+  document.getElementById('vv-data').value = '';
+  filtrarVendVendedor();
 }
 
 function initVendVendedorChart() { filtrarVendVendedor(); }
@@ -2036,7 +2044,7 @@ function renderCompContent(vid) {
   var total = vV.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
   var nivel = getNivel(vid);
   var faixas = COM[nivel] || COM['Junior'];
-  var taxa = 0;
+  var taxa = faixas[faixas.length - 1].taxa;
   for (var i = 0; i < faixas.length; i++) { if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; } }
   var faixaHtml = '<table class="com-faixa-table"><thead><tr><th>Faixa de Vendas</th><th>Taxa (por R$ 1.000)</th></tr></thead><tbody>';
   faixas.forEach(function (f) {
@@ -2075,7 +2083,7 @@ function updateComStats(vid) {
   var total = vV.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
   var nivel = getNivel(vid);
   var faixas = COM[nivel] || COM['Junior'];
-  var taxa = 0;
+  var taxa = faixas[faixas.length - 1].taxa;
   for (var i = 0; i < faixas.length; i++) { if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; } }
   var semanasBatidas = 0;
   for (var s = 1; s <= 4; s++) { var w = document.getElementById('cm-week-' + s); if (w && w.classList.contains('checked')) { semanasBatidas++; } }
@@ -2094,7 +2102,7 @@ function calcComissaoFinal(vid) {
   var total = vV.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
   var nivel = getNivel(vid);
   var faixas = COM[nivel] || COM['Junior'];
-  var taxa = 0;
+  var taxa = faixas[faixas.length - 1].taxa;
   for (var i = 0; i < faixas.length; i++) { if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; } }
   var semanasBatidas = 0;
   for (var s = 1; s <= 4; s++) { var w = document.getElementById('cm-week-' + s); if (w && w.classList.contains('checked')) { semanasBatidas++; } }
@@ -2237,7 +2245,7 @@ function renderMinhas() {
     progressBar('Clientes Novos', vCN, m.clientesNovos || 0, pCN) + '</div>';
 }
 
-// ===== REGISTRAR VENDA (VENDEDOR) =====
+// ===== REGISTRAR VENDA (VENDEDOR) — permite varias vendas por cliente =====
 function renderVenda() {
   return renderWeeklyBar() +
     '<h2 class="st2">Registrar Venda</h2>' +
@@ -2323,11 +2331,6 @@ function saveVenda() {
     if (prod && qtd > 0) { itens.push({ cod: codProd, nome: prod.nome, qtd: qtd, preco: prod.preco }); total += prod.preco * qtd; qtdProdutos += qtd; }
   });
   if (itens.length === 0) { toast('Adicione pelo menos um item', 'error'); return; }
-  if (tipo === 'venda') {
-    var vendas = loadData('vendas');
-    var jaExiste = vendas.some(function (v) { var m = v.cliente.match(/COD\s+(\S+)/); return m && m[1] === cod && v.vendedor === currentUser.id && (v.tipo || 'venda') === 'venda'; });
-    if (jaExiste) { toast('Este cliente ja possui uma venda cadastrada. Use Bonificacao para repetir o codigo.', 'error'); return; }
-  }
   var nomeCli = cliente ? cliente.razao : 'COD ' + cod;
   var estado = cliente ? cliente.estado : '--';
   var segmento = cliente ? cliente.segmento : 'Outros';
