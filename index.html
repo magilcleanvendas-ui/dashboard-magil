@@ -240,7 +240,7 @@ firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(function
 });
 
 // ===== USUARIOS =====
-var USU = [
+var USU = [ 
   { id: 'gerente', nome: 'Mariana', nivel: 'Gerente', isM: true },
   { id: 'v1', nome: 'Vendedor 1', nivel: 'Junior', isM: false },
   { id: 'v2', nome: 'Vendedor 2', nivel: 'Junior', isM: false },
@@ -252,7 +252,11 @@ var USU = [
   { id: 'v8', nome: 'Vendedor 8', nivel: 'Junior', isM: false },
   { id: 'v9', nome: 'Vendedor 9', nivel: 'Pleno', isM: false },
   { id: 'v10', nome: 'Vendedor 10', nivel: 'Junior', isM: false }
-];
+]; 
+// ===== VENDEDORES EXCLUIDOS (persistidos no navegador) =====
+var DELETADOS = [];
+try { DELETADOS = JSON.parse(localStorage.getItem('mc_excluidos')) || []; } catch (e) { DELETADOS = []; }
+USU = USU.filter(function (u) { return DELETADOS.indexOf(u.id) === -1; });
 
 // ===== PRODUTOS =====
 var PROD = [
@@ -391,13 +395,15 @@ function initListener(k) {
         if (!row.origem) { row.origem = 'importado'; }
       });
     }
-    if (k === 'usuarios') {
+        if (k === 'usuarios') {
       arr.forEach(function (u) {
         if (u.id) {
           var usu = USU.find(function (x) { return x.id === u.id; });
           if (usu) {
             usu.nome = String(u.nome || usu.nome);
             usu.nivel = String(u.nivel || usu.nivel);
+          } else if (DELETADOS.indexOf(u.id) === -1) {
+            USU.push({ id: u.id, nome: String(u.nome || u.id), nivel: String(u.nivel || 'Junior'), isM: u.id === 'gerente' });
           }
         }
       });
@@ -1053,6 +1059,8 @@ function addVendedor() {
   var nivel = document.getElementById('nv-nivel').value;
   if (!nome) { toast('Digite o nome do vendedor', 'error'); return; }
   var novoId = 'v' + Date.now().toString().slice(-5);
+    DELETADOS = DELETADOS.filter(function (x) { return x !== novoId; });
+  localStorage.setItem('mc_excluidos', JSON.stringify(DELETADOS));
   var novo = { id: novoId, nome: nome, nivel: nivel, isM: false };
   USU.push(novo);
   db.collection('usuarios').doc(novoId).set({ id: novoId, nome: nome, nivel: nivel, senha: 'magil2026' })
@@ -1109,6 +1117,8 @@ function delVendedor(id) {
     if (c.vendedorId === id) { c.vendedorId = destino; saveData('clientes', c); }
   });
   USU = USU.filter(function (x) { return x.id !== id; });
+    if (DELETADOS.indexOf(id) === -1) { DELETADOS.push(id); }
+  localStorage.setItem('mc_excluidos', JSON.stringify(DELETADOS));
   db.collection('usuarios').doc(id).delete().catch(function (e) { console.log('Delete user error:', e); });
   updateLoginNomes();
   toast('Vendedor excluido: ' + nome + ' (clientes transferidos para ' + getNome(destino) + ')', 'success');
