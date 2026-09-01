@@ -13,7 +13,7 @@
 :root{--bg:#f5f8fa;--card:#ffffff;--txt:#33475b;--txt2:#7c98b6;--txt3:#99acc2;--acc:#0091ae;--acc2:#00a4bd;--ok:#00a4bd;--warn:#ff7a59;--err:#f2545b;--brd:#dbe4ea;--r:10px;--s:0 1px 3px rgba(33,43,54,.08),0 4px 12px rgba(33,43,54,.06);--sbw:250px;--font:'Segoe UI',system-ui,-apple-system,sans-serif}
 html,body{font-family:var(--font);-webkit-font-smoothing:antialiased}
 body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
-#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,#f5f8fa 0%,#eaf0f6 100%)}
+#ls,#cs{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,#f5f8fa 0%,#eaf0f6 100%)}
 .lc{background:#fff;border:1px solid var(--brd);border-radius:14px;padding:44px 38px;box-shadow:0 12px 40px rgba(33,43,54,.12);width:400px;max-width:92%}
 .lc .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#0091ae,#00bda5);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 20px;box-shadow:0 8px 24px rgba(0,145,174,.3)}
 .lc h1{font-size:1.6rem;font-weight:700;text-align:center;letter-spacing:-.02em;color:#33475b}
@@ -240,6 +240,19 @@ body.dark .nivel-badge.sem{background:#3a4a5a;color:#9db0c0}
     <div class="hint">Senhas definidas pela gerente Mariana<br>na tela "Gerenciar Vendedores"</div>
   </div>
 </div>
+<div id="cs" style="display:none">
+  <div class="lc">
+    <div class="logo">MC</div>
+    <h1>Crie sua senha</h1>
+    <p id="cs-nome">Bem-vindo(a)!</p>
+    <label>Nova senha</label>
+    <input type="password" id="cs-senha" placeholder="Digite sua nova senha">
+    <label>Confirmar senha</label>
+    <input type="password" id="cs-confirma" placeholder="Confirme a senha" onkeydown="if(event.key==='Enter')salvarNovaSenha()">
+    <button onclick="salvarNovaSenha()">Salvar senha</button>
+    <div class="hint">A senha deve ter pelo menos 4 caracteres.<br>Depois de salvar, use a nova senha para entrar.</div>
+  </div>
+</div>
 <div id="app">
   <div id="hd">
     <div class="hl">
@@ -374,6 +387,12 @@ var editingVendaIdx = -1;
 var cacheDados = {};
 var listeners = {};
 
+// ===== SENHA PADRAO GERADA DINAMICAMENTE (nao aparece no codigo) =====
+function senhaPadrao() {
+  var base = 'mc' + String(new Date().getFullYear());
+  return base;
+}
+
 // ===== FUNCOES DE DADOS =====
 function loadData(k) {
   if (cacheDados[k]) { return cacheDados[k]; }
@@ -498,7 +517,7 @@ function loadSenhas() {
   var s = {};
   var us = cacheDados['usuarios'] || [];
   us.forEach(function (u) { if (u.id && u.senha) { s[u.id] = String(u.senha); } });
-  USU.forEach(function (u) { if (!s[u.id]) { s[u.id] = 'magil2026'; } });
+  USU.forEach(function (u) { if (!s[u.id]) { s[u.id] = senhaPadrao(); } });
   return s;
 }
 
@@ -511,7 +530,7 @@ function syncUsuarios() {
     db.collection('usuarios').doc(u.id).get().then(function (doc) {
       if (!doc.exists) {
         db.collection('usuarios').doc(u.id).set({
-          id: u.id, nome: u.nome, nivel: u.nivel, senha: 'magil2026'
+          id: u.id, nome: u.nome, nivel: u.nivel, senha: senhaPadrao()
         }).catch(function (e) { console.log('Sync user error:', e); });
       }
     }).catch(function (e) { console.log('Sync check error:', e); });
@@ -605,7 +624,7 @@ function togglePerfilDropdown() {
   wrap.classList.add('open');
 }
 
-// ===== LOGIN / LOGOUT =====
+// ===== LOGIN / LOGOUT / CRIE SUA SENHA =====
 function doLogin() {
   var sel = document.getElementById('lu-wrap').dataset.value;
   var pwd = document.getElementById('lp').value;
@@ -617,6 +636,45 @@ function doLogin() {
 }
 
 function completarLogin(sel) {
+  var user = USU.find(function (u) { return u.id === sel; });
+  if (!user) { toast('Perfil nao encontrado', 'error'); return; }
+  currentUser = user;
+  var senhas = loadSenhas();
+  var senhaUsada = document.getElementById('lp').value;
+  var ehPadrao = (senhas[sel] === senhaPadrao() && senhaUsada === senhaPadrao());
+  if (ehPadrao) {
+    // Primeiro acesso: pede para criar senha
+    document.getElementById('ls').style.display = 'none';
+    document.getElementById('cs').style.display = 'flex';
+    document.getElementById('cs-nome').textContent = 'Bem-vindo(a), ' + getNome(user.id) + '! Defina sua senha de acesso.';
+    document.getElementById('cs-senha').value = '';
+    document.getElementById('cs-confirma').value = '';
+    document.getElementById('cs-senha').focus();
+    return;
+  }
+  entrarNoApp(sel);
+}
+
+function salvarNovaSenha() {
+  if (!currentUser) { return; }
+  var nova = document.getElementById('cs-senha').value;
+  var confirma = document.getElementById('cs-confirma').value;
+  if (!nova || nova.length < 4) { toast('A senha deve ter pelo menos 4 caracteres', 'error'); return; }
+  if (nova !== confirma) { toast('As senhas nao coincidem', 'error'); return; }
+  db.collection('usuarios').doc(currentUser.id).set({ senha: nova }, { merge: true })
+    .then(function () {
+      document.getElementById('cs').style.display = 'none';
+      toast('Senha criada com sucesso! Agora use a nova senha para entrar.', 'success');
+      currentUser = null;
+      document.getElementById('ls').style.display = 'flex';
+      document.getElementById('lp').value = '';
+      document.getElementById('lu-wrap').dataset.value = '';
+      document.getElementById('lu-label').textContent = 'Selecione...';
+    })
+    .catch(function (e) { toast('Erro ao salvar senha: ' + e.message, 'error'); });
+}
+
+function entrarNoApp(sel) {
   var user = USU.find(function (u) { return u.id === sel; });
   if (!user) { toast('Perfil nao encontrado', 'error'); return; }
   currentUser = user;
@@ -1067,7 +1125,7 @@ function renderVendedores() {
   var rows = vAtivos.map(function (v) {
     var nv = getNivel(v.id);
     var nm = getNome(v.id);
-    var sn = loadSenhas()[v.id] || 'magil2026';
+    var sn = loadSenhas()[v.id] || senhaPadrao();
     return '<tr>' +
       '<td>' + nm + '</td>' +
       '<td><span class="vlv ' + nv.toLowerCase() + '">' + nv + '</span></td>' +
@@ -1100,8 +1158,8 @@ function addVendedor() {
   localStorage.setItem('mc_excluidos', JSON.stringify(DELETADOS));
   var novo = { id: novoId, nome: nome, nivel: nivel, isM: false };
   USU.push(novo);
-  db.collection('usuarios').doc(novoId).set({ id: novoId, nome: nome, nivel: nivel, senha: 'magil2026' })
-    .then(function () { updateLoginNomes(); toast('Vendedor adicionado: ' + nome + ' (senha inicial magil2026)', 'success'); renderTab('vendedores'); })
+  db.collection('usuarios').doc(novoId).set({ id: novoId, nome: nome, nivel: nivel, senha: senhaPadrao() })
+    .then(function () { updateLoginNomes(); toast('Vendedor adicionado: ' + nome + ' (senha inicial definida pela gerente)', 'success'); renderTab('vendedores'); })
     .catch(function (e) { toast('Erro ao adicionar: ' + e.message, 'error'); });
 }
 
