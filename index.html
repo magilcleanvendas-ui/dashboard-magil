@@ -302,10 +302,21 @@ var USU = [
   { id: 'v10', nome: 'Vendedor 10', nivel: 'Junior', isM: false }
 ];
 
-// ===== VENDEDORES EXCLUIDOS (persistidos no navegador) =====
+// ===== VENDEDORES EXCLUIDOS (persistidos no Firestore - compartilhado) =====
 var DELETADOS = [];
-try { DELETADOS = JSON.parse(localStorage.getItem('mc_excluidos')) || []; } catch (e) { DELETADOS = []; }
-USU = USU.filter(function (u) { return DELETADOS.indexOf(u.id) === -1; });
+
+function salvarDeletados() {
+  db.collection('config').doc('deletados').set({ ids: DELETADOS })
+    .catch(function (e) { console.log('Erro ao salvar excluidos:', e); });
+}
+
+function carregarDeletados() {
+  db.collection('config').doc('deletados').get().then(function (doc) {
+    if (doc.exists && doc.data().ids) { DELETADOS = doc.data().ids; }
+    USU = USU.filter(function (u) { return DELETADOS.indexOf(u.id) === -1; });
+    updateLoginNomes();
+  }).catch(function (e) { console.log('Erro ao carregar excluidos:', e); });
+}
 
 // ===== PRODUTOS =====
 var PROD = [
@@ -527,6 +538,7 @@ function getVendedores() {
 
 function syncUsuarios() {
   USU.forEach(function (u) {
+    if (DELETADOS.indexOf(u.id) !== -1) { return; }
     db.collection('usuarios').doc(u.id).get().then(function (doc) {
       if (!doc.exists) {
         db.collection('usuarios').doc(u.id).set({
@@ -1155,7 +1167,7 @@ function addVendedor() {
   if (!nome) { toast('Digite o nome do vendedor', 'error'); return; }
   var novoId = 'v' + Date.now().toString().slice(-5);
   DELETADOS = DELETADOS.filter(function (x) { return x !== novoId; });
-  localStorage.setItem('mc_excluidos', JSON.stringify(DELETADOS));
+  salvarDeletados();
   var novo = { id: novoId, nome: nome, nivel: nivel, isM: false };
   USU.push(novo);
   db.collection('usuarios').doc(novoId).set({ id: novoId, nome: nome, nivel: nivel, senha: senhaPadrao() })
@@ -1198,7 +1210,7 @@ function toggleNivel(id) {
     .catch(function (e) { toast('Erro ao alterar nivel: ' + e.message, 'error'); });
 }
 
-// ===== EXCLUIR VENDEDOR (transfere carteira + nao volta ao sair) =====
+// ===== EXCLUIR VENDEDOR (transfere carteira + salva no Firestore - nao volta) =====
 function delVendedor(id) {
   if (!currentUser || !currentUser.isM) { toast('Somente a gerente pode excluir vendedores', 'error'); return; }
   var v = USU.find(function (x) { return x.id === id; });
@@ -1213,7 +1225,7 @@ function delVendedor(id) {
   });
   USU = USU.filter(function (x) { return x.id !== id; });
   if (DELETADOS.indexOf(id) === -1) { DELETADOS.push(id); }
-  localStorage.setItem('mc_excluidos', JSON.stringify(DELETADOS));
+  salvarDeletados();
   db.collection('usuarios').doc(id).delete().catch(function (e) { console.log('Delete user error:', e); });
   updateLoginNomes();
   toast('Vendedor excluido: ' + nome + ' (clientes transferidos para ' + getNome(destino) + ')', 'success');
@@ -2366,6 +2378,7 @@ function delAtividade(i) {
 // ===== INICIALIZACAO =====
 (function () {
   initDarkMode();
+  carregarDeletados();
   initListener('usuarios');
   var saved = localStorage.getItem('mc_user');
   if (!saved) { return; }
