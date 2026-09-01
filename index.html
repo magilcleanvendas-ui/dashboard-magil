@@ -181,6 +181,34 @@ tr:hover td{background:#f5f8fa}
 .action-btns{display:flex;gap:6px;flex-wrap:wrap}
 .edit-btn{background:#eaf6f8;color:var(--acc);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
 .del-btn{background:#fdecec;color:var(--err);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
+/* ===== MODO ESCURO (tema HubSpot) ===== */
+body.dark{background:#1f2a36;color:#e6edf3}
+body.dark .card,body.dark .sc,body.dark .vc,body.dark .pc,body.dark .com-stat,body.dark .lc{background:#2a3744;border-color:#3a4a5a;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+body.dark .sidebar{background:#232f3b;border-right-color:#3a4a5a}
+body.dark .sidebar .nav-item{color:#c7d2dc}
+body.dark .sidebar .nav-item.act{background:#1e3a44;color:#00a4bd}
+body.dark .sidebar .nav-item:hover:not(.act){background:#2a3744;color:#00a4bd}
+body.dark .sidebar .nav-title{color:#7c98b6}
+body.dark th{background:#232f3b;color:#9db0c0;border-bottom-color:#3a4a5a}
+body.dark td{border-bottom-color:#33414f}
+body.dark tr:hover td{background:#2a3744}
+body.dark .fg input,body.dark .fg select,body.dark .fg textarea,body.dark .inp-sm,body.dark .search-box input,body.dark .pe select,body.dark .pe input,body.dark .mp-row select,body.dark .mp-row input,body.dark .cust-select-trigger{background:#232f3b;border-color:#3a4a5a;color:#e6edf3}
+body.dark .st2,body.dark .card h3,body.dark .vc .vn,body.dark .sc .vl,body.dark .com-stat .com-stat-value{color:#e6edf3}
+body.dark .sc .lb,body.dark .fg label,body.dark .pw .pl span:first-child,body.dark .com-stat .com-stat-label{color:#9db0c0}
+body.dark .pb,body.dark .tipo-toggle,body.dark .com-accel,body.dark .pe,body.dark .mp-row{background:#232f3b}
+body.dark .weekly-bar,body.dark .com-hero,body.dark .st{background:linear-gradient(135deg,#1e3a44,#2a4a5a)}
+body.dark .btn-a{background:#1e3a44;color:#00a4bd}
+body.dark .btn-d{background:#3a1f22;color:#f2545b}
+body.dark .tipo-toggle button.act{background:#2a3744;color:#00a4bd}
+body.dark .es{color:#7c98b6}
+body.dark .client-info,body.dark .pred-card,body.dark .com-result{background:#1e3a44;border-color:#00a4bd}
+body.dark .pred-item{background:#232f3b;border-color:#3a4a5a}
+body.dark .com-faixa-table tr.ativa td{background:#1e3a44}
+body.dark .com-week{background:#232f3b;border-color:#3a4a5a}
+body.dark .com-week.checked{background:#1e3a44;border-color:#00a4bd}
+body.dark .search-box .ico{color:#7c98b6}
+body.dark .tipo-badge.venda{background:#1e3a44;color:#00a4bd}
+body.dark .tipo-badge.bonificacao{background:#3a2a1e;color:#ffb300}
 @media(max-width:768px){.sidebar{display:none}.content{padding:18px}.sg{grid-template-columns:repeat(2,1fr)}.vg{grid-template-columns:1fr}.fr{grid-template-columns:1fr}.pe{grid-template-columns:1fr;gap:6px}.pc{flex-direction:column;gap:10px;align-items:stretch}.filtros,.date-filter{flex-direction:column}.com-week-grid{grid-template-columns:repeat(2,1fr)}#hd{padding:10px 16px}}
 @media print{.sidebar{display:none}.content{padding:0}.card{box-shadow:none}.icon-btn,.sidebar-toggle{display:none}}
 </style>
@@ -240,7 +268,7 @@ firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(function
 });
 
 // ===== USUARIOS =====
-var USU = [ 
+var USU = [
   { id: 'gerente', nome: 'Mariana', nivel: 'Gerente', isM: true },
   { id: 'v1', nome: 'Vendedor 1', nivel: 'Junior', isM: false },
   { id: 'v2', nome: 'Vendedor 2', nivel: 'Junior', isM: false },
@@ -252,7 +280,8 @@ var USU = [
   { id: 'v8', nome: 'Vendedor 8', nivel: 'Junior', isM: false },
   { id: 'v9', nome: 'Vendedor 9', nivel: 'Pleno', isM: false },
   { id: 'v10', nome: 'Vendedor 10', nivel: 'Junior', isM: false }
-]; 
+];
+
 // ===== VENDEDORES EXCLUIDOS (persistidos no navegador) =====
 var DELETADOS = [];
 try { DELETADOS = JSON.parse(localStorage.getItem('mc_excluidos')) || []; } catch (e) { DELETADOS = []; }
@@ -395,7 +424,7 @@ function initListener(k) {
         if (!row.origem) { row.origem = 'importado'; }
       });
     }
-        if (k === 'usuarios') {
+    if (k === 'usuarios') {
       arr.forEach(function (u) {
         if (u.id) {
           var usu = USU.find(function (x) { return x.id === u.id; });
@@ -1059,7 +1088,7 @@ function addVendedor() {
   var nivel = document.getElementById('nv-nivel').value;
   if (!nome) { toast('Digite o nome do vendedor', 'error'); return; }
   var novoId = 'v' + Date.now().toString().slice(-5);
-    DELETADOS = DELETADOS.filter(function (x) { return x !== novoId; });
+  DELETADOS = DELETADOS.filter(function (x) { return x !== novoId; });
   localStorage.setItem('mc_excluidos', JSON.stringify(DELETADOS));
   var novo = { id: novoId, nome: nome, nivel: nivel, isM: false };
   USU.push(novo);
@@ -1103,7 +1132,7 @@ function toggleNivel(id) {
     .catch(function (e) { toast('Erro ao alterar nivel: ' + e.message, 'error'); });
 }
 
-// ===== EXCLUIR VENDEDOR (corrigido — transfere carteira, nao quebra rodizio) =====
+// ===== EXCLUIR VENDEDOR (transfere carteira + nao volta ao sair) =====
 function delVendedor(id) {
   if (!currentUser || !currentUser.isM) { toast('Somente a gerente pode excluir vendedores', 'error'); return; }
   var v = USU.find(function (x) { return x.id === id; });
@@ -1117,7 +1146,7 @@ function delVendedor(id) {
     if (c.vendedorId === id) { c.vendedorId = destino; saveData('clientes', c); }
   });
   USU = USU.filter(function (x) { return x.id !== id; });
-    if (DELETADOS.indexOf(id) === -1) { DELETADOS.push(id); }
+  if (DELETADOS.indexOf(id) === -1) { DELETADOS.push(id); }
   localStorage.setItem('mc_excluidos', JSON.stringify(DELETADOS));
   db.collection('usuarios').doc(id).delete().catch(function (e) { console.log('Delete user error:', e); });
   updateLoginNomes();
@@ -1356,34 +1385,61 @@ function rodizioAutomatico() {
   renderTab('rodizio');
 }
 
-// ===== VENDAS (GERENTE) =====
+// ===== VENDAS (GERENTE) — com filtro de periodo =====
 function renderVendasGer() {
+  var filtro = '<div class="card"><h3>Filtro de Periodo</h3><div class="filtros">' +
+    '<div class="fg"><label>Data Inicio</label><input type="date" id="vg-ini"></div>' +
+    '<div class="fg"><label>Data Fim</label><input type="date" id="vg-fim"></div>' +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendasGer()">OK</button>' +
+    '<button class="btn btn-a btn-s" onclick="limparFiltroVendasGer()">Limpar</button></div></div></div>';
+  setTimeout(filtrarVendasGer, 50);
+  return '<h2 class="st2">Vendas</h2>' + filtro +
+    '<div id="vg-resumo"></div>' +
+    '<div class="card"><h3>Todas as Vendas Detalhadas</h3><div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn btn-a btn-s" onclick="exportCSV(loadData(\'vendas\'),\'vendas.csv\')">Exportar CSV</button>' +
+    '<button class="btn btn-p btn-s" onclick="exportVendasPDF()">Exportar PDF</button></div><div id="vg-tabela"></div></div>';
+}
+
+function filtrarVendasGer() {
   var vendas = loadData('vendas');
-  var hoje = new Date();
-  var mesAtual = hoje.getMonth() + 1;
-  var anoAtual = hoje.getFullYear();
-  var vendasMes = vendas.filter(function (v) { var d = new Date(v.data); return d.getMonth() + 1 === mesAtual && d.getFullYear() === anoAtual; });
-  var totMesVendas = vendasMes.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totMesBonif = vendasMes.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totMesGeral = totMesVendas + totMesBonif;
-  var tabela = vendas.length
+  var ini = document.getElementById('vg-ini').value;
+  var fim = document.getElementById('vg-fim').value;
+  var filtradas = vendas.filter(function (v) {
+    if (ini && v.data < ini) { return false; }
+    if (fim && v.data > fim) { return false; }
+    return true;
+  });
+  var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var resumo = document.getElementById('vg-resumo');
+  if (resumo) {
+    resumo.innerHTML = '<div class="sg">' +
+      '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
+      '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
+      '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totVendas + totBonif) + '</div></div>' +
+      '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
+  }
+  var tabelaDiv = document.getElementById('vg-tabela');
+  if (!tabelaDiv) { return; }
+  var html = filtradas.length
     ? '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Segmento</th><th>Vendedor</th><th>Tipo</th><th>Itens</th><th>Qtd</th><th>Total</th><th>Acoes</th></tr></thead><tbody>' +
-      vendas.map(function (v, i) {
+      filtradas.map(function (v) {
+        var fullIdx = vendas.indexOf(v);
         var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--';
         var estado = v.estado || getEstadoFromVenda(v);
         var segmento = v.segmento || getSegmentoFromVenda(v);
         var tipo = v.tipo || 'venda';
         var tipoHtml = '<span class="tipo-badge ' + tipo + '">' + tipo + '</span>';
-        return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td>' + (segmento || '--') + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td><td><div class="action-btns"><button class="edit-btn" onclick="editVenda(' + i + ')">Editar</button><button class="del-btn" onclick="delVenda(' + i + ')">Excluir</button></div></td></tr>';
+        return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td>' + (segmento || '--') + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td><td><div class="action-btns"><button class="edit-btn" onclick="editVenda(' + fullIdx + ')">Editar</button><button class="del-btn" onclick="delVenda(' + fullIdx + ')">Excluir</button></div></td></tr>';
       }).join('') + '</tbody></table>'
-    : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda.</p></div>';
-  return '<h2 class="st2">Vendas</h2>' +
-    '<div class="sg"><div class="sc s"><div class="lb">Vendas Mes (' + MESES[mesAtual - 1] + '/' + anoAtual + ')</div><div class="vl">R$ ' + fmtBRL(totMesVendas) + '</div></div>' +
-    '<div class="sc w"><div class="lb">Bonificacoes Mes</div><div class="vl">R$ ' + fmtBRL(totMesBonif) + '</div></div>' +
-    '<div class="sc"><div class="lb">Total Geral Mes</div><div class="vl">R$ ' + fmtBRL(totMesGeral) + '</div></div></div>' +
-    '<div class="card"><h3>Todas as Vendas Detalhadas</h3><div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn btn-a btn-s" onclick="exportCSV(loadData(\'vendas\'),\'vendas.csv\')">Exportar CSV</button>' +
-    '<button class="btn btn-p btn-s" onclick="exportVendasPDF()">Exportar PDF</button></div>' + tabela + '</div>';
+    : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda no periodo.</p></div>';
+  tabelaDiv.innerHTML = html;
+}
+
+function limparFiltroVendasGer() {
+  document.getElementById('vg-ini').value = '';
+  document.getElementById('vg-fim').value = '';
+  filtrarVendasGer();
 }
 
 function exportVendasPDF() {
@@ -1463,20 +1519,63 @@ function delVenda(i) {
   if (v && v._id) { deleteDoc('vendas', v._id); toast('Venda excluida', 'success'); renderTab('vendas'); }
 }
 
-// ===== MINHAS VENDAS =====
+// ===== MINHAS VENDAS (VENDEDOR) — filtro tipo + periodo + total =====
 function renderMinhasVendas() {
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
+    '<div class="fg"><label>Tipo</label><select id="mv-tipo"><option value="todos">Todos</option><option value="venda">Venda</option><option value="bonificacao">Bonificacao</option></select></div>' +
+    '<div class="fg"><label>Data Inicio</label><input type="date" id="mv-ini"></div>' +
+    '<div class="fg"><label>Data Fim</label><input type="date" id="mv-fim"></div>' +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarMinhasVendas()">OK</button>' +
+    '<button class="btn btn-a btn-s" onclick="limparFiltroMinhasVendas()">Limpar</button></div></div></div>';
+  setTimeout(filtrarMinhasVendas, 50);
+  return renderWeeklyBar() + '<h2 class="st2">Minhas Vendas</h2>' + filtro +
+    '<div id="mv-resumo"></div>' +
+    '<div class="card"><h3>Vendas Lancadas</h3><div id="mv-tabela"></div></div>';
+}
+
+function filtrarMinhasVendas() {
   var vendas = getMinhasVendas();
-  var tabela = vendas.length
+  var tipo = document.getElementById('mv-tipo').value;
+  var ini = document.getElementById('mv-ini').value;
+  var fim = document.getElementById('mv-fim').value;
+  var filtradas = vendas.filter(function (v) {
+    var vt = v.tipo || 'venda';
+    if (tipo === 'venda' && vt !== 'venda') { return false; }
+    if (tipo === 'bonificacao' && vt !== 'bonificacao') { return false; }
+    if (ini && v.data < ini) { return false; }
+    if (fim && v.data > fim) { return false; }
+    return true;
+  });
+  var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var resumo = document.getElementById('mv-resumo');
+  if (resumo) {
+    resumo.innerHTML = '<div class="sg">' +
+      '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
+      '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
+      '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totVendas + totBonif) + '</div></div>' +
+      '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
+  }
+  var tabelaDiv = document.getElementById('mv-tabela');
+  if (!tabelaDiv) { return; }
+  var html = filtradas.length
     ? '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Tipo</th><th>Itens</th><th>Qtd</th><th>Total</th></tr></thead><tbody>' +
-      vendas.map(function (v) {
+      filtradas.map(function (v) {
         var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--';
         var estado = v.estado || getEstadoFromVenda(v);
-        var tipo = v.tipo || 'venda';
-        var tipoHtml = '<span class="tipo-badge ' + tipo + '">' + tipo + '</span>';
+        var tipoV = v.tipo || 'venda';
+        var tipoHtml = '<span class="tipo-badge ' + tipoV + '">' + tipoV + '</span>';
         return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
       }).join('') + '</tbody></table>'
-    : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda lancada.</p></div>';
-  return renderWeeklyBar() + '<h2 class="st2">Minhas Vendas</h2><div class="card"><h3>Vendas Lancadas</h3>' + tabela + '</div>';
+    : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda no filtro.</p></div>';
+  tabelaDiv.innerHTML = html;
+}
+
+function limparFiltroMinhasVendas() {
+  document.getElementById('mv-tipo').value = 'todos';
+  document.getElementById('mv-ini').value = '';
+  document.getElementById('mv-fim').value = '';
+  filtrarMinhasVendas();
 }
 
 // ===== RELATORIO DE ATIVIDADES =====
@@ -1537,7 +1636,7 @@ function filtrarRelAtiv() {
   if (div) { div.innerHTML = html; }
 }
 
-// // ===== VENDAS POR VENDEDOR =====
+// ===== VENDAS POR VENDEDOR =====
 function renderVendVendedor() {
   var vendas = loadData('vendas');
   var vAtivos = getVendedores();
@@ -1721,7 +1820,7 @@ function exportVendSegmentoPDF() {
   exportPDF('Vendas por Segmento', html);
 }
 
-// ===== CRUZAMENTOS =====
+// ===== CRUZAMENTOS (aba Analise) — com filtro de periodo =====
 function renderCruzamentos() {
   var vendas = loadData('vendas');
   var vAtivos = getVendedores();
@@ -1732,6 +1831,8 @@ function renderCruzamentos() {
     '<div class="fg"><label>Vendedor</label><select id="cr-vend" onchange="initCruzamentos()"><option value="">Todos</option>' + vendOpts + '</select></div>' +
     '<div class="fg"><label>Segmento</label><select id="cr-seg" onchange="initCruzamentos()"><option value="">Todos</option>' + segOpts + '</select></div>' +
     '<div class="fg"><label>Estado</label><select id="cr-uf" onchange="initCruzamentos()"><option value="">Todos</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fg"><label>Data Inicio</label><input type="date" id="cr-ini" onchange="initCruzamentos()"></div>' +
+    '<div class="fg"><label>Data Fim</label><input type="date" id="cr-fim" onchange="initCruzamentos()"></div>' +
     '</div></div><div class="card"><h3>Resultado</h3><div id="cr-result"></div></div>';
 }
 
@@ -1740,10 +1841,14 @@ function initCruzamentos() {
   var vend = document.getElementById('cr-vend').value;
   var seg = document.getElementById('cr-seg').value;
   var uf = document.getElementById('cr-uf').value;
+  var ini = document.getElementById('cr-ini').value;
+  var fim = document.getElementById('cr-fim').value;
   var filtradas = vendas.filter(function (v) {
     if (vend && v.vendedor !== vend) { return false; }
     if (seg && getSegmentoFromVenda(v) !== seg) { return false; }
     if (uf && getEstadoFromVenda(v) !== uf) { return false; }
+    if (ini && v.data < ini) { return false; }
+    if (fim && v.data > fim) { return false; }
     return true;
   });
   var tot = filtradas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
@@ -1909,18 +2014,27 @@ function renderCatalogo() {
   return html;
 }
 
-// ===== RELATORIOS GERAIS =====
+// ===== RELATORIOS GERAIS — filtro tipo + mes/ano + periodo + total vendido =====
 function renderRelatorios() {
   var vendas = loadData('vendas');
   var atividades = loadData('atividades');
   var clientes = loadData('clientes');
-  var tipoFiltro = '<div class="card"><h3>Filtro de Tipo</h3><div class="filtros"><div class="fg"><label>Tipo de Registro</label><select id="rel-tipo"><option value="todos">Todos</option><option value="venda">Somente Vendas</option><option value="bonificacao">Somente Bonificacoes</option><option value="ambos">Vendas + Bonificacoes</option></select></div><div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarRelatorio()">OK</button></div></div></div>';
+  var mesOpts = MESES.map(function (m, i) { return '<option value="' + (i + 1) + '">' + m + '</option>'; }).join('');
+  var anoAtual = new Date().getFullYear();
+  var tipoFiltro = '<div class="card"><h3>Filtros do Relatorio</h3><div class="filtros">' +
+    '<div class="fg"><label>Tipo de Registro</label><select id="rel-tipo"><option value="todos">Todos</option><option value="venda">Somente Vendas</option><option value="bonificacao">Somente Bonificacoes</option><option value="ambos">Vendas + Bonificacoes</option></select></div>' +
+    '<div class="fg"><label>Mes</label><select id="rel-mes"><option value="todos">Todos os meses</option>' + mesOpts + '</select></div>' +
+    '<div class="fg"><label>Ano</label><select id="rel-ano"><option value="todos">Todos</option><option value="' + (anoAtual - 1) + '">' + (anoAtual - 1) + '</option><option value="' + anoAtual + '" selected>' + anoAtual + '</option></select></div>' +
+    '<div class="fg"><label>Data Inicio</label><input type="date" id="rel-ini"></div>' +
+    '<div class="fg"><label>Data Fim</label><input type="date" id="rel-fim"></div>' +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarRelatorio()">OK</button></div>' +
+    '</div></div>';
   var totV = vendas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
   var totL = atividades.filter(function (a) { return a.tipo === 'ligacao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
   var totP = atividades.filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
   return '<h2 class="st2">Relatorios Gerais</h2>' + tipoFiltro +
     '<div class="card"><h3>Resumo Geral</h3><div id="rel-resumo"><div class="sg">' +
-    '<div class="sc s"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(totV) + '</div></div>' +
+    '<div class="sc s"><div class="lb">Faturamento Total</div><div class="vl">R$ ' + fmtBRL(totV) + '</div></div>' +
     '<div class="sc"><div class="lb">Vendas</div><div class="vl">' + vendas.length + '</div></div>' +
     '<div class="sc"><div class="lb">Clientes</div><div class="vl">' + clientes.length + '</div></div>' +
     '<div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totL + '</div></div>' +
@@ -1931,17 +2045,38 @@ function renderRelatorios() {
 function filtrarRelatorio() {
   var vendas = loadData('vendas');
   var tipo = document.getElementById('rel-tipo').value;
+  var mes = document.getElementById('rel-mes').value;
+  var ano = document.getElementById('rel-ano').value;
+  var ini = document.getElementById('rel-ini').value;
+  var fim = document.getElementById('rel-fim').value;
   var filtradas = vendas.filter(function (v) {
     var vt = v.tipo || 'venda';
-    if (tipo === 'todos') { return true; }
-    if (tipo === 'venda') { return vt === 'venda'; }
-    if (tipo === 'bonificacao') { return vt === 'bonificacao'; }
-    if (tipo === 'ambos') { return vt === 'venda' || vt === 'bonificacao'; }
+    if (tipo === 'venda' && vt !== 'venda') { return false; }
+    if (tipo === 'bonificacao' && vt !== 'bonificacao') { return false; }
+    if (tipo === 'ambos' && vt !== 'venda' && vt !== 'bonificacao') { return false; }
+    if (mes !== 'todos') {
+      var d = new Date(v.data);
+      if ((d.getMonth() + 1) !== parseInt(mes)) { return false; }
+    }
+    if (ano !== 'todos') {
+      var d2 = new Date(v.data);
+      if (d2.getFullYear() !== parseInt(ano)) { return false; }
+    }
+    if (ini && v.data < ini) { return false; }
+    if (fim && v.data > fim) { return false; }
     return true;
   });
-  var totV = filtradas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totGeral = totVendas + totBonif;
   var resumo = document.getElementById('rel-resumo');
-  if (resumo) { resumo.innerHTML = '<div class="sg"><div class="sc s"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(totV) + '</div></div><div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>'; }
+  if (resumo) {
+    resumo.innerHTML = '<div class="sg">' +
+      '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
+      '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
+      '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totGeral) + '</div></div>' +
+      '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
+  }
   var tabelaDiv = document.getElementById('rel-tabela');
   if (!tabelaDiv) { return; }
   var html = '<table><thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
