@@ -610,6 +610,58 @@ function progressBar(label, atual, meta, pct) {
   return '<div class="pw"><div class="pl"><span>' + label + '</span><span>' + da + ' / ' + dm + ' (' + Math.round(pct) + '%)</span></div><div class="pb"><div class="pf ' + cls + '" style="width:' + Math.max(2, Math.min(100, pct)) + '%"></div></div></div>';
 }
 
+// ===== SISTEMA DE FILTRO DE PERIODO REUTILIZAVEL =====
+// Gera o HTML do seletor de periodo (Semanal/Mensal/Anual/Entre Periodos/Todos)
+// prefix: identificador unico da tela (ex: 'vg', 'mv', 'ra', 'vv', 've', 'vs', 'cr', 'rel')
+function filtroPeriodoHTML(prefix) {
+  return '<div class="fg"><label>Periodo</label><select id="' + prefix + '-periodo" onchange="onChangePeriodo(\'' + prefix + '\')">' +
+    '<option value="todos">Todos</option>' +
+    '<option value="semanal">Semanal</option>' +
+    '<option value="mensal">Mensal</option>' +
+    '<option value="anual">Anual</option>' +
+    '<option value="periodo">Entre Periodos</option></select></div>' +
+    '<div class="fg" id="' + prefix + '-filtro-anual" style="display:none"><label>Ano</label><input type="number" id="' + prefix + '-ano" min="2000" max="2100" placeholder="Ex: 2026" onchange="aplicarFiltroPeriodo(\'' + prefix + '\')"></div>' +
+    '<div class="fg" id="' + prefix + '-filtro-mensal" style="display:none"><label>Mes</label><input type="month" id="' + prefix + '-mes" onchange="aplicarFiltroPeriodo(\'' + prefix + '\')"></div>' +
+    '<div class="fg" id="' + prefix + '-filtro-ini" style="display:none"><label>Data Inicio</label><input type="date" id="' + prefix + '-ini" onchange="aplicarFiltroPeriodo(\'' + prefix + '\')"></div>' +
+    '<div class="fg" id="' + prefix + '-filtro-fim" style="display:none"><label>Data Fim</label><input type="date" id="' + prefix + '-fim" onchange="aplicarFiltroPeriodo(\'' + prefix + '\')"></div>';
+}
+
+// Mostra/esconde os campos conforme o periodo selecionado
+function onChangePeriodo(prefix) {
+  var p = document.getElementById(prefix + '-periodo').value;
+  var fAnual = document.getElementById(prefix + '-filtro-anual');
+  var fMensal = document.getElementById(prefix + '-filtro-mensal');
+  var fIni = document.getElementById(prefix + '-filtro-ini');
+  var fFim = document.getElementById(prefix + '-filtro-fim');
+  if (fAnual) { fAnual.style.display = (p === 'anual') ? 'block' : 'none'; }
+  if (fMensal) { fMensal.style.display = (p === 'mensal') ? 'block' : 'none'; }
+  if (fIni) { fIni.style.display = (p === 'semanal' || p === 'periodo') ? 'block' : 'none'; }
+  if (fFim) { fFim.style.display = (p === 'semanal' || p === 'periodo') ? 'block' : 'none'; }
+  aplicarFiltroPeriodo(prefix);
+}
+
+// Aplica o filtro de periodo sobre um array de registros com campo 'data' (YYYY-MM-DD)
+function aplicarFiltroPeriodo(prefix) {
+  var p = document.getElementById(prefix + '-periodo').value;
+  var ini = document.getElementById(prefix + '-ini') ? document.getElementById(prefix + '-ini').value : '';
+  var fim = document.getElementById(prefix + '-fim') ? document.getElementById(prefix + '-fim').value : '';
+  var mes = document.getElementById(prefix + '-mes') ? document.getElementById(prefix + '-mes').value : '';
+  var ano = document.getElementById(prefix + '-ano') ? document.getElementById(prefix + '-ano').value : '';
+  var fn = window['_filtro_' + prefix];
+  if (typeof fn === 'function') { fn(p, ini, fim, mes, ano); }
+}
+
+// Limpa os campos de periodo de uma tela
+function limparFiltroPeriodo(prefix) {
+  var p = document.getElementById(prefix + '-periodo');
+  if (p) { p.value = 'todos'; }
+  var ini = document.getElementById(prefix + '-ini'); if (ini) { ini.value = ''; }
+  var fim = document.getElementById(prefix + '-fim'); if (fim) { fim.value = ''; }
+  var mes = document.getElementById(prefix + '-mes'); if (mes) { mes.value = ''; }
+  var ano = document.getElementById(prefix + '-ano'); if (ano) { ano.value = ''; }
+  onChangePeriodo(prefix);
+}
+
 // ===== DROPDOWN DE LOGIN (nomes salvos + fecha ao selecionar) =====
 function updateLoginNomes() {
   var list = document.getElementById('lu-list');
@@ -655,7 +707,6 @@ function completarLogin(sel) {
   var senhaUsada = document.getElementById('lp').value;
   var ehPadrao = (senhas[sel] === senhaPadrao() && senhaUsada === senhaPadrao());
   if (ehPadrao) {
-    // Primeiro acesso: pede para criar senha
     document.getElementById('ls').style.display = 'none';
     document.getElementById('cs').style.display = 'flex';
     document.getElementById('cs-nome').textContent = 'Bem-vindo(a), ' + getNome(user.id) + '! Defina sua senha de acesso.';
@@ -1490,61 +1541,51 @@ function rodizioAutomatico() {
   renderTab('rodizio');
 }
 
-// ===== VENDAS (GERENTE) — com filtro de periodo =====
+// ===== VENDAS (GERENTE) — com filtro de periodo dinamico =====
 function renderVendasGer() {
-  var filtro = '<div class="card"><h3>Filtro de Periodo</h3><div class="filtros">' +
-    '<div class="fg"><label>Data Inicio</label><input type="date" id="vg-ini"></div>' +
-    '<div class="fg"><label>Data Fim</label><input type="date" id="vg-fim"></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendasGer()">OK</button>' +
-    '<button class="btn btn-a btn-s" onclick="limparFiltroVendasGer()">Limpar</button></div></div></div>';
-  setTimeout(filtrarVendasGer, 50);
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' + filtroPeriodoHTML('vg') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'vg\')">Limpar</button></div></div></div>';
+  window['_filtro_vg'] = function (p, ini, fim, mes, ano) {
+    var vendas = loadData('vendas');
+    var filtradas = vendas.filter(function (v) {
+      if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+      return true;
+    });
+    var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+    var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+    var resumo = document.getElementById('vg-resumo');
+    if (resumo) {
+      resumo.innerHTML = '<div class="sg">' +
+        '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
+        '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
+        '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totVendas + totBonif) + '</div></div>' +
+        '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
+    }
+    var tabelaDiv = document.getElementById('vg-tabela');
+    if (!tabelaDiv) { return; }
+    var html = filtradas.length
+      ? '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Segmento</th><th>Vendedor</th><th>Tipo</th><th>Itens</th><th>Qtd</th><th>Total</th><th>Acoes</th></tr></thead><tbody>' +
+        filtradas.map(function (v) {
+          var fullIdx = vendas.indexOf(v);
+          var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--';
+          var estado = v.estado || getEstadoFromVenda(v);
+          var segmento = v.segmento || getSegmentoFromVenda(v);
+          var tipo = v.tipo || 'venda';
+          var tipoHtml = '<span class="tipo-badge ' + tipo + '">' + tipo + '</span>';
+          return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td>' + (segmento || '--') + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td><td><div class="action-btns"><button class="edit-btn" onclick="editVenda(' + fullIdx + ')">Editar</button><button class="del-btn" onclick="delVenda(' + fullIdx + ')">Excluir</button></div></td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda no periodo.</p></div>';
+    tabelaDiv.innerHTML = html;
+  };
+  setTimeout(function () { aplicarFiltroPeriodo('vg'); }, 50);
   return '<h2 class="st2">Vendas</h2>' + filtro +
     '<div id="vg-resumo"></div>' +
     '<div class="card"><h3>Todas as Vendas Detalhadas</h3><div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">' +
     '<button class="btn btn-a btn-s" onclick="exportCSV(loadData(\'vendas\'),\'vendas.csv\')">Exportar CSV</button>' +
     '<button class="btn btn-p btn-s" onclick="exportVendasPDF()">Exportar PDF</button></div><div id="vg-tabela"></div></div>';
-}
-
-function filtrarVendasGer() {
-  var vendas = loadData('vendas');
-  var ini = document.getElementById('vg-ini').value;
-  var fim = document.getElementById('vg-fim').value;
-  var filtradas = vendas.filter(function (v) {
-    if (ini && v.data < ini) { return false; }
-    if (fim && v.data > fim) { return false; }
-    return true;
-  });
-  var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var resumo = document.getElementById('vg-resumo');
-  if (resumo) {
-    resumo.innerHTML = '<div class="sg">' +
-      '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
-      '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
-      '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totVendas + totBonif) + '</div></div>' +
-      '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
-  }
-  var tabelaDiv = document.getElementById('vg-tabela');
-  if (!tabelaDiv) { return; }
-  var html = filtradas.length
-    ? '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Segmento</th><th>Vendedor</th><th>Tipo</th><th>Itens</th><th>Qtd</th><th>Total</th><th>Acoes</th></tr></thead><tbody>' +
-      filtradas.map(function (v) {
-        var fullIdx = vendas.indexOf(v);
-        var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--';
-        var estado = v.estado || getEstadoFromVenda(v);
-        var segmento = v.segmento || getSegmentoFromVenda(v);
-        var tipo = v.tipo || 'venda';
-        var tipoHtml = '<span class="tipo-badge ' + tipo + '">' + tipo + '</span>';
-        return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td>' + (segmento || '--') + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td><td><div class="action-btns"><button class="edit-btn" onclick="editVenda(' + fullIdx + ')">Editar</button><button class="del-btn" onclick="delVenda(' + fullIdx + ')">Excluir</button></div></td></tr>';
-      }).join('') + '</tbody></table>'
-    : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda no periodo.</p></div>';
-  tabelaDiv.innerHTML = html;
-}
-
-function limparFiltroVendasGer() {
-  document.getElementById('vg-ini').value = '';
-  document.getElementById('vg-fim').value = '';
-  filtrarVendasGer();
 }
 
 function exportVendasPDF() {
@@ -1624,184 +1665,141 @@ function delVenda(i) {
   if (v && v._id) { deleteDoc('vendas', v._id); toast('Venda excluida', 'success'); renderTab('vendas'); }
 }
 
-// ===== MINHAS VENDAS (VENDEDOR) — filtro tipo + periodo + total =====
+// ===== MINHAS VENDAS (VENDEDOR) — filtro tipo + periodo dinamico =====
 function renderMinhasVendas() {
   var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
-    '<div class="fg"><label>Tipo</label><select id="mv-tipo"><option value="todos">Todos</option><option value="venda">Venda</option><option value="bonificacao">Bonificacao</option></select></div>' +
-    '<div class="fg"><label>Data Inicio</label><input type="date" id="mv-ini"></div>' +
-    '<div class="fg"><label>Data Fim</label><input type="date" id="mv-fim"></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarMinhasVendas()">OK</button>' +
-    '<button class="btn btn-a btn-s" onclick="limparFiltroMinhasVendas()">Limpar</button></div></div></div>';
-  setTimeout(filtrarMinhasVendas, 50);
+    '<div class="fg"><label>Tipo</label><select id="mv-tipo" onchange="aplicarFiltroPeriodo(\'mv\')"><option value="todos">Todos</option><option value="venda">Venda</option><option value="bonificacao">Bonificacao</option></select></div>' +
+    filtroPeriodoHTML('mv') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'mv\')">Limpar</button></div></div></div>';
+  window['_filtro_mv'] = function (p, ini, fim, mes, ano) {
+    var vendas = getMinhasVendas();
+    var tipo = document.getElementById('mv-tipo').value;
+    var filtradas = vendas.filter(function (v) {
+      var vt = v.tipo || 'venda';
+      if (tipo === 'venda' && vt !== 'venda') { return false; }
+      if (tipo === 'bonificacao' && vt !== 'bonificacao') { return false; }
+      if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+      return true;
+    });
+    var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+    var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+    var resumo = document.getElementById('mv-resumo');
+    if (resumo) {
+      resumo.innerHTML = '<div class="sg">' +
+        '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
+        '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
+        '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totVendas + totBonif) + '</div></div>' +
+        '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
+    }
+    var tabelaDiv = document.getElementById('mv-tabela');
+    if (!tabelaDiv) { return; }
+    var html = filtradas.length
+      ? '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Tipo</th><th>Itens</th><th>Qtd</th><th>Total</th></tr></thead><tbody>' +
+        filtradas.map(function (v) {
+          var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--';
+          var estado = v.estado || getEstadoFromVenda(v);
+          var tipoV = v.tipo || 'venda';
+          var tipoHtml = '<span class="tipo-badge ' + tipoV + '">' + tipoV + '</span>';
+          return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda no filtro.</p></div>';
+    tabelaDiv.innerHTML = html;
+  };
+  setTimeout(function () { aplicarFiltroPeriodo('mv'); }, 50);
   return renderWeeklyBar() + '<h2 class="st2">Minhas Vendas</h2>' + filtro +
     '<div id="mv-resumo"></div>' +
     '<div class="card"><h3>Vendas Lancadas</h3><div id="mv-tabela"></div></div>';
 }
 
-function filtrarMinhasVendas() {
-  var vendas = getMinhasVendas();
-  var tipo = document.getElementById('mv-tipo').value;
-  var ini = document.getElementById('mv-ini').value;
-  var fim = document.getElementById('mv-fim').value;
-  var filtradas = vendas.filter(function (v) {
-    var vt = v.tipo || 'venda';
-    if (tipo === 'venda' && vt !== 'venda') { return false; }
-    if (tipo === 'bonificacao' && vt !== 'bonificacao') { return false; }
-    if (ini && v.data < ini) { return false; }
-    if (fim && v.data > fim) { return false; }
-    return true;
-  });
-  var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var resumo = document.getElementById('mv-resumo');
-  if (resumo) {
-    resumo.innerHTML = '<div class="sg">' +
-      '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
-      '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
-      '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totVendas + totBonif) + '</div></div>' +
-      '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
-  }
-  var tabelaDiv = document.getElementById('mv-tabela');
-  if (!tabelaDiv) { return; }
-  var html = filtradas.length
-    ? '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Tipo</th><th>Itens</th><th>Qtd</th><th>Total</th></tr></thead><tbody>' +
-      filtradas.map(function (v) {
-        var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--';
-        var estado = v.estado || getEstadoFromVenda(v);
-        var tipoV = v.tipo || 'venda';
-        var tipoHtml = '<span class="tipo-badge ' + tipoV + '">' + tipoV + '</span>';
-        return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
-      }).join('') + '</tbody></table>'
-    : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda no filtro.</p></div>';
-  tabelaDiv.innerHTML = html;
-}
-
-function limparFiltroMinhasVendas() {
-  document.getElementById('mv-tipo').value = 'todos';
-  document.getElementById('mv-ini').value = '';
-  document.getElementById('mv-fim').value = '';
-  filtrarMinhasVendas();
-}
-
-// ===== RELATORIO DE ATIVIDADES (linha corrigida) =====
+// ===== RELATORIO DE ATIVIDADES — filtro periodo dinamico =====
 function renderRelAtividades() {
-  var atividades = loadData('atividades');
   var vAtivos = getVendedores();
   var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
   var tipoOpts = '<option value="">Todos</option><option value="ligacao">Ligacao</option><option value="prospeccao">Prospeccao</option><option value="visita">Visita</option><option value="email">E-mail</option><option value="whatsapp">WhatsApp</option>';
-  return '<h2 class="st2">Relatorio de Atividades</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="date-filter">' +
-    '<div class="fg"><label>Periodo</label><select id="ra-periodo"><option value="todos">Todos</option><option value="diario">Diario</option><option value="semanal">Semanal</option><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>' +
-    '<div class="fg"><label>Data Inicio</label><input type="date" id="ra-inicio"></div>' +
-    '<div class="fg"><label>Data Fim</label><input type="date" id="ra-fim"></div>' +
-    '<div class="fg"><label>Vendedor</label><select id="ra-vend"><option value="">Todos</option>' + vendOpts + '</select></div>' +
-    '<div class="fg"><label>Tipo</label><select id="ra-tipo">' + tipoOpts + '</select></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarRelAtiv()">OK</button></div></div></div>' +
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
+    '<div class="fg"><label>Vendedor</label><select id="ra-vend" onchange="aplicarFiltroPeriodo(\'ra\')"><option value="">Todos</option>' + vendOpts + '</select></div>' +
+    '<div class="fg"><label>Tipo</label><select id="ra-tipo" onchange="aplicarFiltroPeriodo(\'ra\')">' + tipoOpts + '</select></div>' +
+    filtroPeriodoHTML('ra') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'ra\')">Limpar</button></div></div></div>';
+  window['_filtro_ra'] = function (p, ini, fim, mes, ano) {
+    var atividades = loadData('atividades');
+    var vend = document.getElementById('ra-vend').value;
+    var tipo = document.getElementById('ra-tipo').value;
+    var filtradas = atividades.filter(function (a) {
+      if (vend && a.vendedor !== vend) { return false; }
+      if (tipo && a.tipo !== tipo) { return false; }
+      if (p === 'anual' && ano) { var d = new Date(a.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(a.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && a.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && a.data > fim) { return false; }
+      return true;
+    });
+    var html = '';
+    if (filtradas.length === 0) {
+      html = '<div class="es"><div class="ic">SEM</div><p>Nenhuma atividade no periodo.</p></div>';
+    } else {
+      var totLig = filtradas.filter(function (a) { return a.tipo === 'ligacao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+      var totPro = filtradas.filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+      var totVis = filtradas.filter(function (a) { return a.tipo === 'visita'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+      var totEm = filtradas.filter(function (a) { return a.tipo === 'email'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+      var totWh = filtradas.filter(function (a) { return a.tipo === 'whatsapp'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+      html = '<div class="sg"><div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totLig + '</div></div><div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totPro + '</div></div><div class="sc"><div class="lb">Visitas</div><div class="vl">' + totVis + '</div></div><div class="sc"><div class="lb">E-mails</div><div class="vl">' + totEm + '</div></div><div class="sc"><div class="lb">WhatsApp</div><div class="vl">' + totWh + '</div></div></div>';
+      html += '<table><thead><tr><th>Data</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr></thead><tbody>';
+      filtradas.forEach(function (a) { html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td><td>' + (a.tipo || '--') + '</td><td class="tcc">' + (a.qtd || 0) + '</td><td>' + (a.obs || '') + '</td></tr>'; });
+      html += '</tbody></table>';
+    }
+    var div = document.getElementById('ra-result');
+    if (div) { div.innerHTML = html; }
+  };
+  setTimeout(function () { aplicarFiltroPeriodo('ra'); }, 50);
+  return '<h2 class="st2">Relatorio de Atividades</h2>' + filtro +
     '<div class="card"><h3>Resultados</h3><div id="ra-result"></div></div>';
 }
 
-function filtrarRelAtiv() {
-  var atividades = loadData('atividades');
-  var periodo = document.getElementById('ra-periodo').value;
-  var inicio = document.getElementById('ra-inicio').value;
-  var fim = document.getElementById('ra-fim').value;
-  var vend = document.getElementById('ra-vend').value;
-  var tipo = document.getElementById('ra-tipo').value;
-  var filtradas = atividades.filter(function (a) {
-    if (vend && a.vendedor !== vend) { return false; }
-    if (tipo && a.tipo !== tipo) { return false; }
-    if (inicio && a.data < inicio) { return false; }
-    if (fim && a.data > fim) { return false; }
-    if (periodo !== 'todos' && inicio) {
-      var dataAtiv = new Date(a.data);
-      var dataIni = new Date(inicio);
-      var diff = Math.floor((dataAtiv.getTime() - dataIni.getTime()) / (1000 * 60 * 60 * 24));
-      if (periodo === 'diario' && diff !== 0) { return false; }
-      if (periodo === 'semanal' && diff > 7) { return false; }
-      if (periodo === 'mensal' && diff > 30) { return false; }
-      if (periodo === 'anual' && diff > 365) { return false; }
-    }
-    return true;
-  });
-  var html = '';
-  if (filtradas.length === 0) {
-    html = '<div class="es"><div class="ic">SEM</div><p>Nenhuma atividade no periodo.</p></div>';
-  } else {
-    var totLig = filtradas.filter(function (a) { return a.tipo === 'ligacao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    var totPro = filtradas.filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    var totVis = filtradas.filter(function (a) { return a.tipo === 'visita'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    var totEm = filtradas.filter(function (a) { return a.tipo === 'email'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    var totWh = filtradas.filter(function (a) { return a.tipo === 'whatsapp'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    html = '<div class="sg"><div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totLig + '</div></div><div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totPro + '</div></div><div class="sc"><div class="lb">Visitas</div><div class="vl">' + totVis + '</div></div><div class="sc"><div class="lb">E-mails</div><div class="vl">' + totEm + '</div></div><div class="sc"><div class="lb">WhatsApp</div><div class="vl">' + totWh + '</div></div></div>';
-    html += '<table><thead><tr><th>Data</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr></thead><tbody>';
-    filtradas.forEach(function (a) { html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td><td>' + (a.tipo || '--') + '</td><td class="tcc">' + (a.qtd || 0) + '</td><td>' + (a.obs || '') + '</td></tr>'; });
-    html += '</tbody></table>';
-  }
-  var div = document.getElementById('ra-result');
-  if (div) { div.innerHTML = html; }
-}
-
-// ===== VENDAS POR VENDEDOR (com periodo Mensal/Anual + 1 calendario + Limpar) =====
+// ===== VENDAS POR VENDEDOR — filtro vendedor + periodo dinamico =====
 function renderVendVendedor() {
-  var vendas = loadData('vendas');
   var vAtivos = getVendedores();
   var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
-  var tabela = vAtivos.map(function (v) {
-    var vV = vendas.filter(function (x) { return x.vendedor === v.id; });
-    var tot = vV.reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
-    var qtd = vV.reduce(function (s, x) { return s + (parseInt(x.qtdProdutos) || 0); }, 0);
-    return '<tr><td>' + getNome(v.id) + '</td><td class="tcc">' + vV.length + '</td><td class="tcc">' + qtd + '</td><td class="tcr">R$ ' + fmtBRL(tot) + '</td></tr>';
-  }).join('');
-  return '<h2 class="st2">Vendas por Vendedor</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="filtros">' +
-    '<div class="fg"><label>Vendedor</label><select id="vv-vend"><option value="">Todos</option>' + vendOpts + '</select></div>' +
-    '<div class="fg"><label>Periodo</label><select id="vv-periodo"><option value="todos">Todos</option><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>' +
-    '<div class="fg"><label>Data de Referencia</label><input type="date" id="vv-data"></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendVendedor()">OK</button>' +
-    '<button class="btn btn-a btn-s" onclick="limparFiltroVendVendedor()">Limpar</button></div></div></div>' +
-    '<div class="card"><h3>Resumo</h3><table id="vv-tabela"><thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead><tbody>' + tabela + '</tbody></table></div>' +
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
+    '<div class="fg"><label>Vendedor</label><select id="vv-vend" onchange="aplicarFiltroPeriodo(\'vv\')"><option value="">Todos</option>' + vendOpts + '</select></div>' +
+    filtroPeriodoHTML('vv') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'vv\')">Limpar</button></div></div></div>';
+  window['_filtro_vv'] = function (p, ini, fim, mes, ano) {
+    var vendas = loadData('vendas');
+    var vend = document.getElementById('vv-vend').value;
+    var filtradas = vendas.filter(function (v) {
+      if (vend && v.vendedor !== vend) { return false; }
+      if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+      return true;
+    });
+    var vExibir = vend ? [vend] : getVendedores().map(function (v) { return v.id; });
+    var tabela = vExibir.map(function (vid) {
+      var vV = filtradas.filter(function (x) { return x.vendedor === vid; });
+      var tot = vV.reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
+      var qtd = vV.reduce(function (s, x) { return s + (parseInt(x.qtdProdutos) || 0); }, 0);
+      return '<tr><td>' + getNome(vid) + '</td><td class="tcc">' + vV.length + '</td><td class="tcc">' + qtd + '</td><td class="tcr">R$ ' + fmtBRL(tot) + '</td></tr>';
+    }).join('');
+    var div = document.getElementById('vv-tabela');
+    if (div) { div.innerHTML = '<thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead><tbody>' + tabela + '</tbody>'; }
+    if (charts.vv) { charts.vv.destroy(); }
+    var ctx = document.getElementById('chVV');
+    if (ctx) {
+      charts.vv = new Chart(ctx, { type: 'bar', data: { labels: vExibir.map(function (vid) { return getNome(vid); }), datasets: [{ label: 'Total', data: vExibir.map(function (vid) { return filtradas.filter(function (x) { return x.vendedor === vid; }).reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0); }), backgroundColor: CORES, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+    }
+  };
+  setTimeout(function () { aplicarFiltroPeriodo('vv'); }, 50);
+  return '<h2 class="st2">Vendas por Vendedor</h2>' + filtro +
+    '<div class="card"><h3>Resumo</h3><table id="vv-tabela"><thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead><tbody></tbody></table></div>' +
     '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVV"></canvas></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVV\',\'vendas-vendedor.png\')">Exportar PNG</button><button class="btn btn-p btn-s" onclick="exportVendVendedorPDF()">Exportar PDF</button></div></div>';
 }
 
-function filtrarVendVendedor() {
-  var vendas = loadData('vendas');
-  var vend = document.getElementById('vv-vend').value;
-  var periodo = document.getElementById('vv-periodo').value;
-  var dataRef = document.getElementById('vv-data').value;
-  var filtradas = vendas.filter(function (v) {
-    if (vend && v.vendedor !== vend) { return false; }
-    if (dataRef) {
-      var dV = new Date(v.data);
-      var dR = new Date(dataRef);
-      if (periodo === 'mensal' && (dV.getMonth() !== dR.getMonth() || dV.getFullYear() !== dR.getFullYear())) { return false; }
-      if (periodo === 'anual' && dV.getFullYear() !== dR.getFullYear()) { return false; }
-    }
-    return true;
-  });
-  var vAtivos = getVendedores();
-  var tabela = vAtivos.map(function (v) {
-    var vV = filtradas.filter(function (x) { return x.vendedor === v.id; });
-    var tot = vV.reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
-    var qtd = vV.reduce(function (s, x) { return s + (parseInt(x.qtdProdutos) || 0); }, 0);
-    return '<tr><td>' + getNome(v.id) + '</td><td class="tcc">' + vV.length + '</td><td class="tcc">' + qtd + '</td><td class="tcr">R$ ' + fmtBRL(tot) + '</td></tr>';
-  }).join('');
-  var div = document.getElementById('vv-tabela');
-  if (div) { div.innerHTML = '<thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead><tbody>' + tabela + '</tbody>'; }
-  if (charts.vv) { charts.vv.destroy(); }
-  var ctx = document.getElementById('chVV');
-  if (ctx) {
-    charts.vv = new Chart(ctx, { type: 'bar', data: { labels: vAtivos.map(function (v) { return getNome(v.id); }), datasets: [{ label: 'Total', data: vAtivos.map(function (v) { return filtradas.filter(function (x) { return x.vendedor === v.id; }).reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0); }), backgroundColor: CORES, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
-  }
-}
-
-function limparFiltroVendVendedor() {
-  document.getElementById('vv-vend').value = '';
-  document.getElementById('vv-periodo').value = 'todos';
-  document.getElementById('vv-data').value = '';
-  filtrarVendVendedor();
-}
-
-function initVendVendedorChart() { filtrarVendVendedor(); }
+function initVendVendedorChart() { aplicarFiltroPeriodo('vv'); }
 
 function exportVendVendedorPDF() {
   var vAtivos = getVendedores();
@@ -1817,48 +1815,48 @@ function exportVendVendedorPDF() {
   exportPDF('Vendas por Vendedor', html);
 }
 
-// ===== VENDAS POR ESTADO =====
+// ===== VENDAS POR ESTADO — filtro estado + periodo dinamico =====
 function renderVendEstado() {
-  var vendas = loadData('vendas');
-  var estados = {};
-  vendas.forEach(function (v) {
-    var est = getEstadoFromVenda(v);
-    if (!estados[est]) { estados[est] = { qtd: 0, total: 0 }; }
-    estados[est].qtd++;
-    estados[est].total += parseFloat(v.total) || 0;
-  });
-  var rows = Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; }).map(function (est) { return '<tr><td>' + est + '</td><td class="tcc">' + estados[est].qtd + '</td><td class="tcr">R$ ' + fmtBRL(estados[est].total) + '</td></tr>'; }).join('');
-  return '<h2 class="st2">Vendas por Estado</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="filtros"><div class="fg"><label>Estado</label><select id="ve-uf"><option value="">Todos</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendEstado()">OK</button></div></div></div>' +
-    '<div class="card"><h3>Resumo</h3><table id="ve-tabela"><thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
+    '<div class="fg"><label>Estado</label><select id="ve-uf" onchange="aplicarFiltroPeriodo(\'ve\')"><option value="">Todos</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
+    filtroPeriodoHTML('ve') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'ve\')">Limpar</button></div></div></div>';
+  window['_filtro_ve'] = function (p, ini, fim, mes, ano) {
+    var vendas = loadData('vendas');
+    var uf = document.getElementById('ve-uf').value;
+    var filtradas = vendas.filter(function (v) {
+      if (uf && getEstadoFromVenda(v) !== uf) { return false; }
+      if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+      return true;
+    });
+    var estados = {};
+    filtradas.forEach(function (v) {
+      var est = getEstadoFromVenda(v);
+      if (!estados[est]) { estados[est] = { qtd: 0, total: 0 }; }
+      estados[est].qtd++;
+      estados[est].total += parseFloat(v.total) || 0;
+    });
+    var rows = Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; }).map(function (est) { return '<tr><td>' + est + '</td><td class="tcc">' + estados[est].qtd + '</td><td class="tcr">R$ ' + fmtBRL(estados[est].total) + '</td></tr>'; }).join('');
+    var div = document.getElementById('ve-tabela');
+    if (div) { div.innerHTML = '<thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody>'; }
+    if (charts.ve) { charts.ve.destroy(); }
+    var ctx = document.getElementById('chVE');
+    if (ctx) {
+      var labels = Object.keys(estados);
+      var data = labels.map(function (k) { return estados[k].total; });
+      charts.ve = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Total', data: data, backgroundColor: CORES, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+    }
+  };
+  setTimeout(function () { aplicarFiltroPeriodo('ve'); }, 50);
+  return '<h2 class="st2">Vendas por Estado</h2>' + filtro +
+    '<div class="card"><h3>Resumo</h3><table id="ve-tabela"><thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody></tbody></table></div>' +
     '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVE"></canvas></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVE\',\'vendas-estado.png\')">Exportar PNG</button><button class="btn btn-p btn-s" onclick="exportVendEstadoPDF()">Exportar PDF</button></div></div>';
 }
 
-function filtrarVendEstado() {
-  var vendas = loadData('vendas');
-  var uf = document.getElementById('ve-uf').value;
-  var filtradas = uf ? vendas.filter(function (v) { return getEstadoFromVenda(v) === uf; }) : vendas;
-  var estados = {};
-  filtradas.forEach(function (v) {
-    var est = getEstadoFromVenda(v);
-    if (!estados[est]) { estados[est] = { qtd: 0, total: 0 }; }
-    estados[est].qtd++;
-    estados[est].total += parseFloat(v.total) || 0;
-  });
-  var rows = Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; }).map(function (est) { return '<tr><td>' + est + '</td><td class="tcc">' + estados[est].qtd + '</td><td class="tcr">R$ ' + fmtBRL(estados[est].total) + '</td></tr>'; }).join('');
-  var div = document.getElementById('ve-tabela');
-  if (div) { div.innerHTML = '<thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody>'; }
-  if (charts.ve) { charts.ve.destroy(); }
-  var ctx = document.getElementById('chVE');
-  if (ctx) {
-    var labels = Object.keys(estados);
-    var data = labels.map(function (k) { return estados[k].total; });
-    charts.ve = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Total', data: data, backgroundColor: CORES, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
-  }
-}
-
-function initVendEstadoChart() { filtrarVendEstado(); }
+function initVendEstadoChart() { aplicarFiltroPeriodo('ve'); }
 
 function exportVendEstadoPDF() {
   var vendas = loadData('vendas');
@@ -1875,48 +1873,48 @@ function exportVendEstadoPDF() {
   exportPDF('Vendas por Estado', html);
 }
 
-// ===== VENDAS POR SEGMENTO =====
+// ===== VENDAS POR SEGMENTO — filtro segmento + periodo dinamico =====
 function renderVendSegmento() {
-  var vendas = loadData('vendas');
-  var segs = {};
-  vendas.forEach(function (v) {
-    var seg = getSegmentoFromVenda(v);
-    if (!segs[seg]) { segs[seg] = { qtd: 0, total: 0 }; }
-    segs[seg].qtd++;
-    segs[seg].total += parseFloat(v.total) || 0;
-  });
-  var rows = Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; }).map(function (seg) { return '<tr><td>' + seg + '</td><td class="tcc">' + segs[seg].qtd + '</td><td class="tcr">R$ ' + fmtBRL(segs[seg].total) + '</td></tr>'; }).join('');
-  return '<h2 class="st2">Vendas por Segmento</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="filtros"><div class="fg"><label>Segmento</label><select id="vs-seg"><option value="">Todos</option>' + SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('') + '</select></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendSegmento()">OK</button></div></div></div>' +
-    '<div class="card"><h3>Resumo</h3><table id="vs-tabela"><thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
+    '<div class="fg"><label>Segmento</label><select id="vs-seg" onchange="aplicarFiltroPeriodo(\'vs\')"><option value="">Todos</option>' + SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('') + '</select></div>' +
+    filtroPeriodoHTML('vs') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'vs\')">Limpar</button></div></div></div>';
+  window['_filtro_vs'] = function (p, ini, fim, mes, ano) {
+    var vendas = loadData('vendas');
+    var segFiltro = document.getElementById('vs-seg').value;
+    var filtradas = vendas.filter(function (v) {
+      if (segFiltro && getSegmentoFromVenda(v) !== segFiltro) { return false; }
+      if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+      return true;
+    });
+    var segs = {};
+    filtradas.forEach(function (v) {
+      var seg = getSegmentoFromVenda(v);
+      if (!segs[seg]) { segs[seg] = { qtd: 0, total: 0 }; }
+      segs[seg].qtd++;
+      segs[seg].total += parseFloat(v.total) || 0;
+    });
+    var rows = Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; }).map(function (seg) { return '<tr><td>' + seg + '</td><td class="tcc">' + segs[seg].qtd + '</td><td class="tcr">R$ ' + fmtBRL(segs[seg].total) + '</td></tr>'; }).join('');
+    var div = document.getElementById('vs-tabela');
+    if (div) { div.innerHTML = '<thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody>'; }
+    if (charts.vs) { charts.vs.destroy(); }
+    var ctx = document.getElementById('chVS');
+    if (ctx) {
+      var labels = Object.keys(segs);
+      var data = labels.map(function (k) { return segs[k].total; });
+      charts.vs = new Chart(ctx, { type: 'pie', data: { labels: labels, datasets: [{ data: data, backgroundColor: CORES }] }, options: { responsive: true, maintainAspectRatio: false } });
+    }
+  };
+  setTimeout(function () { aplicarFiltroPeriodo('vs'); }, 50);
+  return '<h2 class="st2">Vendas por Segmento</h2>' + filtro +
+    '<div class="card"><h3>Resumo</h3><table id="vs-tabela"><thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody></tbody></table></div>' +
     '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVS"></canvas></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVS\',\'vendas-segmento.png\')">Exportar PNG</button><button class="btn btn-p btn-s" onclick="exportVendSegmentoPDF()">Exportar PDF</button></div></div>';
 }
 
-function filtrarVendSegmento() {
-  var vendas = loadData('vendas');
-  var segFiltro = document.getElementById('vs-seg').value;
-  var filtradas = segFiltro ? vendas.filter(function (v) { return getSegmentoFromVenda(v) === segFiltro; }) : vendas;
-  var segs = {};
-  filtradas.forEach(function (v) {
-    var seg = getSegmentoFromVenda(v);
-    if (!segs[seg]) { segs[seg] = { qtd: 0, total: 0 }; }
-    segs[seg].qtd++;
-    segs[seg].total += parseFloat(v.total) || 0;
-  });
-  var rows = Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; }).map(function (seg) { return '<tr><td>' + seg + '</td><td class="tcc">' + segs[seg].qtd + '</td><td class="tcr">R$ ' + fmtBRL(segs[seg].total) + '</td></tr>'; }).join('');
-  var div = document.getElementById('vs-tabela');
-  if (div) { div.innerHTML = '<thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody>'; }
-  if (charts.vs) { charts.vs.destroy(); }
-  var ctx = document.getElementById('chVS');
-  if (ctx) {
-    var labels = Object.keys(segs);
-    var data = labels.map(function (k) { return segs[k].total; });
-    charts.vs = new Chart(ctx, { type: 'pie', data: { labels: labels, datasets: [{ data: data, backgroundColor: CORES }] }, options: { responsive: true, maintainAspectRatio: false } });
-  }
-}
-
-function initVendSegmentoChart() { filtrarVendSegmento(); }
+function initVendSegmentoChart() { aplicarFiltroPeriodo('vs'); }
 
 function exportVendSegmentoPDF() {
   var vendas = loadData('vendas');
@@ -1933,48 +1931,49 @@ function exportVendSegmentoPDF() {
   exportPDF('Vendas por Segmento', html);
 }
 
-// ===== CRUZAMENTOS (aba Analise) — com filtro de periodo =====
+// ===== CRUZAMENTOS — filtro vendedor/segmento/estado + periodo dinamico =====
 function renderCruzamentos() {
-  var vendas = loadData('vendas');
   var vAtivos = getVendedores();
   var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
   var segOpts = SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
-  return '<h2 class="st2">Cruzamentos</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="filtros">' +
-    '<div class="fg"><label>Vendedor</label><select id="cr-vend" onchange="initCruzamentos()"><option value="">Todos</option>' + vendOpts + '</select></div>' +
-    '<div class="fg"><label>Segmento</label><select id="cr-seg" onchange="initCruzamentos()"><option value="">Todos</option>' + segOpts + '</select></div>' +
-    '<div class="fg"><label>Estado</label><select id="cr-uf" onchange="initCruzamentos()"><option value="">Todos</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
-    '<div class="fg"><label>Data Inicio</label><input type="date" id="cr-ini" onchange="initCruzamentos()"></div>' +
-    '<div class="fg"><label>Data Fim</label><input type="date" id="cr-fim" onchange="initCruzamentos()"></div>' +
-    '</div></div><div class="card"><h3>Resultado</h3><div id="cr-result"></div></div>';
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
+    '<div class="fg"><label>Vendedor</label><select id="cr-vend" onchange="aplicarFiltroPeriodo(\'cr\')"><option value="">Todos</option>' + vendOpts + '</select></div>' +
+    '<div class="fg"><label>Segmento</label><select id="cr-seg" onchange="aplicarFiltroPeriodo(\'cr\')"><option value="">Todos</option>' + segOpts + '</select></div>' +
+    '<div class="fg"><label>Estado</label><select id="cr-uf" onchange="aplicarFiltroPeriodo(\'cr\')"><option value="">Todos</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
+    filtroPeriodoHTML('cr') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'cr\')">Limpar</button></div></div></div>';
+  window['_filtro_cr'] = function (p, ini, fim, mes, ano) {
+    var vendas = loadData('vendas');
+    var vend = document.getElementById('cr-vend').value;
+    var seg = document.getElementById('cr-seg').value;
+    var uf = document.getElementById('cr-uf').value;
+    var filtradas = vendas.filter(function (v) {
+      if (vend && v.vendedor !== vend) { return false; }
+      if (seg && getSegmentoFromVenda(v) !== seg) { return false; }
+      if (uf && getEstadoFromVenda(v) !== uf) { return false; }
+      if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+      return true;
+    });
+    var tot = filtradas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+    var qtd = filtradas.reduce(function (s, v) { return s + (parseInt(v.qtdProdutos) || 0); }, 0);
+    var html = '<div class="sg"><div class="sc s"><div class="lb">Vendas Filtradas</div><div class="vl">' + filtradas.length + '</div></div><div class="sc"><div class="lb">Produtos</div><div class="vl">' + qtd + '</div></div><div class="sc"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(tot) + '</div></div></div>';
+    if (filtradas.length) {
+      html += '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Segmento</th><th>Vendedor</th><th>Total</th></tr></thead><tbody>';
+      filtradas.forEach(function (v) { html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + getEstadoFromVenda(v) + '</td><td>' + getSegmentoFromVenda(v) + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>'; });
+      html += '</tbody></table>';
+    }
+    var div = document.getElementById('cr-result');
+    if (div) { div.innerHTML = html; }
+  };
+  setTimeout(function () { aplicarFiltroPeriodo('cr'); }, 50);
+  return '<h2 class="st2">Cruzamentos</h2>' + filtro +
+    '<div class="card"><h3>Resultado</h3><div id="cr-result"></div></div>';
 }
 
-function initCruzamentos() {
-  var vendas = loadData('vendas');
-  var vend = document.getElementById('cr-vend').value;
-  var seg = document.getElementById('cr-seg').value;
-  var uf = document.getElementById('cr-uf').value;
-  var ini = document.getElementById('cr-ini').value;
-  var fim = document.getElementById('cr-fim').value;
-  var filtradas = vendas.filter(function (v) {
-    if (vend && v.vendedor !== vend) { return false; }
-    if (seg && getSegmentoFromVenda(v) !== seg) { return false; }
-    if (uf && getEstadoFromVenda(v) !== uf) { return false; }
-    if (ini && v.data < ini) { return false; }
-    if (fim && v.data > fim) { return false; }
-    return true;
-  });
-  var tot = filtradas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var qtd = filtradas.reduce(function (s, v) { return s + (parseInt(v.qtdProdutos) || 0); }, 0);
-  var html = '<div class="sg"><div class="sc s"><div class="lb">Vendas Filtradas</div><div class="vl">' + filtradas.length + '</div></div><div class="sc"><div class="lb">Produtos</div><div class="vl">' + qtd + '</div></div><div class="sc"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(tot) + '</div></div></div>';
-  if (filtradas.length) {
-    html += '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Segmento</th><th>Vendedor</th><th>Total</th></tr></thead><tbody>';
-    filtradas.forEach(function (v) { html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + getEstadoFromVenda(v) + '</td><td>' + getSegmentoFromVenda(v) + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>'; });
-    html += '</tbody></table>';
-  }
-  var div = document.getElementById('cr-result');
-  if (div) { div.innerHTML = html; }
-}
+function initCruzamentos() { aplicarFiltroPeriodo('cr'); }
 
 // ===== ANALISE DE CLIENTES =====
 function renderAnaliseCli() {
@@ -2127,80 +2126,63 @@ function renderCatalogo() {
   return html;
 }
 
-// ===== RELATORIOS GERAIS — filtro tipo + mes/ano + periodo + total vendido =====
+// ===== RELATORIOS GERAIS — filtro tipo + periodo dinamico =====
 function renderRelatorios() {
-  var vendas = loadData('vendas');
-  var atividades = loadData('atividades');
-  var clientes = loadData('clientes');
   var mesOpts = MESES.map(function (m, i) { return '<option value="' + (i + 1) + '">' + m + '</option>'; }).join('');
   var anoAtual = new Date().getFullYear();
-  var tipoFiltro = '<div class="card"><h3>Filtros do Relatorio</h3><div class="filtros">' +
-    '<div class="fg"><label>Tipo de Registro</label><select id="rel-tipo"><option value="todos">Todos</option><option value="venda">Somente Vendas</option><option value="bonificacao">Somente Bonificacoes</option><option value="ambos">Vendas + Bonificacoes</option></select></div>' +
-    '<div class="fg"><label>Mes</label><select id="rel-mes"><option value="todos">Todos os meses</option>' + mesOpts + '</select></div>' +
-    '<div class="fg"><label>Ano</label><select id="rel-ano"><option value="todos">Todos</option><option value="' + (anoAtual - 1) + '">' + (anoAtual - 1) + '</option><option value="' + anoAtual + '" selected>' + anoAtual + '</option></select></div>' +
-    '<div class="fg"><label>Data Inicio</label><input type="date" id="rel-ini"></div>' +
-    '<div class="fg"><label>Data Fim</label><input type="date" id="rel-fim"></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarRelatorio()">OK</button></div>' +
-    '</div></div>';
-  var totV = vendas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totL = atividades.filter(function (a) { return a.tipo === 'ligacao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-  var totP = atividades.filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-  return '<h2 class="st2">Relatorios Gerais</h2>' + tipoFiltro +
+  var filtro = '<div class="card"><h3>Filtros do Relatorio</h3><div class="filtros">' +
+    '<div class="fg"><label>Tipo de Registro</label><select id="rel-tipo" onchange="aplicarFiltroPeriodo(\'rel\')"><option value="todos">Todos</option><option value="venda">Somente Vendas</option><option value="bonificacao">Somente Bonificacoes</option><option value="ambos">Vendas + Bonificacoes</option></select></div>' +
+    filtroPeriodoHTML('rel') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'rel\')">Limpar</button></div></div></div>';
+  window['_filtro_rel'] = function (p, ini, fim, mes, ano) {
+    var vendas = loadData('vendas');
+    var tipo = document.getElementById('rel-tipo').value;
+    var filtradas = vendas.filter(function (v) {
+      var vt = v.tipo || 'venda';
+      if (tipo === 'venda' && vt !== 'venda') { return false; }
+      if (tipo === 'bonificacao' && vt !== 'bonificacao') { return false; }
+      if (tipo === 'ambos' && vt !== 'venda' && vt !== 'bonificacao') { return false; }
+      if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+      return true;
+    });
+    var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+    var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+    var totGeral = totVendas + totBonif;
+    var resumo = document.getElementById('rel-resumo');
+    if (resumo) {
+      resumo.innerHTML = '<div class="sg">' +
+        '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
+        '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
+        '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totGeral) + '</div></div>' +
+        '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
+    }
+    var tabelaDiv = document.getElementById('rel-tabela');
+    if (!tabelaDiv) { return; }
+    var html = '<table><thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
+    filtradas.forEach(function (v) {
+      var tipoV = v.tipo || 'venda';
+      var tipoHtml = '<span class="tipo-badge ' + tipoV + '">' + tipoV + '</span>';
+      html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcc">' + tipoHtml + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    tabelaDiv.innerHTML = html;
+    window._relFiltradas = filtradas;
+  };
+  setTimeout(function () { aplicarFiltroPeriodo('rel'); }, 50);
+  var totV = loadData('vendas').reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totL = loadData('atividades').filter(function (a) { return a.tipo === 'ligacao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+  var totP = loadData('atividades').filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+  return '<h2 class="st2">Relatorios Gerais</h2>' + filtro +
     '<div class="card"><h3>Resumo Geral</h3><div id="rel-resumo"><div class="sg">' +
     '<div class="sc s"><div class="lb">Faturamento Total</div><div class="vl">R$ ' + fmtBRL(totV) + '</div></div>' +
-    '<div class="sc"><div class="lb">Vendas</div><div class="vl">' + vendas.length + '</div></div>' +
-    '<div class="sc"><div class="lb">Clientes</div><div class="vl">' + clientes.length + '</div></div>' +
+    '<div class="sc"><div class="lb">Vendas</div><div class="vl">' + loadData('vendas').length + '</div></div>' +
+    '<div class="sc"><div class="lb">Clientes</div><div class="vl">' + loadData('clientes').length + '</div></div>' +
     '<div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totL + '</div></div>' +
     '<div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totP + '</div></div></div></div><div id="rel-tabela"></div></div>' +
     '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportarRelatorioCSV()">Exportar CSV</button><button class="btn btn-p btn-s" onclick="exportarRelatorioPDF()">Exportar PDF</button></div>';
-}
-
-function filtrarRelatorio() {
-  var vendas = loadData('vendas');
-  var tipo = document.getElementById('rel-tipo').value;
-  var mes = document.getElementById('rel-mes').value;
-  var ano = document.getElementById('rel-ano').value;
-  var ini = document.getElementById('rel-ini').value;
-  var fim = document.getElementById('rel-fim').value;
-  var filtradas = vendas.filter(function (v) {
-    var vt = v.tipo || 'venda';
-    if (tipo === 'venda' && vt !== 'venda') { return false; }
-    if (tipo === 'bonificacao' && vt !== 'bonificacao') { return false; }
-    if (tipo === 'ambos' && vt !== 'venda' && vt !== 'bonificacao') { return false; }
-    if (mes !== 'todos') {
-      var d = new Date(v.data);
-      if ((d.getMonth() + 1) !== parseInt(mes)) { return false; }
-    }
-    if (ano !== 'todos') {
-      var d2 = new Date(v.data);
-      if (d2.getFullYear() !== parseInt(ano)) { return false; }
-    }
-    if (ini && v.data < ini) { return false; }
-    if (fim && v.data > fim) { return false; }
-    return true;
-  });
-  var totVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totGeral = totVendas + totBonif;
-  var resumo = document.getElementById('rel-resumo');
-  if (resumo) {
-    resumo.innerHTML = '<div class="sg">' +
-      '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totVendas) + '</div></div>' +
-      '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totBonif) + '</div></div>' +
-      '<div class="sc"><div class="lb">Total Geral</div><div class="vl">R$ ' + fmtBRL(totGeral) + '</div></div>' +
-      '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>';
-  }
-  var tabelaDiv = document.getElementById('rel-tabela');
-  if (!tabelaDiv) { return; }
-  var html = '<table><thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
-  filtradas.forEach(function (v) {
-    var tipoV = v.tipo || 'venda';
-    var tipoHtml = '<span class="tipo-badge ' + tipoV + '">' + tipoV + '</span>';
-    html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcc">' + tipoHtml + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
-  });
-  html += '</tbody></table>';
-  tabelaDiv.innerHTML = html;
-  window._relFiltradas = filtradas;
 }
 
 function exportarRelatorioCSV() { var dados = window._relFiltradas || loadData('vendas'); exportCSV(dados, 'relatorio-vendas.csv'); }
