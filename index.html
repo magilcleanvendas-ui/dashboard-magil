@@ -4,48 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Magil Clean — Gestão Comercial</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230071e3'/%3E%3Ctext x='32' y='44' font-family='-apple-system,Arial' font-size='28' font-weight='700' fill='white' text-anchor='middle'%3EMC%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
-/* ============ DESIGN SYSTEM — ESTILO APPLE ============ */
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#f5f5f7;
-  --card:#ffffff;
-  --txt:#1d1d1f;
-  --txt2:#86868b;
-  --txt3:#a1a1a6;
-  --acc:#0071e3;
-  --acc2:#0077ed;
-  --ok:#34c759;
-  --warn:#ff9f0a;
-  --err:#ff3b30;
-  --brd:rgba(0,0,0,.08);
-  --r:18px;
-  --s:0 8px 40px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);
-  --sbw:250px;
-  --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif;
-}
+:root{--bg:#f5f5f7;--card:#fff;--txt:#1d1d1f;--txt2:#86868b;--txt3:#a1a1a6;--acc:#0071e3;--acc2:#0077ed;--ok:#34c759;--warn:#ff9f0a;--err:#ff3b30;--brd:rgba(0,0,0,.08);--r:18px;--s:0 8px 40px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);--sbw:250px;--font:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif}
 html,body{font-family:var(--font);-webkit-font-smoothing:antialiased}
 body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
-
-/* ============ LOGIN ============ */
 #ls{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,#f5f5f7 0%,#e8e8ed 100%)}
 .lc{background:rgba(255,255,255,.72);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid var(--brd);border-radius:28px;padding:48px 40px;box-shadow:0 24px 80px rgba(0,0,0,.12);width:400px;max-width:92%}
 .lc .logo{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#0071e3,#5ac8fa);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 20px;box-shadow:0 8px 24px rgba(0,113,227,.35)}
 .lc h1{font-size:1.7rem;font-weight:700;text-align:center;letter-spacing:-.02em}
 .lc p{text-align:center;color:var(--txt2);font-size:.9rem;margin:6px 0 28px}
 .lc label{display:block;font-size:.78rem;font-weight:600;color:var(--txt2);margin-bottom:6px;padding-left:4px}
-.lc select,.lc input{width:100%;padding:14px 16px;margin-bottom:16px;border:1px solid var(--brd);border-radius:12px;font-size:1rem;outline:none;background:#fff;color:var(--txt);transition:.2s}
-.lc select:focus,.lc input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(0,113,227,.15)}
+.lc input{width:100%;padding:14px 16px;margin-bottom:16px;border:1px solid var(--brd);border-radius:12px;font-size:1rem;outline:none;background:#fff;color:var(--txt);transition:.2s}
+.lc input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(0,113,227,.15)}
 .lc button{width:100%;padding:15px;background:var(--acc);color:#fff;border:none;border-radius:980px;font-size:1rem;font-weight:600;cursor:pointer;transition:.2s}
 .lc button:hover{background:var(--acc2);transform:translateY(-1px)}
 .lc .hint{text-align:center;font-size:.72rem;color:var(--txt3);margin-top:14px;line-height:1.5}
-
-/* ============ APP SHELL ============ */
+.cust-select{position:relative;margin-bottom:16px}
+.cust-select-trigger{width:100%;padding:14px 16px;border:1px solid var(--brd);border-radius:12px;background:#fff;color:var(--txt);font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s}
+.cust-select.open .cust-select-trigger{border-color:var(--acc);box-shadow:0 0 0 4px rgba(0,113,227,.15)}
+.cust-arrow{color:var(--txt2);transition:.2s}
+.cust-select.open .cust-arrow{transform:rotate(180deg)}
+.cust-select-list{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--brd);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.12);margin-top:6px;max-height:300px;overflow-y:auto;z-index:50}
+.cust-select.open .cust-select-list{display:block}
+.cust-option{padding:12px 16px;cursor:pointer;font-size:.95rem;color:var(--txt)}
+.cust-option:hover{background:rgba(0,113,227,.08)}
 #app{display:none}
 #hd{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 28px;background:rgba(245,245,247,.72);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-bottom:1px solid var(--brd)}
 #hd .hl{display:flex;align-items:center;gap:14px}
@@ -57,8 +44,6 @@ body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
 .badge{background:rgba(0,113,227,.1);color:var(--acc);padding:5px 14px;border-radius:980px;font-size:.75rem;font-weight:600}
 .badge.mg{background:rgba(255,159,10,.14);color:#c93400}
 #main{display:flex;min-height:calc(100vh - 55px)}
-
-/* ============ SIDEBAR ============ */
 .sidebar{width:var(--sbw);background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--brd);padding:16px 10px;overflow-y:auto;position:sticky;top:55px;height:calc(100vh - 55px);flex-shrink:0;transition:width .3s,opacity .3s}
 .sidebar.collapsed{width:0;padding:0;opacity:0;overflow:hidden;border:none}
 .sidebar .nav-item{padding:11px 14px;cursor:pointer;font-size:.88rem;color:var(--txt2);border-radius:10px;font-weight:500;transition:.15s;display:flex;align-items:center;gap:10px;margin-bottom:2px}
@@ -67,8 +52,6 @@ body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
 .sidebar .nav-ico{font-size:1rem;width:20px;text-align:center}
 .sidebar .nav-sep{height:1px;background:var(--brd);margin:10px 12px}
 .sidebar .nav-title{padding:10px 14px 4px;font-size:.68rem;color:var(--txt3);text-transform:uppercase;font-weight:700;letter-spacing:.06em}
-
-/* ============ CONTENT ============ */
 .content{flex:1;padding:32px;overflow-x:auto;max-width:1400px}
 .tc{display:none}
 .tc.act{display:block;animation:fadeIn .25s ease}
@@ -77,8 +60,6 @@ body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
 .card h3{font-size:1.02rem;font-weight:700;margin-bottom:16px;letter-spacing:-.01em}
 .st2{font-size:1.6rem;font-weight:700;letter-spacing:-.02em;margin-bottom:24px}
 .dv{height:1px;background:var(--brd);margin:20px 0}
-
-/* ============ STATS ============ */
 .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:24px}
 .sc{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:22px;box-shadow:var(--s)}
 .sc .lb{font-size:.72rem;color:var(--txt2);margin-bottom:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
@@ -87,8 +68,6 @@ body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
 .sc.w{border-top:3px solid var(--warn)}
 .sc.d{border-top:3px solid var(--err)}
 .sc.s{border-top:3px solid var(--ok)}
-
-/* ============ PROGRESS ============ */
 .pw{margin-bottom:16px}
 .pw .pl{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:6px}
 .pw .pl span:first-child{color:var(--txt2);font-weight:500}
@@ -98,8 +77,6 @@ body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
 .pf.lo{background:var(--err)}
 .pf.mi{background:var(--warn)}
 .pf.hi{background:var(--ok)}
-
-/* ============ VENDEDOR CARDS ============ */
 .vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
 .vc{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:22px;box-shadow:var(--s)}
 .vc .vh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--brd)}
@@ -107,14 +84,10 @@ body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
 .vlv{font-size:.66rem;padding:3px 12px;border-radius:980px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .vlv.junior{background:rgba(142,142,147,.15);color:#636366}
 .vlv.pleno{background:rgba(0,113,227,.12);color:var(--acc)}
-
-/* ============ FORMS ============ */
 .fr{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
 .fg label{display:block;font-size:.76rem;color:var(--txt2);margin-bottom:6px;font-weight:600}
 .fg input,.fg select,.fg textarea{width:100%;padding:12px 14px;border:1px solid var(--brd);border-radius:12px;font-size:.9rem;outline:none;background:#fff;color:var(--txt);transition:.2s}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(0,113,227,.12)}
-
-/* ============ BUTTONS ============ */
 .btn{padding:11px 22px;border:none;border-radius:980px;font-size:.88rem;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
 .btn-p{background:var(--acc);color:#fff}
 .btn-p:hover{background:var(--acc2);transform:translateY(-1px)}
@@ -124,60 +97,42 @@ body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
 .btn-d:hover{background:rgba(255,59,48,.18)}
 .btn-f{width:100%}
 .btn-s{padding:8px 16px;font-size:.8rem}
-
-/* ============ TABLES ============ */
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 th{background:rgba(0,0,0,.03);color:var(--txt2);padding:12px 14px;text-align:left;font-weight:600;font-size:.74rem;letter-spacing:.03em;text-transform:uppercase;border-bottom:1px solid var(--brd)}
 td{padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.05)}
 tr:hover td{background:rgba(0,113,227,.03)}
 .tcr{text-align:right;font-variant-numeric:tabular-nums}
 .tcc{text-align:center}
-
-/* ============ TOAST ============ */
 #toast{position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;flex-direction:column;gap:10px}
 .tm{padding:14px 22px;border-radius:14px;color:#fff;font-size:.88rem;box-shadow:0 12px 40px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px;max-width:380px;backdrop-filter:blur(10px);transition:.3s}
 .tm.success{background:rgba(52,199,89,.95)}
 .tm.error{background:rgba(255,59,48,.95)}
 .tm.info{background:rgba(0,113,227,.95)}
-
-/* ============ CHARTS ============ */
 .cc{position:relative;height:300px;margin-top:16px}
-
-/* ============ VENDEDOR ROW ============ */
 .pc{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:var(--card);border:1px solid var(--brd);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:10px;gap:10px;flex-wrap:wrap}
 .pc .pi{display:flex;align-items:center;gap:12px}
-
-/* ============ PRODUTO ENTRY ============ */
 .pe{display:grid;grid-template-columns:1fr 90px 130px 40px;gap:8px;align-items:center;padding:12px;background:rgba(0,0,0,.03);border-radius:12px;margin-bottom:8px}
 .pe select,.pe input{padding:9px 12px;border:1px solid var(--brd);border-radius:10px;font-size:.85rem;width:100%;background:#fff;color:var(--txt)}
 .pe .rb{background:var(--err);color:#fff;border:none;border-radius:10px;cursor:pointer;padding:8px;font-size:1rem}
 .st{background:var(--txt);color:#fff;padding:16px;border-radius:14px;text-align:center;font-size:1.1rem;font-weight:700;margin-top:12px;letter-spacing:-.01em}
 .es{text-align:center;padding:40px;color:var(--txt3)}
 .es .ic{font-size:2.6rem;margin-bottom:12px;opacity:.35}
-
-/* ============ SEARCH ============ */
 .search-box{position:relative;margin-bottom:18px}
 .search-box input{width:100%;padding:14px 18px 14px 46px;border:1px solid var(--brd);border-radius:14px;font-size:.95rem;outline:none;background:#fff;color:var(--txt);box-shadow:0 2px 12px rgba(0,0,0,.04);transition:.2s}
 .search-box input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(0,113,227,.12)}
 .search-box .ico{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:1.1rem;pointer-events:none}
-
-/* ============ TIPO TOGGLE ============ */
 .tipo-toggle{display:flex;gap:4px;background:rgba(0,0,0,.05);padding:4px;border-radius:980px;margin-bottom:18px}
 .tipo-toggle button{flex:1;padding:10px 16px;border:none;background:transparent;color:var(--txt2);font-size:.86rem;font-weight:600;cursor:pointer;border-radius:980px;transition:.2s}
 .tipo-toggle button.act{background:#fff;color:var(--txt);box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .tipo-badge{display:inline-block;padding:3px 12px;border-radius:980px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
 .tipo-badge.venda{background:rgba(52,199,89,.14);color:#248a3d}
 .tipo-badge.bonificacao{background:rgba(255,159,10,.16);color:#b25e00}
-
-/* ============ WEEKLY BAR ============ */
 .weekly-bar{background:linear-gradient(135deg,#1d1d1f,#3a3a3c);color:#fff;border-radius:var(--r);padding:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .weekly-bar .wb-label{font-size:.7rem;opacity:.6;text-transform:uppercase;font-weight:600;letter-spacing:.05em}
 .weekly-bar .wb-value{font-size:1.9rem;font-weight:700;letter-spacing:-.02em}
 .weekly-bar .wb-progress{flex:1;min-width:200px;height:8px;background:rgba(255,255,255,.2);border-radius:980px;overflow:hidden}
 .weekly-bar .wb-progress-fill{height:100%;background:#30d158;border-radius:980px;transition:width .8s ease}
 .weekly-bar .wb-pct{font-size:1.2rem;font-weight:700}
-
-/* ============ COMISSAO ============ */
 .com-hero{background:linear-gradient(135deg,#1d1d1f,#3a3a3c);color:#fff;border-radius:var(--r);padding:28px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
 .com-hero .com-name{font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
 .com-hero .com-nivel{font-size:.85rem;opacity:.65;margin-top:4px}
@@ -190,7 +145,6 @@ tr:hover td{background:rgba(0,113,227,.03)}
 .com-stat .com-stat-sub{font-size:.7rem;color:var(--txt3);margin-top:4px}
 .com-stat.highlight{border-top:3px solid var(--ok)}
 .com-stat.highlight .com-stat-value{color:#248a3d}
-.com-faixa-table th{background:rgba(0,0,0,.03)}
 .com-faixa-table tr.ativa td{background:rgba(52,199,89,.08);font-weight:700}
 .com-accel{background:rgba(0,0,0,.03);border-radius:16px;padding:22px;margin-top:16px}
 .com-accel-title{font-size:1rem;font-weight:700;margin-bottom:8px}
@@ -208,8 +162,6 @@ tr:hover td{background:rgba(0,113,227,.03)}
 .com-result .com-result-value{font-size:3rem;font-weight:800;color:#248a3d;margin:8px 0;letter-spacing:-.02em}
 .com-result .com-result-detail{font-size:.82rem;color:#555;margin-top:8px}
 .com-result .com-result-badge{display:inline-block;background:#248a3d;color:#fff;padding:4px 16px;border-radius:980px;font-size:.74rem;font-weight:600;margin-top:12px}
-
-/* ============ PREVISAO ============ */
 .pred-card{background:linear-gradient(135deg,#e8f2ff,#dceaff);border:1px solid rgba(0,113,227,.25);border-radius:16px;padding:22px;margin-top:16px}
 .pred-card h4{color:#0040dd;margin-bottom:12px;font-weight:700}
 .pred-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px}
@@ -219,13 +171,9 @@ tr:hover td{background:rgba(0,113,227,.03)}
 .client-info{background:rgba(0,113,227,.05);border-radius:14px;padding:14px;margin-bottom:14px;border-left:4px solid var(--acc)}
 .client-info .ci-label{font-size:.68rem;color:var(--txt2);text-transform:uppercase;font-weight:700;letter-spacing:.04em}
 .client-info .ci-value{font-size:.92rem;color:var(--txt);font-weight:600;margin-top:2px}
-
-/* ============ METAS MARCA ROW ============ */
 .mp-row{display:grid;grid-template-columns:1fr 110px 40px;gap:8px;align-items:center;padding:10px;background:rgba(0,0,0,.03);border-radius:12px;margin-bottom:8px}
 .mp-row select,.mp-row input{padding:9px 12px;border:1px solid var(--brd);border-radius:10px;font-size:.85rem;width:100%;background:#fff;color:var(--txt)}
 .mp-row .rb{background:var(--err);color:#fff;border:none;border-radius:10px;cursor:pointer;padding:8px}
-
-/* ============ FILTROS ============ */
 .filtros,.date-filter{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:flex-end}
 .filtros .fg,.date-filter .fg{min-width:150px}
 .inp-sm{padding:9px 12px;border:1px solid var(--brd);border-radius:10px;font-size:.85rem;background:#fff;color:var(--txt);outline:none}
@@ -233,13 +181,15 @@ tr:hover td{background:rgba(0,113,227,.03)}
 .action-btns{display:flex;gap:6px;flex-wrap:wrap}
 .edit-btn{background:rgba(0,113,227,.1);color:var(--acc);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
 .del-btn{background:rgba(255,59,48,.1);color:var(--err);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
-
-/* ============ MODO ESCURO ============ */
 body.dark{--bg:#000;--card:#1c1c1e;--txt:#f5f5f7;--txt2:#98989d;--txt3:#6e6e73;--brd:rgba(255,255,255,.1);--s:0 8px 40px rgba(0,0,0,.5)}
 body.dark #ls{background:linear-gradient(180deg,#000 0%,#1c1c1e 100%)}
 body.dark .lc{background:rgba(28,28,30,.7);border-color:rgba(255,255,255,.12)}
-body.dark .lc select,body.dark .lc input{background:#2c2c2e;color:#f5f5f7;border-color:rgba(255,255,255,.12)}
+body.dark .lc input{background:#2c2c2e;color:#f5f5f7;border-color:rgba(255,255,255,.12)}
 body.dark .lc .hint{color:#6e6e73}
+body.dark .cust-select-trigger{background:#2c2c2e;color:#f5f5f7;border-color:rgba(255,255,255,.12)}
+body.dark .cust-select-list{background:#2c2c2e;border-color:rgba(255,255,255,.12)}
+body.dark .cust-option{color:#f5f5f7}
+body.dark .cust-option:hover{background:rgba(0,113,227,.2)}
 body.dark #hd{background:rgba(0,0,0,.6);border-bottom-color:rgba(255,255,255,.1)}
 body.dark #hd h2{color:#f5f5f7}
 body.dark .icon-btn{color:#f5f5f7;border-color:rgba(255,255,255,.15)}
@@ -275,56 +225,30 @@ body.dark .com-result .com-result-value{color:#30d158}
 body.dark .com-result .com-result-label,body.dark .com-result .com-result-detail{color:#98989d}
 body.dark .st{background:#f5f5f7;color:#000}
 body.dark .es{color:#6e6e73}
-
-/* ============ RESPONSIVO ============ */
-@media(max-width:768px){
-  .sidebar{display:none}
-  .content{padding:18px}
-  .sg{grid-template-columns:repeat(2,1fr)}
-  .vg{grid-template-columns:1fr}
-  .fr{grid-template-columns:1fr}
-  .pe{grid-template-columns:1fr;gap:6px}
-  .pc{flex-direction:column;gap:10px;align-items:stretch}
-  .filtros,.date-filter{flex-direction:column}
-  .com-week-grid{grid-template-columns:repeat(2,1fr)}
-  #hd{padding:10px 16px}
-}
+@media(max-width:768px){.sidebar{display:none}.content{padding:18px}.sg{grid-template-columns:repeat(2,1fr)}.vg{grid-template-columns:1fr}.fr{grid-template-columns:1fr}.pe{grid-template-columns:1fr;gap:6px}.pc{flex-direction:column;gap:10px;align-items:stretch}.filtros,.date-filter{flex-direction:column}.com-week-grid{grid-template-columns:repeat(2,1fr)}#hd{padding:10px 16px}}
 @media print{.sidebar{display:none}.content{padding:0}.card{box-shadow:none}.icon-btn,.sidebar-toggle{display:none}}
 </style>
 </head>
 <body>
-<!-- ============ LOGIN ============ -->
 <div id="ls">
   <div class="lc">
-    <div class="logo"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230071e3'/%3E%3Ctext x='32' y='44' font-family='-apple-system,Arial' font-size='28' font-weight='700' fill='white' text-anchor='middle'%3EMC%3C/text%3E%3C/svg%3E" alt="Magil Clean" style="width:100%;height:100%;border-radius:16px"></div>
+    <div class="logo">MC</div>
     <h1>Magil Clean</h1>
     <p>Gestão Comercial</p>
     <label>Perfil</label>
-        <label>Perfil</label>
-    <select id="lu">
-      <option value="">Selecione...</option>
-    </select>
-      <option value="">Selecione...</option>
-      <option value="gerente">Mariana (Gerente)</option>
-      <option value="v1">Vendedor 1</option>
-      <option value="v2">Vendedor 2</option>
-      <option value="v3">Vendedor 3</option>
-      <option value="v4">Vendedor 4</option>
-      <option value="v5">Vendedor 5</option>
-      <option value="v6">Vendedor 6</option>
-      <option value="v7">Vendedor 7</option>
-      <option value="v8">Vendedor 8</option>
-      <option value="v9">Vendedor 9</option>
-      <option value="v10">Vendedor 10</option>
-    </select>
+    <div class="cust-select" id="lu-wrap" onclick="togglePerfilDropdown()">
+      <div class="cust-select-trigger">
+        <span id="lu-label">Selecione...</span>
+        <span class="cust-arrow">▾</span>
+      </div>
+      <div class="cust-select-list" id="lu-list"></div>
+    </div>
     <label>Senha</label>
     <input type="password" id="lp" placeholder="Sua senha" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()">Entrar</button>
     <div class="hint">Senhas definidas pela gerente Mariana<br>na tela "Gerenciar Vendedores"</div>
   </div>
 </div>
-
-<!-- ============ APP ============ -->
 <div id="app">
   <div id="hd">
     <div class="hl">
@@ -344,7 +268,7 @@ body.dark .es{color:#6e6e73}
   </div>
 </div>
 <div id="toast"></div>
-<script>// ===== CONFIGURACAO FIREBASE (intacta, exatamente como antes) =====
+<script>// ===== CONFIGURACAO FIREBASE =====
 var firebaseConfig = {
   apiKey: "AIzaSyDtYSXeuAgvCOrZ88JRCwupLvGnUVdxMrQ",
   authDomain: "magil-clean.firebaseapp.com",
@@ -656,22 +580,32 @@ function progressBar(label, atual, meta, pct) {
   return '<div class="pw"><div class="pl"><span>' + label + '</span><span>' + da + ' / ' + dm + ' (' + Math.round(pct) + '%)</span></div><div class="pb"><div class="pf ' + cls + '" style="width:' + Math.max(2, Math.min(100, pct)) + '%"></div></div></div>';
 }
 
+// ===== DROPDOWN DE LOGIN (nomes salvos pela gerente) =====
 function updateLoginNomes() {
-  var sel = document.getElementById('lu');
-  if (!sel) { return; }
-  sel.innerHTML = '<option value="">Selecione...</option>';
+  var list = document.getElementById('lu-list');
+  if (!list) { return; }
+  list.innerHTML = '';
   USU.forEach(function (u) {
     var nm = getNome(u.id);
-    var opt = document.createElement('option');
-    opt.value = u.id;
+    var opt = document.createElement('div');
+    opt.className = 'cust-option';
     opt.textContent = u.isM ? nm + ' (Gerente)' : nm;
-    sel.appendChild(opt);
+    opt.onclick = function () {
+      document.getElementById('lu-wrap').dataset.value = u.id;
+      document.getElementById('lu-label').textContent = opt.textContent;
+      document.getElementById('lu-wrap').classList.remove('open');
+    };
+    list.appendChild(opt);
   });
+}
+
+function togglePerfilDropdown() {
+  document.getElementById('lu-wrap').classList.toggle('open');
 }
 
 // ===== LOGIN / LOGOUT =====
 function doLogin() {
-  var sel = document.getElementById('lu').value;
+  var sel = document.getElementById('lu-wrap').dataset.value;
   var pwd = document.getElementById('lp').value;
   if (!sel) { toast('Selecione um perfil', 'error'); return; }
   if (!pwd) { toast('Digite a senha', 'error'); return; }
@@ -707,7 +641,7 @@ function toggleSidebar() {
   sb.classList.toggle('collapsed');
 }
 
-// ===== MODO ESCURO (macOS style) =====
+// ===== MODO ESCURO =====
 function toggleDarkMode() {
   document.body.classList.toggle('dark');
   var isDark = document.body.classList.contains('dark');
@@ -724,7 +658,7 @@ function initDarkMode() {
   }
 }
 
-// ===== MASCARA DE TELEFONE (00) 00000-0000 — 11 digitos =====
+// ===== MASCARA DE TELEFONE =====
 function maskTelefone(el) {
   var v = el.value.replace(/\D/g, '').slice(0, 11);
   var r = '';
@@ -827,7 +761,7 @@ function renderProdutosDiscriminados() {
   return html;
 }
 
-// ===== SIDEBAR (Apple) =====
+// ===== SIDEBAR =====
 function initSidebar() {
   var sb = document.getElementById('sb');
   var mc = document.getElementById('mc');
@@ -919,7 +853,7 @@ function renderTab(id) {
   else if (id === 'minhas') { c.innerHTML = renderMinhas(); }
   else if (id === 'venda') { c.innerHTML = renderVenda(); }
   else if (id === 'atividades') { c.innerHTML = renderAtividades(); }
-}// ===== VISAO GERAL (GERENTE) — com quadro "Clientes Existentes" =====
+}// ===== VISAO GERAL (GERENTE) =====
 function renderOverview() {
   var vendas = loadData('vendas');
   var metas = loadData('metas');
@@ -929,7 +863,6 @@ function renderOverview() {
   var tV = 0, tL = 0, tP = 0, tPr = 0, tPos = 0, tCN = 0;
   var clientesExistentes = clientes.filter(function (c) { return c.origem !== 'manual'; }).length;
   var clientesNovosManual = clientes.filter(function (c) { return c.origem === 'manual'; }).length;
-
   var cards = vAtivos.map(function (v) {
     var vV = vendas.filter(function (x) { return x.vendedor === v.id && (x.tipo || 'venda') === 'venda'; });
     var vA = atividades.filter(function (x) { return x.vendedor === v.id; });
@@ -940,9 +873,7 @@ function renderOverview() {
     var vPr = vV.reduce(function (s, x) { return s + (parseInt(x.qtdProdutos) || 0); }, 0);
     var vPos = vV.length;
     var vCN = clientes.filter(function (c) { return c.vendedorId === v.id; }).length;
-
     tV += vTotV; tL += vL; tP += vP; tPr += vPr; tPos += vPos; tCN += vCN;
-
     var m = vM[vM.length - 1] || {};
     var pV = m.valorVenda ? Math.min(100, (vTotV / m.valorVenda) * 100) : 0;
     var pL = m.ligacoes ? Math.min(100, (vL / m.ligacoes) * 100) : 0;
@@ -951,18 +882,14 @@ function renderOverview() {
     var pPos = m.positivacao ? Math.min(100, (vPos / m.positivacao) * 100) : 0;
     var pCN = m.clientesNovos ? Math.min(100, (vCN / m.clientesNovos) * 100) : 0;
     var nv = getNivel(v.id);
-
-    return '<div class="vc">' +
-      '<div class="vh"><span class="vn">' + getNome(v.id) + '</span><span class="vlv ' + nv.toLowerCase() + '">' + nv + '</span></div>' +
+    return '<div class="vc"><div class="vh"><span class="vn">' + getNome(v.id) + '</span><span class="vlv ' + nv.toLowerCase() + '">' + nv + '</span></div>' +
       progressBar('Vendas (R$)', vTotV, m.valorVenda || 0, pV) +
       progressBar('Ligacoes', vL, m.ligacoes || 0, pL) +
       progressBar('Prospeccao', vP, m.prospeccao || 0, pP) +
       progressBar('Produtos', vPr, m.produtos || 0, pPr) +
       progressBar('Positivacao', vPos, m.positivacao || 0, pPos) +
-      progressBar('Clientes Novos', vCN, m.clientesNovos || 0, pCN) +
-      '</div>';
+      progressBar('Clientes Novos', vCN, m.clientesNovos || 0, pCN) + '</div>';
   }).join('');
-
   return '<h2 class="st2">Visao Geral</h2>' +
     '<div class="sg">' +
     '<div class="sc ' + (tV > 0 ? 's' : '') + '"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(tV) + '</div><div class="sb">' + vendas.length + ' vendas</div></div>' +
@@ -990,19 +917,13 @@ function initOverviewChart() {
       datasets: [{
         label: 'Vendas',
         data: vAtivos.map(function (v) {
-          return vendas.filter(function (x) { return x.vendedor === v.id; })
-            .reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
+          return vendas.filter(function (x) { return x.vendedor === v.id; }).reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
         }),
         backgroundColor: '#0071e3',
         borderRadius: 8
       }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true } }
-    }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
   });
 }
 
@@ -1010,68 +931,34 @@ function initOverviewChart() {
 function renderMetas() {
   var metas = loadData('metas');
   var vAtivos = getVendedores();
-  var opts = vAtivos.map(function (v) {
-    return '<option value="' + v.id + '">' + getNome(v.id) + ' (' + getNivel(v.id) + ')</option>';
-  }).join('');
-  var mesOpts = MESES.map(function (m, i) {
-    return '<option value="' + m + '"' + (i === 7 ? ' selected' : '') + '>' + m + '</option>';
-  }).join('');
+  var opts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + ' (' + getNivel(v.id) + ')</option>'; }).join('');
+  var mesOpts = MESES.map(function (m, i) { return '<option value="' + m + '"' + (i === 7 ? ' selected' : '') + '>' + m + '</option>'; }).join('');
   var btnLabel = editingMetaIdx >= 0 ? 'Atualizar Meta' : 'Salvar Meta';
-
   var list = metas.length
-    ? '<div class="card"><h3>Metas Cadastradas</h3><table><thead><tr>' +
-      '<th>Vendedor</th><th>Ano</th><th>Mes</th><th>Sem</th><th>Lig</th><th>Pros</th><th>Prod</th><th>Posit</th><th>ClNov</th><th>Marcas</th><th>Valor</th><th>Acoes</th>' +
-      '</tr></thead><tbody>' +
+    ? '<div class="card"><h3>Metas Cadastradas</h3><table><thead><tr><th>Vendedor</th><th>Ano</th><th>Mes</th><th>Sem</th><th>Lig</th><th>Pros</th><th>Prod</th><th>Posit</th><th>ClNov</th><th>Marcas</th><th>Valor</th><th>Acoes</th></tr></thead><tbody>' +
       metas.map(function (m, i) {
-        var detStr = (m.marcasDetalhe && m.marcasDetalhe.length)
-          ? m.marcasDetalhe.map(function (d) { return d.qtd + 'x ' + d.nome; }).join(', ')
-          : '--';
-        return '<tr>' +
-          '<td>' + getNome(m.vendedor) + '</td>' +
-          '<td>' + m.ano + '</td>' +
-          '<td>' + m.mes + '</td>' +
-          '<td class="tcc">' + m.semana + '</td>' +
-          '<td class="tcc">' + m.ligacoes + '</td>' +
-          '<td class="tcc">' + m.prospeccao + '</td>' +
-          '<td class="tcc">' + m.produtos + '</td>' +
-          '<td class="tcc">' + (m.positivacao || 0) + '</td>' +
-          '<td class="tcc">' + (m.clientesNovos || 0) + '</td>' +
-          '<td style="font-size:.78rem">' + detStr + '</td>' +
-          '<td class="tcr">R$ ' + fmtBRL(m.valorVenda) + '</td>' +
-          '<td><div class="action-btns"><button class="edit-btn" onclick="editMeta(' + i + ')">Editar</button><button class="del-btn" onclick="delMeta(' + i + ')">Excluir</button></div></td>' +
-          '</tr>';
-      }).join('') +
-      '</tbody></table></div>'
+        var detStr = (m.marcasDetalhe && m.marcasDetalhe.length) ? m.marcasDetalhe.map(function (d) { return d.qtd + 'x ' + d.nome; }).join(', ') : '--';
+        return '<tr><td>' + getNome(m.vendedor) + '</td><td>' + m.ano + '</td><td>' + m.mes + '</td><td class="tcc">' + m.semana + '</td><td class="tcc">' + m.ligacoes + '</td><td class="tcc">' + m.prospeccao + '</td><td class="tcc">' + m.produtos + '</td><td class="tcc">' + (m.positivacao || 0) + '</td><td class="tcc">' + (m.clientesNovos || 0) + '</td><td style="font-size:.78rem">' + detStr + '</td><td class="tcr">R$ ' + fmtBRL(m.valorVenda) + '</td><td><div class="action-btns"><button class="edit-btn" onclick="editMeta(' + i + ')">Editar</button><button class="del-btn" onclick="delMeta(' + i + ')">Excluir</button></div></td></tr>';
+      }).join('') + '</tbody></table></div>'
     : '<div class="card"><div class="es"><div class="ic">LISTA</div><p>Nenhuma meta.</p></div></div>';
-
   var formHtml = '<div class="card"><h3>' + (editingMetaIdx >= 0 ? 'Editar Meta' : 'Definir Meta') + '</h3>' +
-    '<div class="fr">' +
-    '<div class="fg"><label>Vendedor</label><select id="m-vend">' + opts + '</select></div>' +
+    '<div class="fr"><div class="fg"><label>Vendedor</label><select id="m-vend">' + opts + '</select></div>' +
     '<div class="fg"><label>Ano</label><select id="m-ano"><option>2025</option><option selected>2026</option><option>2027</option></select></div>' +
     '<div class="fg"><label>Mes</label><select id="m-mes">' + mesOpts + '</select></div>' +
-    '<div class="fg"><label>Semana</label><select id="m-sem"><option value="1">Semana 1</option><option value="2">Semana 2</option><option value="3">Semana 3</option><option value="4">Semana 4</option></select></div>' +
-    '</div>' +
-    '<div class="fr">' +
-    '<div class="fg"><label>Ligacoes</label><input type="number" id="m-lig" value="50"></div>' +
+    '<div class="fg"><label>Semana</label><select id="m-sem"><option value="1">Semana 1</option><option value="2">Semana 2</option><option value="3">Semana 3</option><option value="4">Semana 4</option></select></div></div>' +
+    '<div class="fr"><div class="fg"><label>Ligacoes</label><input type="number" id="m-lig" value="50"></div>' +
     '<div class="fg"><label>Prospeccao</label><input type="number" id="m-pros" value="10"></div>' +
     '<div class="fg"><label>Produtos (Total)</label><input type="number" id="m-prod" value="30" oninput="somaProdMeta()"></div>' +
-    '<div class="fg"><label>Valor (R$)</label><input type="number" id="m-val" value="50000"></div>' +
-    '</div>' +
-    '<div class="fr">' +
-    '<div class="fg"><label>Positivacao</label><input type="number" id="m-pos" value="5" min="0"></div>' +
-    '<div class="fg"><label>Clientes Novos</label><input type="number" id="m-cn" value="3" min="0"></div>' +
-    '</div>' +
-    '<div class="dv"></div>' +
-    '<h3>Marcas Discriminadas</h3>' +
+    '<div class="fg"><label>Valor (R$)</label><input type="number" id="m-val" value="50000"></div></div>' +
+    '<div class="fr"><div class="fg"><label>Positivacao</label><input type="number" id="m-pos" value="5" min="0"></div>' +
+    '<div class="fg"><label>Clientes Novos</label><input type="number" id="m-cn" value="3" min="0"></div></div>' +
+    '<div class="dv"></div><h3>Marcas Discriminadas</h3>' +
     '<p style="font-size:.82rem;color:var(--txt2);margin-bottom:10px">Defina as marcas. A soma deve bater com o total acima.</p>' +
     '<div id="m-prods-list"></div>' +
     '<button class="btn btn-a btn-s" onclick="addMetaMarca()">+ Adicionar Marca</button>' +
     '<div class="st" style="margin-top:10px">Soma: <span id="m-prod-soma">0</span> / <span id="m-prod-total">30</span></div>' +
-    '<div class="dv"></div>' +
-    '<button class="btn btn-p" onclick="saveMeta()">' + btnLabel + '</button>' +
-    (editingMetaIdx >= 0 ? ' <button class="btn btn-d" onclick="cancelEditMeta()">Cancelar</button>' : '') +
-    '</div>';
-
+    '<div class="dv"></div><button class="btn btn-p" onclick="saveMeta()">' + btnLabel + '</button>' +
+    (editingMetaIdx >= 0 ? ' <button class="btn btn-d" onclick="cancelEditMeta()">Cancelar</button>' : '') + '</div>';
   if (editingMetaIdx >= 0) {
     var mm = metas[editingMetaIdx];
     formHtml += '<scr' + 'ipt>';
@@ -1092,7 +979,6 @@ function renderMetas() {
     }
     formHtml += '</scr' + 'ipt>';
   }
-
   return '<h2 class="st2">Definir Metas</h2>' + formHtml + list;
 }
 
@@ -1110,9 +996,7 @@ function addMetaMarca() {
 function addMetaMarcaPre(nome, qtd) {
   var div = document.createElement('div');
   div.className = 'mp-row';
-  var marcaOpts = MARCAS.map(function (m) {
-    return '<option value="' + m.nome + '"' + (m.nome === nome ? ' selected' : '') + '>' + m.nome + '</option>';
-  }).join('');
+  var marcaOpts = MARCAS.map(function (m) { return '<option value="' + m.nome + '"' + (m.nome === nome ? ' selected' : '') + '>' + m.nome + '</option>'; }).join('');
   div.innerHTML = '<select class="mp-prod" onchange="somaProdMeta()">' + marcaOpts + '</select>' +
     '<input type="number" class="mp-qtd" placeholder="Qtd" oninput="somaProdMeta()" min="1" value="' + qtd + '">' +
     '<button class="rb" onclick="this.parentElement.remove();somaProdMeta()">x</button>';
@@ -1172,36 +1056,28 @@ function delMeta(i) {
   if (!confirm('Excluir esta meta?')) { return; }
   var metas = loadData('metas');
   var m = metas[i];
-  if (m && m._id) {
-    deleteDoc('metas', m._id);
-    toast('Meta excluida', 'success');
-    renderTab('metas');
-  }
+  if (m && m._id) { deleteDoc('metas', m._id); toast('Meta excluida', 'success'); renderTab('metas'); }
 }
 
-// ===== GERENCIAR VENDEDORES (GERENTE) =====
+// ===== GERENCIAR VENDEDORES =====
 function renderVendedores() {
   var vAtivos = getVendedores();
   var cards = vAtivos.map(function (v) {
     var nv = getNivel(v.id);
     var nm = getNome(v.id);
     var sn = loadSenhas()[v.id] || 'magil2026';
-    return '<div class="pc">' +
-      '<div class="pi">' +
+    return '<div class="pc"><div class="pi">' +
       '<input type="text" id="nm-' + v.id + '" value="' + nm + '" class="inp-sm" style="width:160px">' +
-      '<span class="vlv ' + nv.toLowerCase() + '">' + nv + '</span>' +
-      '</div>' +
+      '<span class="vlv ' + nv.toLowerCase() + '">' + nv + '</span></div>' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">' +
       '<input type="text" id="sn-' + v.id + '" value="' + sn + '" class="inp-sm" style="width:110px">' +
       '<button class="btn btn-a btn-s" onclick="saveSenha(\'' + v.id + '\')">Senha</button>' +
       '<button class="btn btn-p btn-s" onclick="saveNome(\'' + v.id + '\')">Nome</button>' +
-      '<button class="btn btn-s" style="background:' + (nv === 'Junior' ? '#0a84ff' : '#8e8e93') + ';color:#fff" onclick="toggleNivel(\'' + v.id + '\')">' +
-      (nv === 'Junior' ? '-> Pleno' : '-> Junior') + '</button>' +
+      '<button class="btn btn-s" style="background:' + (nv === 'Junior' ? '#0a84ff' : '#8e8e93') + ';color:#fff" onclick="toggleNivel(\'' + v.id + '\')">' + (nv === 'Junior' ? '-> Pleno' : '-> Junior') + '</button>' +
       '</div></div>';
   }).join('');
   return '<h2 class="st2">Gerenciar Vendedores</h2>' +
-    '<div class="card"><h3>Adicionar Novo Vendedor</h3>' +
-    '<div class="fr">' +
+    '<div class="card"><h3>Adicionar Novo Vendedor</h3><div class="fr">' +
     '<div class="fg"><label>Nome</label><input type="text" id="nv-nome" placeholder="Nome do vendedor"></div>' +
     '<div class="fg"><label>Nivel</label><select id="nv-nivel"><option value="Junior">Junior</option><option value="Pleno">Pleno</option></select></div>' +
     '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p" onclick="addVendedor()">+ Adicionar</button></div>' +
@@ -1216,58 +1092,48 @@ function addVendedor() {
   var novoId = 'v' + Date.now().toString().slice(-5);
   var novo = { id: novoId, nome: nome, nivel: nivel, isM: false };
   USU.push(novo);
-  db.collection('usuarios').doc(novoId).set({
-    id: novoId, nome: nome, nivel: nivel, senha: 'magil2026'
-  }).then(function () {
-    updateLoginNomes();
-    toast('Vendedor adicionado: ' + nome + ' (senha inicial magil2026)', 'success');
-    renderTab('vendedores');
-  }).catch(function (e) {
-    toast('Erro ao adicionar: ' + e.message, 'error');
-  });
+  db.collection('usuarios').doc(novoId).set({ id: novoId, nome: nome, nivel: nivel, senha: 'magil2026' })
+    .then(function () { updateLoginNomes(); toast('Vendedor adicionado: ' + nome + ' (senha inicial magil2026)', 'success'); renderTab('vendedores'); })
+    .catch(function (e) { toast('Erro ao adicionar: ' + e.message, 'error'); });
 }
 
 function saveSenha(id) {
   var val = document.getElementById('sn-' + id).value;
   if (!val) { toast('Digite uma senha', 'error'); return; }
-  db.collection('usuarios').doc(id).set({ senha: val }, { merge: true }).then(function () {
-    toast('Senha salva e sincronizada: ' + getNome(id), 'success');
-  }).catch(function (e) {
-    toast('Erro ao salvar senha: ' + e.message, 'error');
-  });
+  db.collection('usuarios').doc(id).set({ senha: val }, { merge: true })
+    .then(function () { toast('Senha salva e sincronizada: ' + getNome(id), 'success'); })
+    .catch(function (e) { toast('Erro ao salvar senha: ' + e.message, 'error'); });
 }
 
 function saveNome(id) {
   var val = document.getElementById('nm-' + id).value;
   if (!val) { toast('Digite um nome', 'error'); return; }
-  db.collection('usuarios').doc(id).set({ nome: val }, { merge: true }).then(function () {
-    var u = USU.find(function (x) { return x.id === id; });
-    if (u) { u.nome = val; }
-    updateLoginNomes();
-    toast('Nome salvo e sincronizado: ' + val, 'success');
-    renderTab('vendedores');
-  }).catch(function (e) {
-    toast('Erro ao salvar nome: ' + e.message, 'error');
-  });
+  db.collection('usuarios').doc(id).set({ nome: val }, { merge: true })
+    .then(function () {
+      var u = USU.find(function (x) { return x.id === id; });
+      if (u) { u.nome = val; }
+      updateLoginNomes();
+      toast('Nome salvo e sincronizado: ' + val, 'success');
+      renderTab('vendedores');
+    })
+    .catch(function (e) { toast('Erro ao salvar nome: ' + e.message, 'error'); });
 }
 
 function toggleNivel(id) {
   var nv = getNivel(id);
   var novoNivel = nv === 'Junior' ? 'Pleno' : 'Junior';
-  db.collection('usuarios').doc(id).set({ nivel: novoNivel }, { merge: true }).then(function () {
-    var u = USU.find(function (x) { return x.id === id; });
-    if (u) { u.nivel = novoNivel; }
-    toast('Nivel alterado e sincronizado: ' + getNome(id) + ' -> ' + novoNivel, 'success');
-    renderTab('vendedores');
-  }).catch(function (e) {
-    toast('Erro ao alterar nivel: ' + e.message, 'error');
-  });
+  db.collection('usuarios').doc(id).set({ nivel: novoNivel }, { merge: true })
+    .then(function () {
+      var u = USU.find(function (x) { return x.id === id; });
+      if (u) { u.nivel = novoNivel; }
+      toast('Nivel alterado e sincronizado: ' + getNome(id) + ' -> ' + novoNivel, 'success');
+      renderTab('vendedores');
+    })
+    .catch(function (e) { toast('Erro ao alterar nivel: ' + e.message, 'error'); });
 }
 
-// ===== IMPORTACAO DE PLANILHA (marca origem: 'importado') =====
-function importClientes() {
-  document.getElementById('import-file').click();
-}
+// ===== IMPORTACAO DE PLANILHA =====
+function importClientes() { document.getElementById('import-file').click(); }
 
 function handleImportFile(event) {
   var file = event.target.files[0];
@@ -1286,12 +1152,9 @@ function handleImportFile(event) {
         var cod = String(row['Código'] || row['Codigo'] || row['COD'] || row['codigo'] || '').trim();
         var razao = String(row['Razão Social'] || row['Razao Social'] || row['RazaoSocial'] || row['razao'] || '').trim();
         if (!cod || !razao) { ignorados++; return; }
-        var vendedorId = currentUser.isM
-          ? (String(row['Vendedor'] || row['vendedor'] || '').trim() || currentUser.id)
-          : currentUser.id;
+        var vendedorId = currentUser.isM ? (String(row['Vendedor'] || row['vendedor'] || '').trim() || currentUser.id) : currentUser.id;
         var cliente = {
-          cod: cod,
-          razao: razao,
+          cod: cod, razao: razao,
           contato: String(row['Contato'] || row['contato'] || '').trim(),
           telefone: String(row['Telefone'] || row['telefone'] || '').trim(),
           celular: String(row['Celular'] || row['celular'] || '').trim(),
@@ -1304,70 +1167,34 @@ function handleImportFile(event) {
         };
         var clientes = loadData('clientes');
         var existing = clientes.find(function (c) { return String(c.cod).trim() === cod; });
-        if (existing) {
-          cliente._id = existing._id;
-          saveData('clientes', cliente);
-          atualizados++;
-        } else {
-          saveData('clientes', cliente);
-          importados++;
-        }
+        if (existing) { cliente._id = existing._id; saveData('clientes', cliente); atualizados++; }
+        else { saveData('clientes', cliente); importados++; }
       });
-      toast('Importacao concluida: ' + importados + ' novos, ' + atualizados + ' atualizados' +
-        (ignorados ? ', ' + ignorados + ' sem codigo/razao' : ''), 'success');
+      toast('Importacao concluida: ' + importados + ' novos, ' + atualizados + ' atualizados' + (ignorados ? ', ' + ignorados + ' sem codigo/razao' : ''), 'success');
       renderTab(currentUser.isM ? 'clientes' : 'meuscli');
-    } catch (err) {
-      toast('Erro ao importar: ' + err.message, 'error');
-    }
+    } catch (err) { toast('Erro ao importar: ' + err.message, 'error'); }
   };
   reader.readAsArrayBuffer(file);
   event.target.value = '';
 }
 
-// ===== CLIENTES (GERENTE E VENDEDOR) COM FILTRO =====
+// ===== CLIENTES =====
 function renderClientes(isGerente) {
   var clientes = isGerente ? loadData('clientes') : getMeusClientes();
   var segOpts = SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
   var ufOpts = UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('');
   var vendOpts = getVendedores().map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
-
   var tabela = clientes.length
-    ? '<table><thead><tr>' +
-      '<th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th>' +
-      (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') +
-      '<th>Acoes</th></tr></thead><tbody>' +
+    ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
       clientes.map(function (c, i) {
-        var transferirHtml = isGerente
-          ? '<td><select class="inp-sm" style="width:120px" onchange="transferirCliente(\'' + c.cod + '\',this.value)">' +
-            '<option value="">--</option>' + vendOpts + '</select></td>'
-          : '';
-        return '<tr>' +
-          '<td>' + c.cod + '</td>' +
-          '<td>' + c.razao + '</td>' +
-          '<td>' + (c.contato || '--') + '</td>' +
-          '<td>' + (c.celular || '--') + '</td>' +
-          '<td>' + c.cidade + '</td>' +
-          '<td>' + c.estado + '</td>' +
-          '<td>' + (c.segmento || '--') + '</td>' +
-          (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') +
-          transferirHtml +
-          '<td><div class="action-btns">' +
-          '<button class="edit-btn" onclick="editCliente(' + i + ',' + isGerente + ')">Editar</button>' +
-          '<button class="del-btn" onclick="delCliente(' + i + ',' + isGerente + ')">Excluir</button>' +
-          '</div></td></tr>';
-      }).join('') +
-      '</tbody></table>'
+        var transferirHtml = isGerente ? '<td><select class="inp-sm" style="width:120px" onchange="transferirCliente(\'' + c.cod + '\',this.value)"><option value="">--</option>' + vendOpts + '</select></td>' : '';
+        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="editCliente(' + i + ',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + i + ',' + isGerente + ')">Excluir</button></div></td></tr>';
+      }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhum cliente.</p></div>';
-
   var importCard = '<div class="card"><h3>Importar Planilha</h3>' +
-    '<p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">' +
-    (isGerente
-      ? 'Selecione a planilha .xlsx ou .csv. Os clientes importados entram em <strong>Clientes Existentes</strong> e poderao ser transferidos no rodizio de 3 meses.'
-      : 'Selecione sua planilha .xlsx ou .csv. Os clientes importados serao atribuidos automaticamente a voce.') +
-    '</p>' +
+    '<p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">' + (isGerente ? 'Selecione a planilha .xlsx ou .csv. Os clientes importados entram em <strong>Clientes Existentes</strong> e poderao ser transferidos no rodizio de 3 meses.' : 'Selecione sua planilha .xlsx ou .csv. Os clientes importados serao atribuidos automaticamente a voce.') + '</p>' +
     '<input type="file" id="import-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportFile(event)">' +
     '<button class="btn btn-a" onclick="importClientes()">📥 Importar Planilha</button></div>';
-
   var formHtml = '<div class="card"><h3>Adicionar Cliente</h3><div class="fr">' +
     '<div class="fg"><label>Codigo</label><input type="text" id="cl-cod" placeholder="Ex: 001"></div>' +
     '<div class="fg"><label>Razao Social</label><input type="text" id="cl-razao" placeholder="Nome do cliente"></div>' +
@@ -1378,61 +1205,24 @@ function renderClientes(isGerente) {
     '<div class="fg"><label>Segmento</label><select id="cl-segmento"><option value="">--</option>' + segOpts + '</select></div>' +
     (isGerente ? '<div class="fg"><label>Vendedor</label><select id="cl-vend">' + vendOpts + '</select></div>' : '') +
     '</div><button class="btn btn-p" onclick="saveCliente(' + isGerente + ')">Salvar Cliente</button></div>';
-
-  var rotacaoCard = isGerente
-    ? '<div class="card" style="border-left:4px solid var(--warn)"><h3>🔄 Rodizio de 3 Meses</h3>' +
-      '<p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">O rodizio completo (carteiras por vendedor) esta na aba <strong>Rodizio (3 Meses)</strong> no menu. Aqui voce pode transferir um cliente individualmente.</p>' +
-      '<button class="btn btn-a" onclick="renderTab(\'rodizio\')">Ir para o Rodizio</button></div>'
-    : '';
-
-  var filtroHtml = '<div class="card"><h3>Buscar Cliente</h3>' +
-    '<div class="search-box"><span class="ico">🔍</span>' +
-    '<input type="text" id="cl-busca" placeholder="Buscar por nome, codigo ou telefone..." oninput="filtrarClientes(' + isGerente + ')">' +
-    '</div><div id="cl-lista">' + tabela + '</div></div>';
-
-  return '<h2 class="st2">' + (isGerente ? 'Clientes' : 'Meus Clientes') + '</h2>' +
-    importCard + rotacaoCard + formHtml + filtroHtml;
+  var rotacaoCard = isGerente ? '<div class="card" style="border-left:4px solid var(--warn)"><h3>🔄 Rodizio de 3 Meses</h3><p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">O rodizio completo (carteiras por vendedor) esta na aba <strong>Rodizio (3 Meses)</strong> no menu.</p><button class="btn btn-a" onclick="renderTab(\'rodizio\')">Ir para o Rodizio</button></div>' : '';
+  var filtroHtml = '<div class="card"><h3>Buscar Cliente</h3><div class="search-box"><span class="ico">🔍</span><input type="text" id="cl-busca" placeholder="Buscar por nome, codigo ou telefone..." oninput="filtrarClientes(' + isGerente + ')"></div><div id="cl-lista">' + tabela + '</div></div>';
+  return '<h2 class="st2">' + (isGerente ? 'Clientes' : 'Meus Clientes') + '</h2>' + importCard + rotacaoCard + formHtml + filtroHtml;
 }
 
 function filtrarClientes(isGerente) {
   var clientes = isGerente ? loadData('clientes') : getMeusClientes();
   var termo = document.getElementById('cl-busca').value.toLowerCase().trim();
-  var filtrados = clientes;
-  if (termo) {
-    filtrados = clientes.filter(function (c) {
-      return (c.razao || '').toLowerCase().indexOf(termo) >= 0 ||
-        (c.cod || '').toLowerCase().indexOf(termo) >= 0 ||
-        (c.celular || '').indexOf(termo) >= 0 ||
-        (c.telefone || '').indexOf(termo) >= 0;
-    });
-  }
+  var filtrados = termo ? clientes.filter(function (c) {
+    return (c.razao || '').toLowerCase().indexOf(termo) >= 0 || (c.cod || '').toLowerCase().indexOf(termo) >= 0 || (c.celular || '').indexOf(termo) >= 0 || (c.telefone || '').indexOf(termo) >= 0;
+  }) : clientes;
   var vendOpts = getVendedores().map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
   var html = filtrados.length
-    ? '<table><thead><tr>' +
-      '<th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th>' +
-      (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') +
-      '<th>Acoes</th></tr></thead><tbody>' +
+    ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
       filtrados.map(function (c) {
-        var transferirHtml = isGerente
-          ? '<td><select class="inp-sm" style="width:120px" onchange="transferirCliente(\'' + c.cod + '\',this.value)">' +
-            '<option value="">--</option>' + vendOpts + '</select></td>'
-          : '';
-        return '<tr>' +
-          '<td>' + c.cod + '</td>' +
-          '<td>' + c.razao + '</td>' +
-          '<td>' + (c.contato || '--') + '</td>' +
-          '<td>' + (c.celular || '--') + '</td>' +
-          '<td>' + c.cidade + '</td>' +
-          '<td>' + c.estado + '</td>' +
-          '<td>' + (c.segmento || '--') + '</td>' +
-          (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') +
-          transferirHtml +
-          '<td><div class="action-btns">' +
-          '<button class="edit-btn" onclick="editCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Editar</button>' +
-          '<button class="del-btn" onclick="delCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Excluir</button>' +
-          '</div></td></tr>';
-      }).join('') +
-      '</tbody></table>'
+        var transferirHtml = isGerente ? '<td><select class="inp-sm" style="width:120px" onchange="transferirCliente(\'' + c.cod + '\',this.value)"><option value="">--</option>' + vendOpts + '</select></td>' : '';
+        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="editCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Excluir</button></div></td></tr>';
+      }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhum cliente encontrado.</p></div>';
   var div = document.getElementById('cl-lista');
   if (div) { div.innerHTML = html; }
@@ -1455,8 +1245,7 @@ function saveCliente(isGerente) {
   var razao = document.getElementById('cl-razao').value.trim();
   if (!cod || !razao) { toast('Codigo e Razao sao obrigatorios', 'error'); return; }
   var c = {
-    cod: cod,
-    razao: razao,
+    cod: cod, razao: razao,
     contato: document.getElementById('cl-contato').value.trim(),
     telefone: '',
     celular: document.getElementById('cl-celular').value.trim(),
@@ -1504,11 +1293,11 @@ function editCliente(i, isGerente) {
   document.getElementById('cl-cidade').value = cli.cidade || '';
   document.getElementById('cl-estado').value = cli.estado || '';
   document.getElementById('cl-segmento').value = cli.segmento || '';
-  if (isGerente && document.getElementById('cl-vend')) {
-    document.getElementById('cl-vend').value = cli.vendedorId || '';
-  }
+  if (isGerente && document.getElementById('cl-vend')) { document.getElementById('cl-vend').value = cli.vendedorId || ''; }
   toast('Editando: ' + cli.razao, 'info');
-}// ===== RODIZIO DE CLIENTES (3 MESES) — ABA SEPARADA COM CARTEIRAS RECOLHIVEIS =====
+}
+
+// ===== RODIZIO (3 MESES) =====
 function renderRodizio() {
   var vAtivos = getVendedores();
   var clientes = loadData('clientes');
@@ -1516,36 +1305,21 @@ function renderRodizio() {
   var html = '<h2 class="st2">Rodizio de Clientes (3 Meses)</h2>';
   if (ultimoRod) {
     var d = new Date(ultimoRod);
-    html += '<div class="card" style="background:rgba(255,159,10,.08);border-left:4px solid var(--warn)">' +
-      '<h3 style="color:#b25e00">Ultimo rodizio realizado</h3>' +
-      '<p style="font-size:.9rem;color:var(--txt2)">' + d.toLocaleDateString('pt-BR') + ' — o proximo rodizio deve ocorrer apos 3 meses.</p></div>';
+    html += '<div class="card" style="background:rgba(255,159,10,.08);border-left:4px solid var(--warn)"><h3 style="color:#b25e00">Ultimo rodizio realizado</h3><p style="font-size:.9rem;color:var(--txt2)">' + d.toLocaleDateString('pt-BR') + ' — o proximo rodizio deve ocorrer apos 3 meses.</p></div>';
   }
-  html += '<div class="card"><h3>Como funciona</h3>' +
-    '<p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">Cada vendedor tem sua carteira. Clique no nome do vendedor para <strong>expandir/recolher</strong> a lista. Use o botao <strong>Mover Carteira</strong> para transferir a lista inteira de um vendedor para outro, ou o <strong>Rodizio Automatico</strong> para girar todas as carteiras de uma vez (V1 -> V2, V2 -> V3, ..., ultimo -> V1).</p>' +
-    '<button class="btn btn-d" onclick="rodizioAutomatico()">🔄 Rodizio Automatico (3 Meses)</button></div>';
-
+  html += '<div class="card"><h3>Como funciona</h3><p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">Cada vendedor tem sua carteira. Clique no nome do vendedor para <strong>expandir/recolher</strong> a lista. Use o botao <strong>Mover Carteira</strong> para transferir a lista inteira, ou o <strong>Rodizio Automatico</strong> para girar todas (V1 -> V2, V2 -> V3, ..., ultimo -> V1).</p><button class="btn btn-d" onclick="rodizioAutomatico()">🔄 Rodizio Automatico (3 Meses)</button></div>';
   vAtivos.forEach(function (v) {
     var meus = clientes.filter(function (c) { return c.vendedorId === v.id; });
-    var destOpts = vAtivos.filter(function (d) { return d.id !== v.id; })
-      .map(function (d) { return '<option value="' + d.id + '">' + getNome(d.id) + '</option>'; }).join('');
+    var destOpts = vAtivos.filter(function (d) { return d.id !== v.id; }).map(function (d) { return '<option value="' + d.id + '">' + getNome(d.id) + '</option>'; }).join('');
     var corpo = meus.length
-      ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th></tr></thead><tbody>' +
-        meus.map(function (c) {
-          return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td>' +
-            '<td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td></tr>';
-        }).join('') +
-        '</tbody></table>'
+      ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th></tr></thead><tbody>' + meus.map(function (c) { return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td></tr>'; }).join('') + '</tbody></table>'
       : '<div class="es"><div class="ic">SEM</div><p>Sem clientes atribuidos a este vendedor.</p></div>';
-    html += '<div class="card">' +
-      '<div class="com-hero" style="margin-bottom:12px;cursor:pointer" onclick="toggleCarteira(\'' + v.id + '\')">' +
-      '<div><div class="com-name">' + getNome(v.id) + ' <span id="rd-arrow-' + v.id + '" style="font-size:.9rem;opacity:.7">▾</span></div>' +
-      '<div class="com-nivel">' + getNivel(v.id) + ' — ' + meus.length + ' clientes</div></div>' +
+    html += '<div class="card"><div class="com-hero" style="margin-bottom:12px;cursor:pointer" onclick="toggleCarteira(\'' + v.id + '\')">' +
+      '<div><div class="com-name">' + getNome(v.id) + ' <span id="rd-arrow-' + v.id + '" style="font-size:.9rem;opacity:.7">▾</span></div><div class="com-nivel">' + getNivel(v.id) + ' — ' + meus.length + ' clientes</div></div>' +
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" onclick="event.stopPropagation()">' +
       '<select id="rd-dest-' + v.id + '" class="inp-sm" style="width:150px"><option value="">Destino...</option>' + destOpts + '</select>' +
-      '<button class="btn btn-a btn-s" onclick="transferirCarteira(\'' + v.id + '\')">Mover Carteira</button>' +
-      '</div></div>' +
-      '<div id="rd-body-' + v.id + '">' + corpo + '</div>' +
-      '</div>';
+      '<button class="btn btn-a btn-s" onclick="transferirCarteira(\'' + v.id + '\')">Mover Carteira</button></div></div>' +
+      '<div id="rd-body-' + v.id + '">' + corpo + '</div></div>';
   });
   return html;
 }
@@ -1567,10 +1341,7 @@ function transferirCarteira(origemId) {
   var daCarteira = clientes.filter(function (c) { return c.vendedorId === origemId; });
   if (!daCarteira.length) { toast(getNome(origemId) + ' nao possui clientes na carteira', 'error'); return; }
   if (!confirm('Mover a carteira de ' + getNome(origemId) + ' (' + daCarteira.length + ' clientes) para ' + getNome(destId) + '?')) { return; }
-  daCarteira.forEach(function (c) {
-    c.vendedorId = destId;
-    saveData('clientes', c);
-  });
+  daCarteira.forEach(function (c) { c.vendedorId = destId; saveData('clientes', c); });
   toast('Carteira de ' + getNome(origemId) + ' movida para ' + getNome(destId), 'success');
   renderTab('rodizio');
 }
@@ -1582,14 +1353,8 @@ function rodizioAutomatico() {
   if (!clientes.length) { toast('Nenhum cliente para rodizio', 'error'); return; }
   if (!confirm('Rodizio automatico: a carteira de TODOS os vendedores sera movida para o proximo da lista (V1 -> V2, V2 -> V3, ..., ultimo -> V1). Continuar?')) { return; }
   var mapa = {};
-  vAtivos.forEach(function (v, i) {
-    var prox = vAtivos[(i + 1) % vAtivos.length];
-    mapa[v.id] = prox.id;
-  });
-  clientes.forEach(function (c) {
-    c.vendedorId = mapa[c.vendedorId] || c.vendedorId;
-    saveData('clientes', c);
-  });
+  vAtivos.forEach(function (v, i) { mapa[v.id] = vAtivos[(i + 1) % vAtivos.length].id; });
+  clientes.forEach(function (c) { c.vendedorId = mapa[c.vendedorId] || c.vendedorId; saveData('clientes', c); });
   localStorage.setItem('mc_ultimo_rodizio', new Date().toISOString());
   toast('Rodizio concluido: todas as carteiras movidas para o proximo vendedor', 'success');
   renderTab('rodizio');
@@ -1601,64 +1366,34 @@ function renderVendasGer() {
   var hoje = new Date();
   var mesAtual = hoje.getMonth() + 1;
   var anoAtual = hoje.getFullYear();
-  var vendasMes = vendas.filter(function (v) {
-    var d = new Date(v.data);
-    return d.getMonth() + 1 === mesAtual && d.getFullYear() === anoAtual;
-  });
-  var totMesVendas = vendasMes.filter(function (v) { return (v.tipo || 'venda') === 'venda'; })
-    .reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totMesBonif = vendasMes.filter(function (v) { return v.tipo === 'bonificacao'; })
-    .reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var vendasMes = vendas.filter(function (v) { var d = new Date(v.data); return d.getMonth() + 1 === mesAtual && d.getFullYear() === anoAtual; });
+  var totMesVendas = vendasMes.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totMesBonif = vendasMes.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
   var totMesGeral = totMesVendas + totMesBonif;
-
   var tabela = vendas.length
     ? '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Segmento</th><th>Vendedor</th><th>Tipo</th><th>Itens</th><th>Qtd</th><th>Total</th><th>Acoes</th></tr></thead><tbody>' +
       vendas.map(function (v, i) {
-        var itensStr = (v.itens && v.itens.length)
-          ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ')
-          : '--';
+        var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--';
         var estado = v.estado || getEstadoFromVenda(v);
         var segmento = v.segmento || getSegmentoFromVenda(v);
         var tipo = v.tipo || 'venda';
         var tipoHtml = '<span class="tipo-badge ' + tipo + '">' + tipo + '</span>';
-        return '<tr>' +
-          '<td>' + v.data + '</td>' +
-          '<td>' + v.cliente + '</td>' +
-          '<td class="tcc">' + estado + '</td>' +
-          '<td>' + (segmento || '--') + '</td>' +
-          '<td>' + getNome(v.vendedor) + '</td>' +
-          '<td class="tcc">' + tipoHtml + '</td>' +
-          '<td style="font-size:.78rem">' + itensStr + '</td>' +
-          '<td class="tcc">' + (v.qtdProdutos || 0) + '</td>' +
-          '<td class="tcr">R$ ' + fmtBRL(v.total) + '</td>' +
-          '<td><div class="action-btns">' +
-          '<button class="edit-btn" onclick="editVenda(' + i + ')">Editar</button>' +
-          '<button class="del-btn" onclick="delVenda(' + i + ')">Excluir</button>' +
-          '</div></td></tr>';
-      }).join('') +
-      '</tbody></table>'
+        return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td>' + (segmento || '--') + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td><td><div class="action-btns"><button class="edit-btn" onclick="editVenda(' + i + ')">Editar</button><button class="del-btn" onclick="delVenda(' + i + ')">Excluir</button></div></td></tr>';
+      }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda.</p></div>';
-
   return '<h2 class="st2">Vendas</h2>' +
-    '<div class="sg">' +
-    '<div class="sc s"><div class="lb">Vendas Mes (' + MESES[mesAtual - 1] + '/' + anoAtual + ')</div><div class="vl">R$ ' + fmtBRL(totMesVendas) + '</div></div>' +
+    '<div class="sg"><div class="sc s"><div class="lb">Vendas Mes (' + MESES[mesAtual - 1] + '/' + anoAtual + ')</div><div class="vl">R$ ' + fmtBRL(totMesVendas) + '</div></div>' +
     '<div class="sc w"><div class="lb">Bonificacoes Mes</div><div class="vl">R$ ' + fmtBRL(totMesBonif) + '</div></div>' +
-    '<div class="sc"><div class="lb">Total Geral Mes</div><div class="vl">R$ ' + fmtBRL(totMesGeral) + '</div></div>' +
-    '</div>' +
-    '<div class="card"><h3>Todas as Vendas Detalhadas</h3>' +
-    '<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">' +
+    '<div class="sc"><div class="lb">Total Geral Mes</div><div class="vl">R$ ' + fmtBRL(totMesGeral) + '</div></div></div>' +
+    '<div class="card"><h3>Todas as Vendas Detalhadas</h3><div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">' +
     '<button class="btn btn-a btn-s" onclick="exportCSV(loadData(\'vendas\'),\'vendas.csv\')">Exportar CSV</button>' +
-    '<button class="btn btn-p btn-s" onclick="exportVendasPDF()">Exportar PDF</button>' +
-    '</div>' + tabela + '</div>';
+    '<button class="btn btn-p btn-s" onclick="exportVendasPDF()">Exportar PDF</button></div>' + tabela + '</div>';
 }
 
 function exportVendasPDF() {
   var vendas = loadData('vendas');
   var html = '<table><thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
-  vendas.forEach(function (v) {
-    html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td>' + getNome(v.vendedor) + '</td>' +
-      '<td>' + (v.tipo || 'venda') + '</td><td>' + (v.qtdProdutos || 0) + '</td><td>R$ ' + fmtBRL(v.total) + '</td></tr>';
-  });
+  vendas.forEach(function (v) { html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td>' + getNome(v.vendedor) + '</td><td>' + (v.tipo || 'venda') + '</td><td>' + (v.qtdProdutos || 0) + '</td><td>R$ ' + fmtBRL(v.total) + '</td></tr>'; });
   html += '</tbody></table>';
   exportPDF('Relatorio de Vendas', html);
 }
@@ -1674,37 +1409,23 @@ function editVenda(i) {
   var itensHtml = '';
   if (v.itens && v.itens.length) {
     v.itens.forEach(function (it) {
-      itensHtml += '<div class="pe">' +
-        '<select class="pe-prod" onchange="calcVendaTotal()">' + prodOpts.replace('value="' + it.cod + '"', 'value="' + it.cod + '" selected') + '</select>' +
-        '<input type="number" class="pe-qtd" value="' + it.qtd + '" oninput="calcVendaTotal()" min="1">' +
-        '<input type="text" class="pe-preco" value="R$ ' + fmtBRL(it.preco * it.qtd) + '" readonly>' +
-        '<button class="rb" onclick="this.parentElement.remove();calcVendaTotal()">x</button></div>';
+      itensHtml += '<div class="pe"><select class="pe-prod" onchange="calcVendaTotal()">' + prodOpts.replace('value="' + it.cod + '"', 'value="' + it.cod + '" selected') + '</select><input type="number" class="pe-qtd" value="' + it.qtd + '" oninput="calcVendaTotal()" min="1"><input type="text" class="pe-preco" value="R$ ' + fmtBRL(it.preco * it.qtd) + '" readonly><button class="rb" onclick="this.parentElement.remove();calcVendaTotal()">x</button></div>';
     });
   }
   var tipoSel = v.tipo || 'venda';
-  var html = '<div class="card"><h3>Editar Venda</h3>' +
-    '<div class="tipo-toggle">' +
+  var html = '<div class="card"><h3>Editar Venda</h3><div class="tipo-toggle">' +
     '<button id="tt-venda" class="' + (tipoSel === 'venda' ? 'act' : '') + '" onclick="setTipoLanc(\'venda\')">Venda</button>' +
-    '<button id="tt-bonif" class="' + (tipoSel === 'bonificacao' ? 'act' : '') + '" onclick="setTipoLanc(\'bonificacao\')">Bonificacao</button>' +
-    '</div>' +
-    '<div class="fr">' +
-    '<div class="fg"><label>Data</label><input type="date" id="vd-data" value="' + v.data + '"></div>' +
-    '<div class="fg"><label>Cliente</label><select id="vd-cli">' + cliOpts + '</select></div>' +
-    '</div>' +
+    '<button id="tt-bonif" class="' + (tipoSel === 'bonificacao' ? 'act' : '') + '" onclick="setTipoLanc(\'bonificacao\')">Bonificacao</button></div>' +
+    '<div class="fr"><div class="fg"><label>Data</label><input type="date" id="vd-data" value="' + v.data + '"></div>' +
+    '<div class="fg"><label>Cliente</label><select id="vd-cli">' + cliOpts + '</select></div></div>' +
     '<div class="dv"></div><h3>Itens</h3><div id="vd-itens">' + itensHtml + '</div>' +
     '<button class="btn btn-a btn-s" onclick="addVendaItem()">+ Adicionar Item</button>' +
     '<div class="dv"></div><div class="st" id="vd-total">Total: R$ ' + fmtBRL(v.total) + '</div>' +
-    '<div class="dv"></div>' +
-    '<button class="btn btn-p btn-f" onclick="salvarEdicaoVenda()">Salvar Alteracoes</button> ' +
-    '<button class="btn btn-d" onclick="cancelarEdicaoVenda()">Cancelar</button>' +
-    '</div>';
+    '<div class="dv"></div><button class="btn btn-p btn-f" onclick="salvarEdicaoVenda()">Salvar Alteracoes</button> <button class="btn btn-d" onclick="cancelarEdicaoVenda()">Cancelar</button></div>';
   var c = document.getElementById('tc-vendas');
   if (c) { c.innerHTML = '<h2 class="st2">Editar Venda</h2>' + html; }
   var cliSel = document.getElementById('vd-cli');
-  if (cliSel) {
-    var m = v.cliente.match(/COD\s+(\S+)/);
-    if (m) { cliSel.value = m[1]; }
-  }
+  if (cliSel) { var m = v.cliente.match(/COD\s+(\S+)/); if (m) { cliSel.value = m[1]; } }
   calcVendaTotal();
 }
 
@@ -1724,28 +1445,13 @@ function salvarEdicaoVenda() {
     var codProd = row.querySelector('.pe-prod').value;
     var qtd = parseInt(row.querySelector('.pe-qtd').value) || 0;
     var prod = PROD.find(function (p) { return p.cod === codProd; });
-    if (prod && qtd > 0) {
-      itens.push({ cod: codProd, nome: prod.nome, qtd: qtd, preco: prod.preco });
-      total += prod.preco * qtd;
-      qtdProdutos += qtd;
-    }
+    if (prod && qtd > 0) { itens.push({ cod: codProd, nome: prod.nome, qtd: qtd, preco: prod.preco }); total += prod.preco * qtd; qtdProdutos += qtd; }
   });
   if (itens.length === 0) { toast('Adicione pelo menos um item', 'error'); return; }
   var nomeCli = cliente ? cliente.razao : 'COD ' + cod;
   var estado = cliente ? cliente.estado : '--';
   var segmento = cliente ? cliente.segmento : 'Outros';
-  var updated = {
-    _id: v._id,
-    data: data,
-    cliente: nomeCli + ' (COD ' + cod + ' / ' + estado + ')',
-    vendedor: v.vendedor,
-    itens: itens,
-    qtdProdutos: qtdProdutos,
-    total: total,
-    estado: estado,
-    segmento: segmento,
-    tipo: tipo
-  };
+  var updated = { _id: v._id, data: data, cliente: nomeCli + ' (COD ' + cod + ' / ' + estado + ')', vendedor: v.vendedor, itens: itens, qtdProdutos: qtdProdutos, total: total, estado: estado, segmento: segmento, tipo: tipo };
   saveData('vendas', updated);
   editingVendaIdx = -1;
   toast('Venda atualizada!', 'success');
@@ -1758,60 +1464,39 @@ function delVenda(i) {
   if (!confirm('Excluir esta venda?')) { return; }
   var vendas = loadData('vendas');
   var v = vendas[i];
-  if (v && v._id) {
-    deleteDoc('vendas', v._id);
-    toast('Venda excluida', 'success');
-    renderTab('vendas');
-  }
+  if (v && v._id) { deleteDoc('vendas', v._id); toast('Venda excluida', 'success'); renderTab('vendas'); }
 }
 
-// ===== MINHAS VENDAS (VENDEDOR) =====
+// ===== MINHAS VENDAS =====
 function renderMinhasVendas() {
   var vendas = getMinhasVendas();
   var tabela = vendas.length
     ? '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Tipo</th><th>Itens</th><th>Qtd</th><th>Total</th></tr></thead><tbody>' +
       vendas.map(function (v) {
-        var itensStr = (v.itens && v.itens.length)
-          ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ')
-          : '--';
+        var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--';
         var estado = v.estado || getEstadoFromVenda(v);
         var tipo = v.tipo || 'venda';
         var tipoHtml = '<span class="tipo-badge ' + tipo + '">' + tipo + '</span>';
-        return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td>' +
-          '<td class="tcc">' + estado + '</td><td class="tcc">' + tipoHtml + '</td>' +
-          '<td style="font-size:.78rem">' + itensStr + '</td>' +
-          '<td class="tcc">' + (v.qtdProdutos || 0) + '</td>' +
-          '<td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
-      }).join('') +
-      '</tbody></table>'
+        return '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + estado + '</td><td class="tcc">' + tipoHtml + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
+      }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhuma venda lancada.</p></div>';
-  return renderWeeklyBar() + '<h2 class="st2">Minhas Vendas</h2>' +
-    '<div class="card"><h3>Vendas Lancadas</h3>' + tabela + '</div>';
+  return renderWeeklyBar() + '<h2 class="st2">Minhas Vendas</h2><div class="card"><h3>Vendas Lancadas</h3>' + tabela + '</div>';
 }
 
-// ===== RELATORIO DE ATIVIDADES (GERENTE) =====
+// ===== RELATORIO DE ATIVIDADES =====
 function renderRelAtividades() {
   var atividades = loadData('atividades');
   var vAtivos = getVendedores();
   var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
-  var tipoOpts = '<option value="">Todos</option>' +
-    '<option value="ligacao">Ligacao</option>' +
-    '<option value="prospeccao">Prospeccao</option>' +
-    '<option value="visita">Visita</option>' +
-    '<option value="email">E-mail</option>' +
-    '<option value="whatsapp">WhatsApp</option>';
+  var tipoOpts = '<option value="">Todos</option><option value="ligacao">Ligacao</option><option value="prospeccao">Prospeccao</option><option value="visita">Visita</option><option value="email">E-mail</option><option value="whatsapp">WhatsApp</option>';
   return '<h2 class="st2">Relatorio de Atividades</h2>' +
     '<div class="card"><h3>Filtros</h3><div class="date-filter">' +
-    '<div class="fg"><label>Periodo</label><select id="ra-periodo">' +
-    '<option value="todos">Todos</option><option value="diario">Diario</option>' +
-    '<option value="semanal">Semanal</option><option value="mensal">Mensal</option><option value="anual">Anual</option>' +
-    '</select></div>' +
+    '<div class="fg"><label>Periodo</label><select id="ra-periodo"><option value="todos">Todos</option><option value="diario">Diario</option><option value="semanal">Semanal</option><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>' +
     '<div class="fg"><label>Data Inicio</label><input type="date" id="ra-inicio"></div>' +
     '<div class="fg"><label>Data Fim</label><input type="date" id="ra-fim"></div>' +
     '<div class="fg"><label>Vendedor</label><select id="ra-vend"><option value="">Todos</option>' + vendOpts + '</select></div>' +
     '<div class="fg"><label>Tipo</label><select id="ra-tipo">' + tipoOpts + '</select></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarRelAtiv()">OK</button></div>' +
-    '</div></div>' +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarRelAtiv()">OK</button></div></div></div>' +
     '<div class="card"><h3>Resultados</h3><div id="ra-result"></div></div>';
 }
 
@@ -1842,34 +1527,21 @@ function filtrarRelAtiv() {
   if (filtradas.length === 0) {
     html = '<div class="es"><div class="ic">SEM</div><p>Nenhuma atividade no periodo.</p></div>';
   } else {
-    var totLig = filtradas.filter(function (a) { return a.tipo === 'ligacao'; })
-      .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    var totPro = filtradas.filter(function (a) { return a.tipo === 'prospeccao'; })
-      .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    var totVis = filtradas.filter(function (a) { return a.tipo === 'visita'; })
-      .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    var totEm = filtradas.filter(function (a) { return a.tipo === 'email'; })
-      .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    var totWh = filtradas.filter(function (a) { return a.tipo === 'whatsapp'; })
-      .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-    html = '<div class="sg">' +
-      '<div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totLig + '</div></div>' +
-      '<div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totPro + '</div></div>' +
-      '<div class="sc"><div class="lb">Visitas</div><div class="vl">' + totVis + '</div></div>' +
-      '<div class="sc"><div class="lb">E-mails</div><div class="vl">' + totEm + '</div></div>' +
-      '<div class="sc"><div class="lb">WhatsApp</div><div class="vl">' + totWh + '</div></div>' +
-      '</div>';
+    var totLig = filtradas.filter(function (a) { return a.tipo === 'ligacao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+    var totPro = filtradas.filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+    var totVis = filtradas.filter(function (a) { return a.tipo === 'visita'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+    var totEm = filtradas.filter(function (a) { return a.tipo === 'email'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+    var totWh = filtradas.filter(function (a) { return a.tipo === 'whatsapp'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+    html = '<div class="sg"><div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totLig + '</div></div><div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totPro + '</div></div><div class="sc"><div class="lb">Visitas</div><div class="vl">' + totVis + '</div></div><div class="sc"><div class="lb">E-mails</div><div class="vl">' + totEm + '</div></div><div class="sc"><div class="lb">WhatsApp</div><div class="vl">' + totWh + '</div></div></div>';
     html += '<table><thead><tr><th>Data</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr></thead><tbody>';
-    filtradas.forEach(function (a) {
-      html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td>' +
-        '<td>' + (a.tipo || '--') + '</td><td class="tcc">' + (a.qtd || 0) + '</td>' +
-        '<td>' + (a.obs || '') + '</td></tr>';
-    });
+    filtradas.forEach(function (a) { html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td><td>' + (a.tipo || '--') + '</td><td class="tcc">' + (a.qtd || 0) + '</td><td>' + (a.obs || '') + '</td></tr>'; });
     html += '</tbody></table>';
   }
   var div = document.getElementById('ra-result');
   if (div) { div.innerHTML = html; }
-}// ===== VENDAS POR VENDEDOR =====
+}
+
+// ===== VENDAS POR VENDEDOR =====
 function renderVendVendedor() {
   var vendas = loadData('vendas');
   var vAtivos = getVendedores();
@@ -1878,26 +1550,15 @@ function renderVendVendedor() {
     var vV = vendas.filter(function (x) { return x.vendedor === v.id; });
     var tot = vV.reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
     var qtd = vV.reduce(function (s, x) { return s + (parseInt(x.qtdProdutos) || 0); }, 0);
-    return '<tr><td>' + getNome(v.id) + '</td><td class="tcc">' + vV.length + '</td>' +
-      '<td class="tcc">' + qtd + '</td><td class="tcr">R$ ' + fmtBRL(tot) + '</td></tr>';
+    return '<tr><td>' + getNome(v.id) + '</td><td class="tcc">' + vV.length + '</td><td class="tcc">' + qtd + '</td><td class="tcr">R$ ' + fmtBRL(tot) + '</td></tr>';
   }).join('');
   return '<h2 class="st2">Vendas por Vendedor</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="filtros">' +
-    '<div class="fg"><label>Vendedor</label><select id="vv-vend"><option value="">Todos</option>' + vendOpts + '</select></div>' +
-    '<div class="fg"><label>Periodo</label><select id="vv-periodo">' +
-    '<option value="todos">Todos</option><option value="diario">Diario</option>' +
-    '<option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>' +
+    '<div class="card"><h3>Filtros</h3><div class="filtros"><div class="fg"><label>Vendedor</label><select id="vv-vend"><option value="">Todos</option>' + vendOpts + '</select></div>' +
+    '<div class="fg"><label>Periodo</label><select id="vv-periodo"><option value="todos">Todos</option><option value="diario">Diario</option><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>' +
     '<div class="fg"><label>Data</label><input type="date" id="vv-data"></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendVendedor()">OK</button></div>' +
-    '</div></div>' +
-    '<div class="card"><h3>Resumo</h3><table id="vv-tabela">' +
-    '<thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead>' +
-    '<tbody>' + tabela + '</tbody></table></div>' +
-    '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVV"></canvas></div>' +
-    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVV\',\'vendas-vendedor.png\')">Exportar PNG</button>' +
-    '<button class="btn btn-p btn-s" onclick="exportVendVendedorPDF()">Exportar PDF</button>' +
-    '</div></div>';
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendVendedor()">OK</button></div></div></div>' +
+    '<div class="card"><h3>Resumo</h3><table id="vv-tabela"><thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead><tbody>' + tabela + '</tbody></table></div>' +
+    '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVV"></canvas></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVV\',\'vendas-vendedor.png\')">Exportar PNG</button><button class="btn btn-p btn-s" onclick="exportVendVendedorPDF()">Exportar PDF</button></div></div>';
 }
 
 function filtrarVendVendedor() {
@@ -1921,37 +1582,14 @@ function filtrarVendVendedor() {
     var vV = filtradas.filter(function (x) { return x.vendedor === v.id; });
     var tot = vV.reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
     var qtd = vV.reduce(function (s, x) { return s + (parseInt(x.qtdProdutos) || 0); }, 0);
-    return '<tr><td>' + getNome(v.id) + '</td><td class="tcc">' + vV.length + '</td>' +
-      '<td class="tcc">' + qtd + '</td><td class="tcr">R$ ' + fmtBRL(tot) + '</td></tr>';
+    return '<tr><td>' + getNome(v.id) + '</td><td class="tcc">' + vV.length + '</td><td class="tcc">' + qtd + '</td><td class="tcr">R$ ' + fmtBRL(tot) + '</td></tr>';
   }).join('');
   var div = document.getElementById('vv-tabela');
-  if (div) {
-    div.innerHTML = '<thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead><tbody>' + tabela + '</tbody>';
-  }
+  if (div) { div.innerHTML = '<thead><tr><th>Vendedor</th><th>Vendas</th><th>Produtos</th><th>Total</th></tr></thead><tbody>' + tabela + '</tbody>'; }
   if (charts.vv) { charts.vv.destroy(); }
   var ctx = document.getElementById('chVV');
   if (ctx) {
-    charts.vv = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: vAtivos.map(function (v) { return getNome(v.id); }),
-        datasets: [{
-          label: 'Total',
-          data: vAtivos.map(function (v) {
-            return filtradas.filter(function (x) { return x.vendedor === v.id; })
-              .reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
-          }),
-          backgroundColor: CORES,
-          borderRadius: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
-      }
-    });
+    charts.vv = new Chart(ctx, { type: 'bar', data: { labels: vAtivos.map(function (v) { return getNome(v.id); }), datasets: [{ label: 'Total', data: vAtivos.map(function (v) { return filtradas.filter(function (x) { return x.vendedor === v.id; }).reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0); }), backgroundColor: CORES, borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
   }
 }
 
@@ -1981,23 +1619,12 @@ function renderVendEstado() {
     estados[est].qtd++;
     estados[est].total += parseFloat(v.total) || 0;
   });
-  var rows = Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; })
-    .map(function (est) {
-      return '<tr><td>' + est + '</td><td class="tcc">' + estados[est].qtd + '</td><td class="tcr">R$ ' + fmtBRL(estados[est].total) + '</td></tr>';
-    }).join('');
+  var rows = Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; }).map(function (est) { return '<tr><td>' + est + '</td><td class="tcc">' + estados[est].qtd + '</td><td class="tcr">R$ ' + fmtBRL(estados[est].total) + '</td></tr>'; }).join('');
   return '<h2 class="st2">Vendas por Estado</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="filtros">' +
-    '<div class="fg"><label>Estado</label><select id="ve-uf"><option value="">Todos</option>' +
-    UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendEstado()">OK</button></div>' +
-    '</div></div>' +
-    '<div class="card"><h3>Resumo</h3><table id="ve-tabela">' +
-    '<thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVE"></canvas></div>' +
-    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVE\',\'vendas-estado.png\')">Exportar PNG</button>' +
-    '<button class="btn btn-p btn-s" onclick="exportVendEstadoPDF()">Exportar PDF</button>' +
-    '</div></div>';
+    '<div class="card"><h3>Filtros</h3><div class="filtros"><div class="fg"><label>Estado</label><select id="ve-uf"><option value="">Todos</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendEstado()">OK</button></div></div></div>' +
+    '<div class="card"><h3>Resumo</h3><table id="ve-tabela"><thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVE"></canvas></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVE\',\'vendas-estado.png\')">Exportar PNG</button><button class="btn btn-p btn-s" onclick="exportVendEstadoPDF()">Exportar PDF</button></div></div>';
 }
 
 function filtrarVendEstado() {
@@ -2011,32 +1638,15 @@ function filtrarVendEstado() {
     estados[est].qtd++;
     estados[est].total += parseFloat(v.total) || 0;
   });
-  var rows = Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; })
-    .map(function (est) {
-      return '<tr><td>' + est + '</td><td class="tcc">' + estados[est].qtd + '</td><td class="tcr">R$ ' + fmtBRL(estados[est].total) + '</td></tr>';
-    }).join('');
+  var rows = Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; }).map(function (est) { return '<tr><td>' + est + '</td><td class="tcc">' + estados[est].qtd + '</td><td class="tcr">R$ ' + fmtBRL(estados[est].total) + '</td></tr>'; }).join('');
   var div = document.getElementById('ve-tabela');
-  if (div) {
-    div.innerHTML = '<thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody>';
-  }
+  if (div) { div.innerHTML = '<thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody>'; }
   if (charts.ve) { charts.ve.destroy(); }
   var ctx = document.getElementById('chVE');
   if (ctx) {
     var labels = Object.keys(estados);
     var data = labels.map(function (k) { return estados[k].total; });
-    charts.ve = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{ label: 'Total', data: data, backgroundColor: CORES, borderRadius: 8 }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
-      }
-    });
+    charts.ve = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Total', data: data, backgroundColor: CORES, borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
   }
 }
 
@@ -2052,10 +1662,7 @@ function exportVendEstadoPDF() {
     estados[est].total += parseFloat(v.total) || 0;
   });
   var html = '<table><thead><tr><th>Estado</th><th>Vendas</th><th>Total</th></tr></thead><tbody>';
-  Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; })
-    .forEach(function (est) {
-      html += '<tr><td>' + est + '</td><td>' + estados[est].qtd + '</td><td>R$ ' + fmtBRL(estados[est].total) + '</td></tr>';
-    });
+  Object.keys(estados).sort(function (a, b) { return estados[b].total - estados[a].total; }).forEach(function (est) { html += '<tr><td>' + est + '</td><td>' + estados[est].qtd + '</td><td>R$ ' + fmtBRL(estados[est].total) + '</td></tr>'; });
   html += '</tbody></table>';
   exportPDF('Vendas por Estado', html);
 }
@@ -2070,23 +1677,12 @@ function renderVendSegmento() {
     segs[seg].qtd++;
     segs[seg].total += parseFloat(v.total) || 0;
   });
-  var rows = Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; })
-    .map(function (seg) {
-      return '<tr><td>' + seg + '</td><td class="tcc">' + segs[seg].qtd + '</td><td class="tcr">R$ ' + fmtBRL(segs[seg].total) + '</td></tr>';
-    }).join('');
+  var rows = Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; }).map(function (seg) { return '<tr><td>' + seg + '</td><td class="tcc">' + segs[seg].qtd + '</td><td class="tcr">R$ ' + fmtBRL(segs[seg].total) + '</td></tr>'; }).join('');
   return '<h2 class="st2">Vendas por Segmento</h2>' +
-    '<div class="card"><h3>Filtros</h3><div class="filtros">' +
-    '<div class="fg"><label>Segmento</label><select id="vs-seg"><option value="">Todos</option>' +
-    SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('') + '</select></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendSegmento()">OK</button></div>' +
-    '</div></div>' +
-    '<div class="card"><h3>Resumo</h3><table id="vs-tabela">' +
-    '<thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVS"></canvas></div>' +
-    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVS\',\'vendas-segmento.png\')">Exportar PNG</button>' +
-    '<button class="btn btn-p btn-s" onclick="exportVendSegmentoPDF()">Exportar PDF</button>' +
-    '</div></div>';
+    '<div class="card"><h3>Filtros</h3><div class="filtros"><div class="fg"><label>Segmento</label><select id="vs-seg"><option value="">Todos</option>' + SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarVendSegmento()">OK</button></div></div></div>' +
+    '<div class="card"><h3>Resumo</h3><table id="vs-tabela"><thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="card"><h3>Grafico</h3><div class="cc"><canvas id="chVS"></canvas></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportChartPNG(\'chVS\',\'vendas-segmento.png\')">Exportar PNG</button><button class="btn btn-p btn-s" onclick="exportVendSegmentoPDF()">Exportar PDF</button></div></div>';
 }
 
 function filtrarVendSegmento() {
@@ -2100,24 +1696,15 @@ function filtrarVendSegmento() {
     segs[seg].qtd++;
     segs[seg].total += parseFloat(v.total) || 0;
   });
-  var rows = Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; })
-    .map(function (seg) {
-      return '<tr><td>' + seg + '</td><td class="tcc">' + segs[seg].qtd + '</td><td class="tcr">R$ ' + fmtBRL(segs[seg].total) + '</td></tr>';
-    }).join('');
+  var rows = Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; }).map(function (seg) { return '<tr><td>' + seg + '</td><td class="tcc">' + segs[seg].qtd + '</td><td class="tcr">R$ ' + fmtBRL(segs[seg].total) + '</td></tr>'; }).join('');
   var div = document.getElementById('vs-tabela');
-  if (div) {
-    div.innerHTML = '<thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody>';
-  }
+  if (div) { div.innerHTML = '<thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody>' + rows + '</tbody>'; }
   if (charts.vs) { charts.vs.destroy(); }
   var ctx = document.getElementById('chVS');
   if (ctx) {
     var labels = Object.keys(segs);
     var data = labels.map(function (k) { return segs[k].total; });
-    charts.vs = new Chart(ctx, {
-      type: 'pie',
-      data: { labels: labels, datasets: [{ data: data, backgroundColor: CORES }] },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
+    charts.vs = new Chart(ctx, { type: 'pie', data: { labels: labels, datasets: [{ data: data, backgroundColor: CORES }] }, options: { responsive: true, maintainAspectRatio: false } });
   }
 }
 
@@ -2133,10 +1720,7 @@ function exportVendSegmentoPDF() {
     segs[seg].total += parseFloat(v.total) || 0;
   });
   var html = '<table><thead><tr><th>Segmento</th><th>Vendas</th><th>Total</th></tr></thead><tbody>';
-  Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; })
-    .forEach(function (seg) {
-      html += '<tr><td>' + seg + '</td><td>' + segs[seg].qtd + '</td><td>R$ ' + fmtBRL(segs[seg].total) + '</td></tr>';
-    });
+  Object.keys(segs).sort(function (a, b) { return segs[b].total - segs[a].total; }).forEach(function (seg) { html += '<tr><td>' + seg + '</td><td>' + segs[seg].qtd + '</td><td>R$ ' + fmtBRL(segs[seg].total) + '</td></tr>'; });
   html += '</tbody></table>';
   exportPDF('Vendas por Segmento', html);
 }
@@ -2151,10 +1735,8 @@ function renderCruzamentos() {
     '<div class="card"><h3>Filtros</h3><div class="filtros">' +
     '<div class="fg"><label>Vendedor</label><select id="cr-vend" onchange="initCruzamentos()"><option value="">Todos</option>' + vendOpts + '</select></div>' +
     '<div class="fg"><label>Segmento</label><select id="cr-seg" onchange="initCruzamentos()"><option value="">Todos</option>' + segOpts + '</select></div>' +
-    '<div class="fg"><label>Estado</label><select id="cr-uf" onchange="initCruzamentos()"><option value="">Todos</option>' +
-    UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
-    '</div></div>' +
-    '<div class="card"><h3>Resultado</h3><div id="cr-result"></div></div>';
+    '<div class="fg"><label>Estado</label><select id="cr-uf" onchange="initCruzamentos()"><option value="">Todos</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
+    '</div></div><div class="card"><h3>Resultado</h3><div id="cr-result"></div></div>';
 }
 
 function initCruzamentos() {
@@ -2170,20 +1752,10 @@ function initCruzamentos() {
   });
   var tot = filtradas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
   var qtd = filtradas.reduce(function (s, v) { return s + (parseInt(v.qtdProdutos) || 0); }, 0);
-  var html = '<div class="sg">' +
-    '<div class="sc s"><div class="lb">Vendas Filtradas</div><div class="vl">' + filtradas.length + '</div></div>' +
-    '<div class="sc"><div class="lb">Produtos</div><div class="vl">' + qtd + '</div></div>' +
-    '<div class="sc"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(tot) + '</div></div>' +
-    '</div>';
+  var html = '<div class="sg"><div class="sc s"><div class="lb">Vendas Filtradas</div><div class="vl">' + filtradas.length + '</div></div><div class="sc"><div class="lb">Produtos</div><div class="vl">' + qtd + '</div></div><div class="sc"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(tot) + '</div></div></div>';
   if (filtradas.length) {
     html += '<table><thead><tr><th>Data</th><th>Cliente</th><th>UF</th><th>Segmento</th><th>Vendedor</th><th>Total</th></tr></thead><tbody>';
-    filtradas.forEach(function (v) {
-      html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td>' +
-        '<td class="tcc">' + getEstadoFromVenda(v) + '</td>' +
-        '<td>' + getSegmentoFromVenda(v) + '</td>' +
-        '<td>' + getNome(v.vendedor) + '</td>' +
-        '<td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
-    });
+    filtradas.forEach(function (v) { html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td class="tcc">' + getEstadoFromVenda(v) + '</td><td>' + getSegmentoFromVenda(v) + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>'; });
     html += '</tbody></table>';
   }
   var div = document.getElementById('cr-result');
@@ -2193,28 +1765,17 @@ function initCruzamentos() {
 // ===== ANALISE DE CLIENTES =====
 function renderAnaliseCli() {
   var clientes = loadData('clientes');
-  var cliOpts = clientes.map(function (c) {
-    return '<option value="' + c.cod + '">' + c.cod + ' - ' + c.razao + '</option>';
-  }).join('');
+  var cliOpts = clientes.map(function (c) { return '<option value="' + c.cod + '">' + c.cod + ' - ' + c.razao + '</option>'; }).join('');
   return '<h2 class="st2">Analise de Clientes</h2>' +
-    '<div class="card"><h3>Selecionar Cliente</h3><div class="fr">' +
-    '<div class="fg"><label>Cliente</label><select id="ac-cli" onchange="analisaCliente()"><option value="">Selecione...</option>' + cliOpts + '</select></div>' +
-    '</div></div><div id="ac-result"></div>';
+    '<div class="card"><h3>Selecionar Cliente</h3><div class="fr"><div class="fg"><label>Cliente</label><select id="ac-cli" onchange="analisaCliente()"><option value="">Selecione...</option>' + cliOpts + '</select></div></div></div><div id="ac-result"></div>';
 }
 
 function analisaCliente() {
   var selCod = document.getElementById('ac-cli').value;
-  if (!selCod) {
-    var r = document.getElementById('ac-result');
-    if (r) { r.innerHTML = ''; }
-    return;
-  }
+  if (!selCod) { var r0 = document.getElementById('ac-result'); if (r0) { r0.innerHTML = ''; } return; }
   var vendas = loadData('vendas');
   var cliente = getClienteByCod(selCod);
-  var vCli = vendas.filter(function (v) {
-    var m = v.cliente.match(/COD\s+(\S+)/);
-    return m && m[1] === selCod;
-  });
+  var vCli = vendas.filter(function (v) { var m = v.cliente.match(/COD\s+(\S+)/); return m && m[1] === selCod; });
   vCli.sort(function (a, b) { return a.data.localeCompare(b.data); });
   var html = '';
   if (vCli.length === 0) {
@@ -2224,71 +1785,43 @@ function analisaCliente() {
     var qtdProd = vCli.reduce(function (s, v) { return s + (parseInt(v.qtdProdutos) || 0); }, 0);
     var mediaTicket = totGeral / vCli.length;
     var intervalos = [];
-    for (var i = 1; i < vCli.length; i++) {
-      var d1 = new Date(vCli[i - 1].data);
-      var d2 = new Date(vCli[i].data);
-      intervalos.push(Math.floor((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)));
-    }
+    for (var i = 1; i < vCli.length; i++) { var d1 = new Date(vCli[i - 1].data); var d2 = new Date(vCli[i].data); intervalos.push(Math.floor((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24))); }
     var intervaloMedio = intervalos.length ? Math.round(intervalos.reduce(function (s, x) { return s + x; }, 0) / intervalos.length) : 0;
     var produtosFreq = {};
     vCli.forEach(function (v) {
-      if (v.itens) {
-        v.itens.forEach(function (it) {
-          var nome = it.nome || it.cod;
-          if (!produtosFreq[nome]) { produtosFreq[nome] = { qtd: 0, vezes: 0 }; }
-          produtosFreq[nome].qtd += parseInt(it.qtd) || 0;
-          produtosFreq[nome].vezes++;
-        });
-      }
+      if (v.itens) { v.itens.forEach(function (it) { var nome = it.nome || it.cod; if (!produtosFreq[nome]) { produtosFreq[nome] = { qtd: 0, vezes: 0 }; } produtosFreq[nome].qtd += parseInt(it.qtd) || 0; produtosFreq[nome].vezes++; }); }
     });
     var prodsOrdenados = Object.keys(produtosFreq).sort(function (a, b) { return produtosFreq[b].vezes - produtosFreq[a].vezes; });
     var dataPrevista = '--';
-    if (intervaloMedio > 0 && vCli.length > 1) {
-      var dUlt = new Date(vCli[vCli.length - 1].data);
-      dUlt.setDate(dUlt.getDate() + intervaloMedio);
-      dataPrevista = dUlt.toISOString().split('T')[0];
-    }
+    if (intervaloMedio > 0 && vCli.length > 1) { var dUlt = new Date(vCli[vCli.length - 1].data); dUlt.setDate(dUlt.getDate() + intervaloMedio); dataPrevista = dUlt.toISOString().split('T')[0]; }
     var valorPrevisto = mediaTicket;
     html = '<div class="card"><h3>' + (cliente ? cliente.razao : 'Cliente ' + selCod) + '</h3><div class="sg">' +
       '<div class="sc s"><div class="lb">Total Compras</div><div class="vl">' + vCli.length + '</div></div>' +
       '<div class="sc"><div class="lb">Faturamento Total</div><div class="vl">R$ ' + fmtBRL(totGeral) + '</div></div>' +
       '<div class="sc"><div class="lb">Ticket Medio</div><div class="vl">R$ ' + fmtBRL(mediaTicket) + '</div></div>' +
       '<div class="sc"><div class="lb">Produtos Comprados</div><div class="vl">' + qtdProd + '</div></div>' +
-      '<div class="sc"><div class="lb">Intervalo Medio</div><div class="vl">' + intervaloMedio + ' dias</div></div>' +
-      '</div></div>';
+      '<div class="sc"><div class="lb">Intervalo Medio</div><div class="vl">' + intervaloMedio + ' dias</div></div></div></div>';
     html += '<div class="card"><h3>Historico de Compras</h3><table><thead><tr><th>Data</th><th>Itens</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
-    vCli.forEach(function (v) {
-      var itensStr = (v.itens && v.itens.length)
-        ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ')
-        : '--';
-      html += '<tr><td>' + v.data + '</td><td style="font-size:.78rem">' + itensStr + '</td>' +
-        '<td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
-    });
+    vCli.forEach(function (v) { var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--'; html += '<tr><td>' + v.data + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>'; });
     html += '</tbody></table></div>';
     html += '<div class="card"><h3>Produtos Mais Comprados</h3><table><thead><tr><th>Produto</th><th>Qtd Total</th><th>Frequencia</th></tr></thead><tbody>';
-    prodsOrdenados.forEach(function (p) {
-      html += '<tr><td>' + p + '</td><td class="tcc">' + produtosFreq[p].qtd + '</td><td class="tcc">' + produtosFreq[p].vezes + 'x</td></tr>';
-    });
+    prodsOrdenados.forEach(function (p) { html += '<tr><td>' + p + '</td><td class="tcc">' + produtosFreq[p].qtd + '</td><td class="tcc">' + produtosFreq[p].vezes + 'x</td></tr>'; });
     html += '</tbody></table></div>';
     html += '<div class="pred-card"><h4>Previsao do Proximo Pedido</h4><div class="pred-grid">' +
       '<div class="pred-item"><div class="pred-label">Data Estimada</div><div class="pred-value">' + dataPrevista + '</div></div>' +
       '<div class="pred-item"><div class="pred-label">Valor Estimado</div><div class="pred-value">R$ ' + fmtBRL(valorPrevisto) + '</div></div>' +
-      '<div class="pred-item"><div class="pred-label">Intervalo</div><div class="pred-value">' + intervaloMedio + ' dias</div></div>' +
-      '</div></div>';
+      '<div class="pred-item"><div class="pred-label">Intervalo</div><div class="pred-value">' + intervaloMedio + ' dias</div></div></div></div>';
   }
   var div = document.getElementById('ac-result');
   if (div) { div.innerHTML = html; }
-}// ===== COMISSAO =====
+}
+
+// ===== COMISSAO =====
 function renderComissao(isGerente) {
   var vAtivos = getVendedores();
-  var vendOpts = vAtivos.map(function (v) {
-    return '<option value="' + v.id + '">' + getNome(v.id) + '</option>';
-  }).join('');
+  var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
   return '<h2 class="st2">Comissao</h2>' +
-    '<div class="card"><h3>Calcular Comissao</h3><div class="fr">' +
-    '<div class="fg"><label>Vendedor</label><select id="cm-vend" onchange="renderCompContent(document.getElementById(\'cm-vend\').value)">' +
-    (isGerente ? vendOpts : '<option value="' + currentUser.id + '">' + getNome(currentUser.id) + '</option>') +
-    '</select></div></div><div id="cm-result"></div></div>';
+    '<div class="card"><h3>Calcular Comissao</h3><div class="fr"><div class="fg"><label>Vendedor</label><select id="cm-vend" onchange="renderCompContent(document.getElementById(\'cm-vend\').value)">' + (isGerente ? vendOpts : '<option value="' + currentUser.id + '">' + getNome(currentUser.id) + '</option>') + '</select></div></div><div id="cm-result"></div></div>';
 }
 
 function renderCompContent(vid) {
@@ -2298,37 +1831,26 @@ function renderCompContent(vid) {
   var nivel = getNivel(vid);
   var faixas = COM[nivel] || COM['Junior'];
   var taxa = 0;
-  for (var i = 0; i < faixas.length; i++) {
-    if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; }
-  }
+  for (var i = 0; i < faixas.length; i++) { if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; } }
   var faixaHtml = '<table class="com-faixa-table"><thead><tr><th>Faixa de Vendas</th><th>Taxa (por R$ 1.000)</th></tr></thead><tbody>';
   faixas.forEach(function (f) {
     var ativa = (total >= f.min && total <= f.max);
-    faixaHtml += '<tr' + (ativa ? ' class="ativa"' : '') + '><td>' +
-      (f.max >= 999999999 ? 'Acima de R$ ' + fmtBRL(f.min) : 'R$ ' + fmtBRL(f.min) + ' ate R$ ' + fmtBRL(f.max)) +
-      '</td><td style="text-align:center">' + f.taxa.toFixed(2) + '</td></tr>';
+    faixaHtml += '<tr' + (ativa ? ' class="ativa"' : '') + '><td>' + (f.max >= 999999999 ? 'Acima de R$ ' + fmtBRL(f.min) : 'R$ ' + fmtBRL(f.min) + ' ate R$ ' + fmtBRL(f.max)) + '</td><td style="text-align:center">' + f.taxa.toFixed(2) + '</td></tr>';
   });
   faixaHtml += '</tbody></table>';
   var comissaoBase = (total / 1000) * taxa;
-  var html = '<div class="com-hero"><div><div class="com-name">' + getNome(vid) + '</div><div class="com-nivel">' + nivel + '</div></div>' +
-    '<div style="text-align:right"><div class="com-total-label">Total Vendido</div><div class="com-total">R$ ' + fmtBRL(total) + '</div></div></div>';
+  var html = '<div class="com-hero"><div><div class="com-name">' + getNome(vid) + '</div><div class="com-nivel">' + nivel + '</div></div><div style="text-align:right"><div class="com-total-label">Total Vendido</div><div class="com-total">R$ ' + fmtBRL(total) + '</div></div></div>';
   html += '<div class="com-stats">' +
     '<div class="com-stat"><div class="com-stat-label">Taxa Base</div><div class="com-stat-value" id="cm-taxa-base">' + taxa.toFixed(2) + '</div></div>' +
     '<div class="com-stat"><div class="com-stat-label">Acelerador</div><div class="com-stat-value" id="cm-accel-val">+0.00</div><div class="com-stat-sub" id="cm-weeks-val">0/4 semanas</div></div>' +
     '<div class="com-stat"><div class="com-stat-label">Taxa Final</div><div class="com-stat-value" id="cm-taxa-final">' + taxa.toFixed(2) + '</div></div>' +
-    '<div class="com-stat highlight"><div class="com-stat-label">Comissao</div><div class="com-stat-value" id="cm-comissao-val">R$ ' + fmtBRL(comissaoBase) + '</div></div>' +
-    '</div>';
+    '<div class="com-stat highlight"><div class="com-stat-label">Comissao</div><div class="com-stat-value" id="cm-comissao-val">R$ ' + fmtBRL(comissaoBase) + '</div></div></div>';
   html += '<div class="card"><h3>Faixas de Comissao - ' + nivel + '</h3>' + faixaHtml + '</div>';
   html += '<div class="com-accel"><div class="com-accel-title">Acelerador por Positivacao</div>' +
     '<div class="com-accel-desc">+0.05 por semana de meta de positivacao atingida (maximo +0.20 com as 4 semanas). Valor adicionado a taxa base. Cliente contabilizado apenas uma vez no mes. Valido apenas para pedidos aprovados.</div>' +
     '<div class="com-week-grid">';
-  for (var s = 1; s <= 4; s++) {
-    html += '<div class="com-week" id="cm-week-' + s + '" onclick="toggleWeek(' + s + ',\'' + vid + '\')">' +
-      '<div class="com-week-num">Semana ' + s + '</div><div class="com-week-icon">&#9744;</div><div class="com-week-bonus">+0.05</div></div>';
-  }
-  html += '</div>' +
-    '<button class="btn btn-p btn-f" onclick="calcComissaoFinal(\'' + vid + '\')" style="margin-top:16px">Calcular Comissao</button>' +
-    '<div id="cm-resultado" style="margin-top:16px"></div></div>';
+  for (var s = 1; s <= 4; s++) { html += '<div class="com-week" id="cm-week-' + s + '" onclick="toggleWeek(' + s + ',\'' + vid + '\')"><div class="com-week-num">Semana ' + s + '</div><div class="com-week-icon">&#9744;</div><div class="com-week-bonus">+0.05</div></div>'; }
+  html += '</div><button class="btn btn-p btn-f" onclick="calcComissaoFinal(\'' + vid + '\')" style="margin-top:16px">Calcular Comissao</button><div id="cm-resultado" style="margin-top:16px"></div></div>';
   var div = document.getElementById('cm-result');
   if (div) { div.innerHTML = html; }
 }
@@ -2348,25 +1870,16 @@ function updateComStats(vid) {
   var nivel = getNivel(vid);
   var faixas = COM[nivel] || COM['Junior'];
   var taxa = 0;
-  for (var i = 0; i < faixas.length; i++) {
-    if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; }
-  }
+  for (var i = 0; i < faixas.length; i++) { if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; } }
   var semanasBatidas = 0;
-  for (var s = 1; s <= 4; s++) {
-    var w = document.getElementById('cm-week-' + s);
-    if (w && w.classList.contains('checked')) { semanasBatidas++; }
-  }
+  for (var s = 1; s <= 4; s++) { var w = document.getElementById('cm-week-' + s); if (w && w.classList.contains('checked')) { semanasBatidas++; } }
   var acelerador = semanasBatidas * ACELERADOR_POR_SEMANA;
   var taxaFinal = taxa + acelerador;
   var comissao = (total / 1000) * taxaFinal;
-  var av = document.getElementById('cm-accel-val');
-  if (av) { av.textContent = '+' + acelerador.toFixed(2); }
-  var wv = document.getElementById('cm-weeks-val');
-  if (wv) { wv.textContent = semanasBatidas + '/4 semanas'; }
-  var tf = document.getElementById('cm-taxa-final');
-  if (tf) { tf.textContent = taxaFinal.toFixed(2); }
-  var cv = document.getElementById('cm-comissao-val');
-  if (cv) { cv.textContent = 'R$ ' + fmtBRL(comissao); }
+  var av = document.getElementById('cm-accel-val'); if (av) { av.textContent = '+' + acelerador.toFixed(2); }
+  var wv = document.getElementById('cm-weeks-val'); if (wv) { wv.textContent = semanasBatidas + '/4 semanas'; }
+  var tf = document.getElementById('cm-taxa-final'); if (tf) { tf.textContent = taxaFinal.toFixed(2); }
+  var cv = document.getElementById('cm-comissao-val'); if (cv) { cv.textContent = 'R$ ' + fmtBRL(comissao); }
 }
 
 function calcComissaoFinal(vid) {
@@ -2376,22 +1889,13 @@ function calcComissaoFinal(vid) {
   var nivel = getNivel(vid);
   var faixas = COM[nivel] || COM['Junior'];
   var taxa = 0;
-  for (var i = 0; i < faixas.length; i++) {
-    if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; }
-  }
+  for (var i = 0; i < faixas.length; i++) { if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; } }
   var semanasBatidas = 0;
-  for (var s = 1; s <= 4; s++) {
-    var w = document.getElementById('cm-week-' + s);
-    if (w && w.classList.contains('checked')) { semanasBatidas++; }
-  }
+  for (var s = 1; s <= 4; s++) { var w = document.getElementById('cm-week-' + s); if (w && w.classList.contains('checked')) { semanasBatidas++; } }
   var acelerador = semanasBatidas * ACELERADOR_POR_SEMANA;
   var taxaFinal = taxa + acelerador;
   var comissao = (total / 1000) * taxaFinal;
-  var html = '<div class="com-result">' +
-    '<div class="com-result-label">Comissao Calculada</div>' +
-    '<div class="com-result-value">R$ ' + fmtBRL(comissao) + '</div>' +
-    '<div class="com-result-detail">Taxa base: ' + taxa.toFixed(2) + ' | Acelerador: +' + acelerador.toFixed(2) + ' | Taxa final: ' + taxaFinal.toFixed(2) + '</div>' +
-    '<div class="com-result-badge">' + semanasBatidas + ' de 4 semanas batidas</div></div>';
+  var html = '<div class="com-result"><div class="com-result-label">Comissao Calculada</div><div class="com-result-value">R$ ' + fmtBRL(comissao) + '</div><div class="com-result-detail">Taxa base: ' + taxa.toFixed(2) + ' | Acelerador: +' + acelerador.toFixed(2) + ' | Taxa final: ' + taxaFinal.toFixed(2) + '</div><div class="com-result-badge">' + semanasBatidas + ' de 4 semanas batidas</div></div>';
   var div = document.getElementById('cm-resultado');
   if (div) { div.innerHTML = html; }
 }
@@ -2399,16 +1903,11 @@ function calcComissaoFinal(vid) {
 // ===== CATALOGO =====
 function renderCatalogo() {
   var linhas = {};
-  PROD.forEach(function (p) {
-    if (!linhas[p.linha]) { linhas[p.linha] = []; }
-    linhas[p.linha].push(p);
-  });
+  PROD.forEach(function (p) { if (!linhas[p.linha]) { linhas[p.linha] = []; } linhas[p.linha].push(p); });
   var html = '<h2 class="st2">Catalogo de Produtos</h2>';
   Object.keys(linhas).forEach(function (linha) {
     html += '<div class="card"><h3>' + linha + '</h3><table><thead><tr><th>Cod</th><th>Produto</th><th>Un</th><th>Preco</th></tr></thead><tbody>';
-    linhas[linha].forEach(function (p) {
-      html += '<tr><td>' + p.cod + '</td><td>' + p.nome + '</td><td>' + p.un + '</td><td class="tcr">R$ ' + fmtBRL(p.preco) + '</td></tr>';
-    });
+    linhas[linha].forEach(function (p) { html += '<tr><td>' + p.cod + '</td><td>' + p.nome + '</td><td>' + p.un + '</td><td class="tcr">R$ ' + fmtBRL(p.preco) + '</td></tr>'; });
     html += '</tbody></table></div>';
   });
   return html;
@@ -2419,31 +1918,18 @@ function renderRelatorios() {
   var vendas = loadData('vendas');
   var atividades = loadData('atividades');
   var clientes = loadData('clientes');
-  var tipoFiltro = '<div class="card"><h3>Filtro de Tipo</h3><div class="filtros">' +
-    '<div class="fg"><label>Tipo de Registro</label><select id="rel-tipo">' +
-    '<option value="todos">Todos</option><option value="venda">Somente Vendas</option>' +
-    '<option value="bonificacao">Somente Bonificacoes</option><option value="ambos">Vendas + Bonificacoes</option>' +
-    '</select></div>' +
-    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarRelatorio()">OK</button></div>' +
-    '</div></div>';
+  var tipoFiltro = '<div class="card"><h3>Filtro de Tipo</h3><div class="filtros"><div class="fg"><label>Tipo de Registro</label><select id="rel-tipo"><option value="todos">Todos</option><option value="venda">Somente Vendas</option><option value="bonificacao">Somente Bonificacoes</option><option value="ambos">Vendas + Bonificacoes</option></select></div><div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarRelatorio()">OK</button></div></div></div>';
   var totV = vendas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var totL = atividades.filter(function (a) { return a.tipo === 'ligacao'; })
-    .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-  var totP = atividades.filter(function (a) { return a.tipo === 'prospeccao'; })
-    .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+  var totL = atividades.filter(function (a) { return a.tipo === 'ligacao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+  var totP = atividades.filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
   return '<h2 class="st2">Relatorios Gerais</h2>' + tipoFiltro +
-    '<div class="card"><h3>Resumo Geral</h3><div id="rel-resumo">' +
-    '<div class="sg">' +
+    '<div class="card"><h3>Resumo Geral</h3><div id="rel-resumo"><div class="sg">' +
     '<div class="sc s"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(totV) + '</div></div>' +
     '<div class="sc"><div class="lb">Vendas</div><div class="vl">' + vendas.length + '</div></div>' +
     '<div class="sc"><div class="lb">Clientes</div><div class="vl">' + clientes.length + '</div></div>' +
     '<div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totL + '</div></div>' +
-    '<div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totP + '</div></div>' +
-    '</div></div><div id="rel-tabela"></div></div>' +
-    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">' +
-    '<button class="btn btn-a btn-s" onclick="exportarRelatorioCSV()">Exportar CSV</button>' +
-    '<button class="btn btn-p btn-s" onclick="exportarRelatorioPDF()">Exportar PDF</button>' +
-    '</div>';
+    '<div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totP + '</div></div></div></div><div id="rel-tabela"></div></div>' +
+    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-a btn-s" onclick="exportarRelatorioCSV()">Exportar CSV</button><button class="btn btn-p btn-s" onclick="exportarRelatorioPDF()">Exportar PDF</button></div>';
 }
 
 function filtrarRelatorio() {
@@ -2459,39 +1945,26 @@ function filtrarRelatorio() {
   });
   var totV = filtradas.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
   var resumo = document.getElementById('rel-resumo');
-  if (resumo) {
-    resumo.innerHTML = '<div class="sg">' +
-      '<div class="sc s"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(totV) + '</div></div>' +
-      '<div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div>' +
-      '</div>';
-  }
+  if (resumo) { resumo.innerHTML = '<div class="sg"><div class="sc s"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(totV) + '</div></div><div class="sc"><div class="lb">Registros</div><div class="vl">' + filtradas.length + '</div></div></div>'; }
   var tabelaDiv = document.getElementById('rel-tabela');
   if (!tabelaDiv) { return; }
   var html = '<table><thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
   filtradas.forEach(function (v) {
     var tipoV = v.tipo || 'venda';
     var tipoHtml = '<span class="tipo-badge ' + tipoV + '">' + tipoV + '</span>';
-    html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td>' + getNome(v.vendedor) + '</td>' +
-      '<td class="tcc">' + tipoHtml + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td>' +
-      '<td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
+    html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td>' + getNome(v.vendedor) + '</td><td class="tcc">' + tipoHtml + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>';
   });
   html += '</tbody></table>';
   tabelaDiv.innerHTML = html;
   window._relFiltradas = filtradas;
 }
 
-function exportarRelatorioCSV() {
-  var dados = window._relFiltradas || loadData('vendas');
-  exportCSV(dados, 'relatorio-vendas.csv');
-}
+function exportarRelatorioCSV() { var dados = window._relFiltradas || loadData('vendas'); exportCSV(dados, 'relatorio-vendas.csv'); }
 
 function exportarRelatorioPDF() {
   var dados = window._relFiltradas || loadData('vendas');
   var html = '<table><thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
-  dados.forEach(function (v) {
-    html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td>' + getNome(v.vendedor) + '</td>' +
-      '<td>' + (v.tipo || 'venda') + '</td><td>' + (v.qtdProdutos || 0) + '</td><td>R$ ' + fmtBRL(v.total) + '</td></tr>';
-  });
+  dados.forEach(function (v) { html += '<tr><td>' + v.data + '</td><td>' + v.cliente + '</td><td>' + getNome(v.vendedor) + '</td><td>' + (v.tipo || 'venda') + '</td><td>' + (v.qtdProdutos || 0) + '</td><td>R$ ' + fmtBRL(v.total) + '</td></tr>'; });
   html += '</tbody></table>';
   exportPDF('Relatorio Geral de Vendas', html);
 }
@@ -2507,10 +1980,8 @@ function renderMinhas() {
   var vA = atividades.filter(function (a) { return a.vendedor === currentUser.id; });
   var m = vM[vM.length - 1] || {};
   var vTotV = vV.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
-  var vL = vA.filter(function (a) { return a.tipo === 'ligacao'; })
-    .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-  var vP = vA.filter(function (a) { return a.tipo === 'prospeccao'; })
-    .reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+  var vL = vA.filter(function (a) { return a.tipo === 'ligacao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
+  var vP = vA.filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
   var vPr = vV.reduce(function (s, v) { return s + (parseInt(v.qtdProdutos) || 0); }, 0);
   var vPos = vV.length;
   var vCN = clientes.filter(function (c) { return c.vendedorId === currentUser.id; }).length;
@@ -2521,50 +1992,36 @@ function renderMinhas() {
   var pPos = m.positivacao ? Math.min(100, (vPos / m.positivacao) * 100) : 0;
   var pCN = m.clientesNovos ? Math.min(100, (vCN / m.clientesNovos) * 100) : 0;
   return renderWeeklyBar() + renderProdutosDiscriminados() +
-    '<h2 class="st2">Minhas Metas</h2>' +
-    '<div class="card"><h3>Progresso Atual</h3>' +
+    '<h2 class="st2">Minhas Metas</h2><div class="card"><h3>Progresso Atual</h3>' +
     progressBar('Vendas (R$)', vTotV, m.valorVenda || 0, pV) +
     progressBar('Ligacoes', vL, m.ligacoes || 0, pL) +
     progressBar('Prospeccao', vP, m.prospeccao || 0, pP) +
     progressBar('Produtos', vPr, m.produtos || 0, pPr) +
     progressBar('Positivacao', vPos, m.positivacao || 0, pPos) +
-    progressBar('Clientes Novos', vCN, m.clientesNovos || 0, pCN) +
-    '</div>';
+    progressBar('Clientes Novos', vCN, m.clientesNovos || 0, pCN) + '</div>';
 }
 
-// ===== REGISTRAR VENDA (VENDEDOR) — campo de CODIGO do cliente =====
+// ===== REGISTRAR VENDA (VENDEDOR) =====
 function renderVenda() {
   return renderWeeklyBar() +
     '<h2 class="st2">Registrar Venda</h2>' +
     '<div class="card"><h3>Nova Venda ou Bonificacao</h3>' +
-    '<div class="tipo-toggle">' +
-    '<button id="tt-venda" class="act" onclick="setTipoLanc(\'venda\')">Venda</button>' +
-    '<button id="tt-bonif" onclick="setTipoLanc(\'bonificacao\')">Bonificacao</button>' +
-    '</div>' +
-    '<div class="fr">' +
-    '<div class="fg"><label>Data</label><input type="date" id="vd-data" value="' + new Date().toISOString().split('T')[0] + '"></div>' +
-    '<div class="fg"><label>Codigo do Cliente</label><input type="text" id="vd-cli" placeholder="Digite o codigo do cliente" oninput="updateClienteInfo()"></div>' +
-    '</div>' +
+    '<div class="tipo-toggle"><button id="tt-venda" class="act" onclick="setTipoLanc(\'venda\')">Venda</button><button id="tt-bonif" onclick="setTipoLanc(\'bonificacao\')">Bonificacao</button></div>' +
+    '<div class="fr"><div class="fg"><label>Data</label><input type="date" id="vd-data" value="' + new Date().toISOString().split('T')[0] + '"></div>' +
+    '<div class="fg"><label>Codigo do Cliente</label><input type="text" id="vd-cli" placeholder="Digite o codigo do cliente" oninput="updateClienteInfo()"></div></div>' +
     '<div id="vd-cli-info"></div>' +
     '<div class="dv"></div><h3>Itens da Venda</h3><div id="vd-itens"></div>' +
     '<button class="btn btn-a btn-s" onclick="addVendaItem()">+ Adicionar Item</button>' +
     '<div class="dv"></div><div class="st" id="vd-total">Total: R$ 0,00</div>' +
-    '<div class="dv"></div>' +
-    '<button class="btn btn-p btn-f" onclick="saveVenda()">Salvar Lancamento</button>' +
-    '</div>';
+    '<div class="dv"></div><button class="btn btn-p btn-f" onclick="saveVenda()">Salvar Lancamento</button></div>';
 }
 
 function setTipoLanc(tipo) {
   var bv = document.getElementById('tt-venda');
   var bb = document.getElementById('tt-bonif');
   if (!bv || !bb) { return; }
-  if (tipo === 'venda') {
-    bv.classList.add('act');
-    bb.classList.remove('act');
-  } else {
-    bb.classList.add('act');
-    bv.classList.remove('act');
-  }
+  if (tipo === 'venda') { bv.classList.add('act'); bb.classList.remove('act'); }
+  else { bb.classList.add('act'); bv.classList.remove('act'); }
 }
 
 function getTipoLanc() {
@@ -2579,17 +2036,13 @@ function updateClienteInfo() {
   var div = document.getElementById('vd-cli-info');
   if (!div) { return; }
   if (!cod) { div.innerHTML = ''; return; }
-  if (!c) {
-    div.innerHTML = '<div class="client-info" style="border-left-color:var(--err)"><div class="ci-label">Cliente</div><div class="ci-value" style="color:var(--err)">Nao encontrado com o codigo: ' + cod + '</div></div>';
-    return;
-  }
+  if (!c) { div.innerHTML = '<div class="client-info" style="border-left-color:var(--err)"><div class="ci-label">Cliente</div><div class="ci-value" style="color:var(--err)">Nao encontrado com o codigo: ' + cod + '</div></div>'; return; }
   div.innerHTML = '<div class="client-info"><div style="display:flex;gap:20px;flex-wrap:wrap">' +
     '<div><div class="ci-label">Razao Social</div><div class="ci-value">' + c.razao + '</div></div>' +
     '<div><div class="ci-label">Cidade</div><div class="ci-value">' + (c.cidade || '--') + '</div></div>' +
     '<div><div class="ci-label">Estado</div><div class="ci-value">' + (c.estado || '--') + '</div></div>' +
     '<div><div class="ci-label">Segmento</div><div class="ci-value">' + (c.segmento || '--') + '</div></div>' +
-    '<div><div class="ci-label">Vendedor</div><div class="ci-value">' + getNome(c.vendedorId || currentUser.id) + '</div></div>' +
-    '</div></div>';
+    '<div><div class="ci-label">Vendedor</div><div class="ci-value">' + getNome(c.vendedorId || currentUser.id) + '</div></div></div></div>';
 }
 
 function addVendaItem() {
@@ -2610,11 +2063,7 @@ function calcVendaTotal() {
     var cod = row.querySelector('.pe-prod').value;
     var qtd = parseInt(row.querySelector('.pe-qtd').value) || 0;
     var prod = PROD.find(function (p) { return p.cod === cod; });
-    if (prod) {
-      var preco = prod.preco * qtd;
-      total += preco;
-      row.querySelector('.pe-preco').value = 'R$ ' + fmtBRL(preco);
-    }
+    if (prod) { var preco = prod.preco * qtd; total += preco; row.querySelector('.pe-preco').value = 'R$ ' + fmtBRL(preco); }
   });
   var div = document.getElementById('vd-total');
   if (div) { div.textContent = 'Total: R$ ' + fmtBRL(total); }
@@ -2632,38 +2081,18 @@ function saveVenda() {
     var codProd = row.querySelector('.pe-prod').value;
     var qtd = parseInt(row.querySelector('.pe-qtd').value) || 0;
     var prod = PROD.find(function (p) { return p.cod === codProd; });
-    if (prod && qtd > 0) {
-      itens.push({ cod: codProd, nome: prod.nome, qtd: qtd, preco: prod.preco });
-      total += prod.preco * qtd;
-      qtdProdutos += qtd;
-    }
+    if (prod && qtd > 0) { itens.push({ cod: codProd, nome: prod.nome, qtd: qtd, preco: prod.preco }); total += prod.preco * qtd; qtdProdutos += qtd; }
   });
   if (itens.length === 0) { toast('Adicione pelo menos um item', 'error'); return; }
   if (tipo === 'venda') {
     var vendas = loadData('vendas');
-    var jaExiste = vendas.some(function (v) {
-      var m = v.cliente.match(/COD\s+(\S+)/);
-      return m && m[1] === cod && v.vendedor === currentUser.id && (v.tipo || 'venda') === 'venda';
-    });
-    if (jaExiste) {
-      toast('Este cliente ja possui uma venda cadastrada. Use Bonificacao para repetir o codigo.', 'error');
-      return;
-    }
+    var jaExiste = vendas.some(function (v) { var m = v.cliente.match(/COD\s+(\S+)/); return m && m[1] === cod && v.vendedor === currentUser.id && (v.tipo || 'venda') === 'venda'; });
+    if (jaExiste) { toast('Este cliente ja possui uma venda cadastrada. Use Bonificacao para repetir o codigo.', 'error'); return; }
   }
   var nomeCli = cliente ? cliente.razao : 'COD ' + cod;
   var estado = cliente ? cliente.estado : '--';
   var segmento = cliente ? cliente.segmento : 'Outros';
-  var venda = {
-    data: data,
-    cliente: nomeCli + ' (COD ' + cod + ' / ' + estado + ')',
-    vendedor: currentUser.id,
-    itens: itens,
-    qtdProdutos: qtdProdutos,
-    total: total,
-    estado: estado,
-    segmento: segmento,
-    tipo: tipo
-  };
+  var venda = { data: data, cliente: nomeCli + ' (COD ' + cod + ' / ' + estado + ')', vendedor: currentUser.id, itens: itens, qtdProdutos: qtdProdutos, total: total, estado: estado, segmento: segmento, tipo: tipo };
   saveData('vendas', venda);
   toast((tipo === 'venda' ? 'Venda' : 'Bonificacao') + ' salva: R$ ' + fmtBRL(total), 'success');
   renderTab('venda');
@@ -2672,32 +2101,19 @@ function saveVenda() {
 // ===== ATIVIDADES (VENDEDOR) =====
 function renderAtividades() {
   var atividades = loadData('atividades');
-  var tipoOpts = '<option value="ligacao">Ligacao</option>' +
-    '<option value="prospeccao">Prospeccao</option>' +
-    '<option value="visita">Visita</option>' +
-    '<option value="email">E-mail</option>' +
-    '<option value="whatsapp">WhatsApp</option>';
+  var tipoOpts = '<option value="ligacao">Ligacao</option><option value="prospeccao">Prospeccao</option><option value="visita">Visita</option><option value="email">E-mail</option><option value="whatsapp">WhatsApp</option>';
   var minhas = atividades.filter(function (a) { return a.vendedor === currentUser.id; });
   var tabela = minhas.length
     ? '<table><thead><tr><th>Data</th><th>Tipo</th><th>Qtd</th><th>Obs</th><th>Acoes</th></tr></thead><tbody>' +
-      minhas.map(function (a) {
-        var idx = atividades.indexOf(a);
-        return '<tr><td>' + a.data + '</td><td>' + a.tipo + '</td><td class="tcc">' + a.qtd + '</td>' +
-          '<td>' + (a.obs || '') + '</td>' +
-          '<td><button class="del-btn" onclick="delAtividade(' + idx + ')">Excluir</button></td></tr>';
-      }).join('') +
-      '</tbody></table>'
+      minhas.map(function (a) { var idx = atividades.indexOf(a); return '<tr><td>' + a.data + '</td><td>' + a.tipo + '</td><td class="tcc">' + a.qtd + '</td><td>' + (a.obs || '') + '</td><td><button class="del-btn" onclick="delAtividade(' + idx + ')">Excluir</button></td></tr>'; }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhuma atividade.</p></div>';
   return '<h2 class="st2">Atividades</h2>' +
-    '<div class="card"><h3>Registrar Atividade</h3>' +
-    '<div class="fr">' +
+    '<div class="card"><h3>Registrar Atividade</h3><div class="fr">' +
     '<div class="fg"><label>Data</label><input type="date" id="at-data" value="' + new Date().toISOString().split('T')[0] + '"></div>' +
     '<div class="fg"><label>Tipo</label><select id="at-tipo">' + tipoOpts + '</select></div>' +
-    '<div class="fg"><label>Quantidade</label><input type="number" id="at-qtd" value="1" min="1"></div>' +
-    '</div>' +
+    '<div class="fg"><label>Quantidade</label><input type="number" id="at-qtd" value="1" min="1"></div></div>' +
     '<div class="fg"><label>Observacao</label><textarea id="at-obs" rows="2" placeholder="Opcional"></textarea></div>' +
-    '<button class="btn btn-p" onclick="saveAtividade()">Salvar Atividade</button>' +
-    '</div>' +
+    '<button class="btn btn-p" onclick="saveAtividade()">Salvar Atividade</button></div>' +
     '<div class="card"><h3>Minhas Atividades</h3>' + tabela + '</div>';
 }
 
@@ -2717,11 +2133,7 @@ function delAtividade(i) {
   if (!confirm('Excluir esta atividade?')) { return; }
   var atividades = loadData('atividades');
   var a = atividades[i];
-  if (a && a._id) {
-    deleteDoc('atividades', a._id);
-    toast('Atividade excluida', 'success');
-    renderTab('atividades');
-  }
+  if (a && a._id) { deleteDoc('atividades', a._id); toast('Atividade excluida', 'success'); renderTab('atividades'); }
 }
 
 // ===== INICIALIZACAO =====
@@ -2743,9 +2155,7 @@ function delAtividade(i) {
     initSidebar();
     ['vendas', 'clientes', 'metas', 'atividades', 'usuarios'].forEach(function (k) { initListener(k); });
     syncUsuarios();
-  } catch (e) {
-    localStorage.removeItem('mc_user');
-  }
+  } catch (e) { localStorage.removeItem('mc_user'); }
 })();
 </script>
 </body>
