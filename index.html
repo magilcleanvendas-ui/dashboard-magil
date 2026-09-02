@@ -10,60 +10,57 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#f5f8fa;--card:#ffffff;--txt:#33475b;--txt2:#7c98b6;--txt3:#99acc2;--acc:#0091ae;--acc2:#00a4bd;--ok:#00a4bd;--warn:#ff7a59;--err:#f2545b;--brd:#dbe4ea;--r:10px;--s:0 1px 3px rgba(33,43,54,.08),0 4px 12px rgba(33,43,54,.06);--sbw:250px;--font:'Segoe UI',system-ui,-apple-system,sans-serif}
+:root{--bg:#f4f6f9;--card:#ffffff;--txt:#1f2a36;--txt2:#6b7a8d;--txt3:#9aa8b8;--acc:#0ea5a4;--acc2:#14b8a6;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;--brd:#e5e9ef;--r:14px;--s:0 2px 8px rgba(31,42,54,.05),0 8px 24px rgba(31,42,54,.06);--font:'Inter','Segoe UI',system-ui,-apple-system,sans-serif}
 html,body{font-family:var(--font);-webkit-font-smoothing:antialiased}
 body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
-#ls,#cs{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,#f5f8fa 0%,#eaf0f6 100%)}
-.lc{background:#fff;border:1px solid var(--brd);border-radius:14px;padding:44px 38px;box-shadow:0 12px 40px rgba(33,43,54,.12);width:400px;max-width:92%}
-.lc .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#0091ae,#00bda5);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 20px;box-shadow:0 8px 24px rgba(0,145,174,.3)}
-.lc h1{font-size:1.6rem;font-weight:700;text-align:center;letter-spacing:-.02em;color:#33475b}
+#ls,#cs{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(1200px 600px at 20% -10%,#0ea5a4 0%,transparent 50%),radial-gradient(1000px 500px at 100% 110%,#14b8a6 0%,transparent 50%),#f4f6f9}
+.lc{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border:1px solid var(--brd);border-radius:20px;padding:44px 38px;box-shadow:0 20px 60px rgba(31,42,54,.14);width:400px;max-width:92%}
+.lc .logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#0ea5a4,#14b8a6);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin:0 auto 20px;box-shadow:0 10px 30px rgba(14,165,164,.35)}
+.lc h1{font-size:1.6rem;font-weight:800;text-align:center;letter-spacing:-.02em;color:var(--txt)}
 .lc p{text-align:center;color:var(--txt2);font-size:.9rem;margin:6px 0 26px}
 .lc label{display:block;font-size:.78rem;font-weight:600;color:var(--txt2);margin-bottom:6px;padding-left:2px}
-.lc input{width:100%;padding:13px 14px;margin-bottom:16px;border:1px solid var(--brd);border-radius:8px;font-size:1rem;outline:none;background:#fff;color:var(--txt);transition:.2s}
-.lc input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(0,145,174,.15)}
-.lc button{width:100%;padding:14px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:.2s}
+.lc input{width:100%;padding:13px 14px;margin-bottom:16px;border:1px solid var(--brd);border-radius:12px;font-size:1rem;outline:none;background:#fff;color:var(--txt);transition:.2s}
+.lc input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(14,165,164,.15)}
+.lc button{width:100%;padding:14px;background:var(--acc);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
 .lc button:hover{background:var(--acc2)}
 .lc .hint{text-align:center;font-size:.72rem;color:var(--txt3);margin-top:14px;line-height:1.5}
 .cust-select{position:relative;margin-bottom:16px}
-.cust-select-trigger{width:100%;padding:13px 14px;border:1px solid var(--brd);border-radius:8px;background:#fff;color:var(--txt);font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s}
-.cust-select.open .cust-select-trigger{border-color:var(--acc);box-shadow:0 0 0 3px rgba(0,145,174,.15)}
+.cust-select-trigger{width:100%;padding:13px 14px;border:1px solid var(--brd);border-radius:12px;background:#fff;color:var(--txt);font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.2s}
+.cust-select.open .cust-select-trigger{border-color:var(--acc);box-shadow:0 0 0 3px rgba(14,165,164,.15)}
 .cust-arrow{color:var(--txt2);transition:.2s}
 .cust-select.open .cust-arrow{transform:rotate(180deg)}
-.cust-select-list{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--brd);border-radius:8px;box-shadow:0 12px 40px rgba(33,43,54,.12);margin-top:6px;max-height:300px;overflow-y:auto;z-index:50}
+.cust-select-list{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--brd);border-radius:12px;box-shadow:0 20px 60px rgba(31,42,54,.14);margin-top:6px;max-height:300px;overflow-y:auto;z-index:50}
 .cust-select.open .cust-select-list{display:block}
 .cust-option{padding:12px 14px;cursor:pointer;font-size:.95rem;color:var(--txt)}
-.cust-option:hover{background:#eaf6f8;color:var(--acc)}
+.cust-option:hover{background:#e6f7f6;color:var(--acc)}
 #app{display:none}
-#hd{background:#33475b;color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+#hd{background:rgba(255,255,255,.9);backdrop-filter:blur(12px);color:var(--txt);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--brd)}
 #hd .hl{display:flex;align-items:center;gap:12px}
-#hd .app-mark{width:30px;height:30px;border-radius:8px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
-#hd h2{font-size:1.05rem;font-weight:700;letter-spacing:-.01em;color:#fff}
+#hd .app-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#0ea5a4,#14b8a6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+#hd h2{font-size:1.05rem;font-weight:800;letter-spacing:-.01em;color:var(--txt)}
 #hd .hr{display:flex;align-items:center;gap:10px}
-.icon-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:8px 14px;font-size:.85rem;color:#fff;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
-.icon-btn:hover{background:rgba(255,255,255,.2)}
-.badge{background:rgba(255,255,255,.15);color:#fff;padding:5px 14px;border-radius:20px;font-size:.75rem;font-weight:600}
-.badge.mg{background:#ff7a59;color:#fff}
-#main{display:flex;min-height:calc(100vh - 55px)}
-.sidebar{width:var(--sbw);background:#fff;border-right:1px solid var(--brd);padding:14px 0;overflow-y:auto;position:sticky;top:55px;height:calc(100vh - 55px);flex-shrink:0;transition:width .3s,opacity .3s}
-.sidebar.collapsed{width:0;padding:0;opacity:0;overflow:hidden;border:none}
-.sidebar .nav-item{padding:10px 12px;cursor:pointer;font-size:.88rem;color:var(--txt);border-radius:6px;font-weight:500;transition:.15s;display:flex;align-items:center;gap:10px;margin:2px 8px}
-.sidebar .nav-item.act{background:#eaf6f8;color:var(--acc);font-weight:600}
-.sidebar .nav-item:hover:not(.act){background:#f5f8fa;color:var(--acc)}
-.sidebar .nav-ico{font-size:1rem;width:20px;text-align:center}
-.sidebar .nav-sep{height:1px;background:var(--brd);margin:8px 12px}
-.sidebar .nav-title{padding:8px 14px 4px;font-size:.68rem;color:var(--txt2);text-transform:uppercase;font-weight:700;letter-spacing:.06em}
-.content{flex:1;padding:28px;overflow-x:auto;max-width:1400px}
+.icon-btn{background:#f4f6f9;border:1px solid var(--brd);border-radius:10px;padding:8px 14px;font-size:.85rem;color:var(--txt);cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.icon-btn:hover{background:#e6f7f6;color:var(--acc)}
+.badge{background:#e6f7f6;color:var(--acc);padding:5px 14px;border-radius:20px;font-size:.75rem;font-weight:700}
+.badge.mg{background:linear-gradient(135deg,#0ea5a4,#14b8a6);color:#fff}
+#main{min-height:calc(100vh - 60px);padding:20px}
+/* ===== GUIAS RECOLHIVEIS (sem sidebar) ===== */
+.tabs-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.tab-pill{background:#fff;border:1px solid var(--brd);border-radius:12px;padding:10px 16px;font-size:.85rem;font-weight:600;color:var(--txt2);cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.tab-pill:hover{color:var(--acc);border-color:var(--acc)}
+.tab-pill.act{background:var(--acc);color:#fff;border-color:var(--acc);box-shadow:0 6px 16px rgba(14,165,164,.3)}
+.tab-pill .ico{font-size:1rem}
 .tc{display:none}
 .tc.act{display:block;animation:fadeIn .25s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .card{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:24px;box-shadow:var(--s);margin-bottom:20px}
 .card h3{font-size:1.02rem;font-weight:700;margin-bottom:16px;letter-spacing:-.01em;color:var(--txt)}
-.st2{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;margin-bottom:24px;color:var(--txt)}
+.st2{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:24px;color:var(--txt)}
 .dv{height:1px;background:var(--brd);margin:20px 0}
 .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:24px}
 .sc{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:20px;box-shadow:var(--s);border-top:3px solid var(--acc)}
 .sc .lb{font-size:.72rem;color:var(--txt2);margin-bottom:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-.sc .vl{font-size:1.8rem;font-weight:700;letter-spacing:-.02em;color:var(--txt)}
+.sc .vl{font-size:1.8rem;font-weight:800;letter-spacing:-.02em;color:var(--txt)}
 .sc .sb{font-size:.74rem;color:var(--txt3);margin-top:4px}
 .sc.w{border-top-color:var(--warn)}
 .sc.d{border-top-color:var(--err)}
@@ -82,142 +79,163 @@ body{background:var(--bg);color:var(--txt);font-size:15px;line-height:1.5}
 .vc .vh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--brd)}
 .vc .vn{font-weight:700;font-size:1rem;color:var(--txt)}
 .vlv{font-size:.66rem;padding:3px 12px;border-radius:980px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff}
-.vlv.junior{background:#99acc2}
+.vlv.junior{background:#9aa8b8}
 .vlv.pleno{background:var(--acc)}
 .fr{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
 .fg label{display:block;font-size:.76rem;color:var(--txt2);margin-bottom:6px;font-weight:600}
-.fg input,.fg select,.fg textarea{width:100%;padding:11px 12px;border:1px solid var(--brd);border-radius:8px;font-size:.9rem;outline:none;background:#fff;color:var(--txt);transition:.2s}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(0,145,174,.12)}
-.btn{padding:11px 22px;border:none;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.fg input,.fg select,.fg textarea{width:100%;padding:11px 12px;border:1px solid var(--brd);border-radius:10px;font-size:.9rem;outline:none;background:#fff;color:var(--txt);transition:.2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(14,165,164,.12)}
+.btn{padding:11px 22px;border:none;border-radius:10px;font-size:.88rem;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
 .btn-p{background:var(--acc);color:#fff}
 .btn-p:hover{background:var(--acc2)}
-.btn-a{background:#eaf6f8;color:var(--acc)}
-.btn-a:hover{background:#d6eef2}
+.btn-a{background:#e6f7f6;color:var(--acc)}
+.btn-a:hover{background:#cdeeea}
 .btn-d{background:#fdecec;color:var(--err)}
 .btn-d:hover{background:#fbdada}
 .btn-f{width:100%}
 .btn-s{padding:8px 16px;font-size:.8rem}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-th{background:#f5f8fa;color:var(--txt2);padding:12px 14px;text-align:left;font-weight:600;font-size:.74rem;letter-spacing:.03em;text-transform:uppercase;border-bottom:1px solid var(--brd)}
+th{background:#f4f6f9;color:var(--txt2);padding:12px 14px;text-align:left;font-weight:600;font-size:.74rem;letter-spacing:.03em;text-transform:uppercase;border-bottom:1px solid var(--brd)}
 td{padding:12px 14px;border-bottom:1px solid #eef3f7}
-tr:hover td{background:#f5f8fa}
+tr:hover td{background:#f4f6f9}
 .tcr{text-align:right;font-variant-numeric:tabular-nums}
 .tcc{text-align:center}
 #toast{position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;flex-direction:column;gap:10px}
-.tm{padding:14px 22px;border-radius:8px;color:#fff;font-size:.88rem;box-shadow:0 12px 40px rgba(33,43,54,.2);display:flex;align-items:center;gap:10px;max-width:380px;transition:.3s}
-.tm.success{background:#00a4bd}
-.tm.error{background:#f2545b}
-.tm.info{background:#33475b}
+.tm{padding:14px 22px;border-radius:12px;color:#fff;font-size:.88rem;box-shadow:0 12px 40px rgba(31,42,54,.2);display:flex;align-items:center;gap:10px;max-width:380px;transition:.3s}
+.tm.success{background:var(--ok)}
+.tm.error{background:var(--err)}
+.tm.info{background:var(--txt)}
 .cc{position:relative;height:300px;margin-top:16px}
-.pc{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:var(--card);border:1px solid var(--brd);border-radius:10px;box-shadow:0 2px 12px rgba(33,43,54,.04);margin-bottom:10px;gap:10px;flex-wrap:wrap}
-.pc .pi{display:flex;align-items:center;gap:12px}
-.pe{display:grid;grid-template-columns:1fr 90px 130px 40px;gap:8px;align-items:center;padding:12px;background:#f5f8fa;border-radius:8px;margin-bottom:8px}
-.pe select,.pe input{padding:9px 12px;border:1px solid var(--brd);border-radius:6px;font-size:.85rem;width:100%;background:#fff;color:var(--txt)}
-.pe .rb{background:var(--err);color:#fff;border:none;border-radius:6px;cursor:pointer;padding:8px;font-size:1rem}
-.st{background:#33475b;color:#fff;padding:16px;border-radius:8px;text-align:center;font-size:1.1rem;font-weight:700;margin-top:12px;letter-spacing:-.01em}
+.pe{display:grid;grid-template-columns:1fr 90px 130px 40px;gap:8px;align-items:center;padding:12px;background:#f4f6f9;border-radius:10px;margin-bottom:8px}
+.pe select,.pe input{padding:9px 12px;border:1px solid var(--brd);border-radius:8px;font-size:.85rem;width:100%;background:#fff;color:var(--txt)}
+.pe .rb{background:var(--err);color:#fff;border:none;border-radius:8px;cursor:pointer;padding:8px;font-size:1rem}
+.st{background:var(--txt);color:#fff;padding:16px;border-radius:10px;text-align:center;font-size:1.1rem;font-weight:700;margin-top:12px;letter-spacing:-.01em}
 .es{text-align:center;padding:40px;color:var(--txt3)}
 .es .ic{font-size:2.6rem;margin-bottom:12px;opacity:.35}
 .search-box{position:relative;margin-bottom:18px}
-.search-box input{width:100%;padding:14px 18px 14px 46px;border:1px solid var(--brd);border-radius:10px;font-size:.95rem;outline:none;background:#fff;color:var(--txt);box-shadow:0 2px 12px rgba(33,43,54,.04);transition:.2s}
-.search-box input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(0,145,174,.12)}
+.search-box input{width:100%;padding:14px 18px 14px 46px;border:1px solid var(--brd);border-radius:12px;font-size:.95rem;outline:none;background:#fff;color:var(--txt);box-shadow:0 2px 12px rgba(31,42,54,.04);transition:.2s}
+.search-box input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(14,165,164,.12)}
 .search-box .ico{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:1.1rem;pointer-events:none}
 .tipo-toggle{display:flex;gap:4px;background:#eef3f7;padding:4px;border-radius:980px;margin-bottom:18px}
 .tipo-toggle button{flex:1;padding:10px 16px;border:none;background:transparent;color:var(--txt2);font-size:.86rem;font-weight:600;cursor:pointer;border-radius:980px;transition:.2s}
-.tipo-toggle button.act{background:#fff;color:var(--acc);box-shadow:0 2px 8px rgba(33,43,54,.1)}
+.tipo-toggle button.act{background:#fff;color:var(--acc);box-shadow:0 2px 8px rgba(31,42,54,.1)}
 .tipo-badge{display:inline-block;padding:3px 12px;border-radius:980px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
-.tipo-badge.venda{background:#eaf6f8;color:var(--acc)}
+.tipo-badge.venda{background:#e6f7f6;color:var(--acc)}
 .tipo-badge.bonificacao{background:#fff3e8;color:#b25e00}
-.weekly-bar{background:linear-gradient(135deg,#33475b,#425b76);color:#fff;border-radius:var(--r);padding:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.weekly-bar{background:linear-gradient(135deg,#0ea5a4,#14b8a6);color:#fff;border-radius:var(--r);padding:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .weekly-bar .wb-label{font-size:.7rem;opacity:.6;text-transform:uppercase;font-weight:600;letter-spacing:.05em}
 .weekly-bar .wb-value{font-size:1.9rem;font-weight:700;letter-spacing:-.02em}
 .weekly-bar .wb-progress{flex:1;min-width:200px;height:8px;background:rgba(255,255,255,.2);border-radius:980px;overflow:hidden}
-.weekly-bar .wb-progress-fill{height:100%;background:#00a4bd;border-radius:980px;transition:width .8s ease}
+.weekly-bar .wb-progress-fill{height:100%;background:#fff;border-radius:980px;transition:width .8s ease}
 .weekly-bar .wb-pct{font-size:1.2rem;font-weight:700}
-.com-hero{background:linear-gradient(135deg,#33475b,#425b76);color:#fff;border-radius:var(--r);padding:28px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.com-hero{background:linear-gradient(135deg,#0ea5a4,#14b8a6);color:#fff;border-radius:var(--r);padding:28px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
 .com-hero .com-name{font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
 .com-hero .com-nivel{font-size:.85rem;opacity:.65;margin-top:4px}
 .com-hero .com-total{font-size:2.6rem;font-weight:800;letter-spacing:-.02em}
 .com-hero .com-total-label{font-size:.7rem;opacity:.6;text-transform:uppercase;letter-spacing:.05em}
 .com-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px}
-.com-stat{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:18px;text-align:center}
+.com-stat{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:18px;text-align:center}
 .com-stat .com-stat-label{font-size:.68rem;color:var(--txt2);text-transform:uppercase;font-weight:600;margin-bottom:6px;letter-spacing:.04em}
 .com-stat .com-stat-value{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
 .com-stat .com-stat-sub{font-size:.7rem;color:var(--txt3);margin-top:4px}
 .com-stat.highlight{border-top:3px solid var(--ok)}
 .com-stat.highlight .com-stat-value{color:var(--acc)}
-.com-faixa-table tr.ativa td{background:#eaf6f8;font-weight:700}
-.com-accel{background:#f5f8fa;border-radius:10px;padding:22px;margin-top:16px}
+.com-faixa-table tr.ativa td{background:#e6f7f6;font-weight:700}
+.com-accel{background:#f4f6f9;border-radius:12px;padding:22px;margin-top:16px}
 .com-accel-title{font-size:1rem;font-weight:700;margin-bottom:8px}
 .com-accel-desc{font-size:.8rem;color:var(--txt2);margin-bottom:14px;line-height:1.6}
 .com-week-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.com-week{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:.15s}
+.com-week{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:.15s}
 .com-week:hover{border-color:var(--acc)}
-.com-week.checked{background:#eaf6f8;border-color:var(--ok)}
+.com-week.checked{background:#e6f7f6;border-color:var(--ok)}
 .com-week .com-week-num{font-size:.66rem;color:var(--txt2);text-transform:uppercase;font-weight:600;letter-spacing:.04em;margin-bottom:6px}
 .com-week .com-week-icon{font-size:1.7rem}
 .com-week .com-week-bonus{font-size:.74rem;font-weight:700;margin-top:6px;color:var(--acc)}
-.com-week.checked .com-week-bonus{color:var(--acc)}
-.com-result{background:#eaf6f8;border:1px solid var(--acc);border-radius:10px;padding:28px;margin-top:20px;text-align:center}
+.com-result{background:#e6f7f6;border:1px solid var(--acc);border-radius:12px;padding:28px;margin-top:20px;text-align:center}
 .com-result .com-result-label{font-size:.72rem;color:var(--txt2);text-transform:uppercase;font-weight:600;letter-spacing:.05em}
 .com-result .com-result-value{font-size:3rem;font-weight:800;color:var(--acc);margin:8px 0;letter-spacing:-.02em}
 .com-result .com-result-detail{font-size:.82rem;color:var(--txt2);margin-top:8px}
 .com-result .com-result-badge{display:inline-block;background:var(--acc);color:#fff;padding:4px 16px;border-radius:980px;font-size:.74rem;font-weight:600;margin-top:12px}
-.pred-card{background:#eaf6f8;border:1px solid var(--acc);border-radius:10px;padding:22px;margin-top:16px}
+.pred-card{background:#e6f7f6;border:1px solid var(--acc);border-radius:12px;padding:22px;margin-top:16px}
 .pred-card h4{color:var(--acc);margin-bottom:12px;font-weight:700}
 .pred-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px}
-.pred-item{background:#fff;padding:14px;border-radius:8px;text-align:center;border:1px solid var(--brd)}
+.pred-item{background:#fff;padding:14px;border-radius:10px;text-align:center;border:1px solid var(--brd)}
 .pred-item .pred-label{font-size:.7rem;color:var(--txt2);text-transform:uppercase;font-weight:600;margin-bottom:4px;letter-spacing:.04em}
 .pred-item .pred-value{font-size:1.15rem;font-weight:700;color:var(--txt)}
-.client-info{background:#eaf6f8;border-radius:10px;padding:14px;margin-bottom:14px;border-left:4px solid var(--acc)}
+.client-info{background:#e6f7f6;border-radius:12px;padding:14px;margin-bottom:14px;border-left:4px solid var(--acc)}
 .client-info .ci-label{font-size:.68rem;color:var(--txt2);text-transform:uppercase;font-weight:700;letter-spacing:.04em}
 .client-info .ci-value{font-size:.92rem;color:var(--txt);font-weight:600;margin-top:2px}
-.mp-row{display:grid;grid-template-columns:1fr 110px 40px;gap:8px;align-items:center;padding:10px;background:#f5f8fa;border-radius:8px;margin-bottom:8px}
-.mp-row select,.mp-row input{padding:9px 12px;border:1px solid var(--brd);border-radius:6px;font-size:.85rem;width:100%;background:#fff;color:var(--txt)}
-.mp-row .rb{background:var(--err);color:#fff;border:none;border-radius:6px;cursor:pointer;padding:8px}
+.mp-row{display:grid;grid-template-columns:1fr 110px 40px;gap:8px;align-items:center;padding:10px;background:#f4f6f9;border-radius:10px;margin-bottom:8px}
+.mp-row select,.mp-row input{padding:9px 12px;border:1px solid var(--brd);border-radius:8px;font-size:.85rem;width:100%;background:#fff;color:var(--txt)}
+.mp-row .rb{background:var(--err);color:#fff;border:none;border-radius:8px;cursor:pointer;padding:8px}
 .filtros,.date-filter{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:flex-end}
 .filtros .fg,.date-filter .fg{min-width:150px}
-.inp-sm{padding:9px 12px;border:1px solid var(--brd);border-radius:6px;font-size:.85rem;background:#fff;color:var(--txt);outline:none}
+.inp-sm{padding:9px 12px;border:1px solid var(--brd);border-radius:8px;font-size:.85rem;background:#fff;color:var(--txt);outline:none}
 .inp-sm:focus{border-color:var(--acc)}
 .action-btns{display:flex;gap:6px;flex-wrap:wrap}
-.edit-btn{background:#eaf6f8;color:var(--acc);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
-.del-btn{background:#fdecec;color:var(--err);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
+.edit-btn{background:#e6f7f6;color:var(--acc);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
+.del-btn{background:#fdecec;color:var(--err);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.76rem;font-weight:600}
+/* ===== SELECAO EM MASSA ===== */
+.bulk-bar{display:flex;align-items:center;gap:10px;background:#e6f7f6;border:1px solid var(--acc);border-radius:12px;padding:12px 16px;margin-bottom:14px;flex-wrap:wrap}
+.bulk-bar .bb-count{font-weight:700;color:var(--acc)}
+.bulk-bar .bb-actions{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.chk{width:18px;height:18px;accent-color:var(--acc);cursor:pointer}
+tr.sel td{background:#e6f7f6}
 /* ===== NIVEL DO CLIENTE ===== */
 .nivel-badge{display:inline-block;padding:3px 12px;border-radius:980px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#fff}
 .nivel-badge.ouro{background:linear-gradient(135deg,#f5b301,#d48806);box-shadow:0 1px 4px rgba(212,136,6,.4)}
 .nivel-badge.prata{background:linear-gradient(135deg,#b0bec5,#90a4ae);box-shadow:0 1px 4px rgba(144,164,174,.4)}
 .nivel-badge.bronze{background:linear-gradient(135deg,#cd7f32,#a05a1c);box-shadow:0 1px 4px rgba(160,90,28,.4)}
 .nivel-badge.sem{background:#e0e0e0;color:#757575}
-/* ===== MODO ESCURO (tema HubSpot) ===== */
-body.dark{background:#1f2a36;color:#e6edf3}
-body.dark .card,body.dark .sc,body.dark .vc,body.dark .pc,body.dark .com-stat,body.dark .lc{background:#2a3744;border-color:#3a4a5a;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-body.dark .sidebar{background:#232f3b;border-right-color:#3a4a5a}
-body.dark .sidebar .nav-item{color:#c7d2dc}
-body.dark .sidebar .nav-item.act{background:#1e3a44;color:#00a4bd}
-body.dark .sidebar .nav-item:hover:not(.act){background:#2a3744;color:#00a4bd}
-body.dark .sidebar .nav-title{color:#7c98b6}
-body.dark th{background:#232f3b;color:#9db0c0;border-bottom-color:#3a4a5a}
-body.dark td{border-bottom-color:#33414f}
-body.dark tr:hover td{background:#2a3744}
-body.dark .fg input,body.dark .fg select,body.dark .fg textarea,body.dark .inp-sm,body.dark .search-box input,body.dark .pe select,body.dark .pe input,body.dark .mp-row select,body.dark .mp-row input,body.dark .cust-select-trigger{background:#232f3b;border-color:#3a4a5a;color:#e6edf3}
+/* ===== CAIXA "EDITADO POR" ===== */
+.edit-note{display:flex;align-items:center;gap:8px;background:#e6f7f6;border:1px solid var(--acc);border-radius:10px;padding:10px 14px;font-size:.8rem;color:var(--acc);font-weight:600;margin-bottom:14px}
+.edit-note .ico{font-size:1rem}
+/* ===== METRICAS ===== */
+.metrica-dica{background:#fff8e6;border:1px solid #f5c542;border-radius:10px;padding:12px 16px;font-size:.82rem;color:#8a6d1a;margin-bottom:14px;line-height:1.6}
+.metrica-dica strong{color:#6b5200}
+.metrica-grupo{margin-bottom:24px}
+.metrica-grupo-titulo{font-size:1.05rem;font-weight:800;color:var(--txt);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.metrica-grupo-desc{font-size:.8rem;color:var(--txt2);margin-bottom:14px}
+.rfm-badge{display:inline-block;padding:3px 12px;border-radius:980px;font-size:.7rem;font-weight:700;color:#fff}
+.rfm-badge.campeao{background:linear-gradient(135deg,#f5b301,#d48806)}
+.rfm-badge.leal{background:linear-gradient(135deg,#0ea5a4,#14b8a6)}
+.rfm-badge.promissor{background:linear-gradient(135deg,#10b981,#34d399)}
+.rfm-badge.risco{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+.rfm-badge.perdido{background:linear-gradient(135deg,#ef4444,#f87171)}
+/* ===== MODO ESCURO ===== */
+body.dark{background:#141b24;color:#e6edf3}
+body.dark .card,body.dark .sc,body.dark .vc,body.dark .com-stat,body.dark .lc{background:#1d2733;border-color:#2c3a49;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+body.dark #hd{background:rgba(20,27,36,.9);border-bottom-color:#2c3a49}
+body.dark .tab-pill{background:#1d2733;border-color:#2c3a49;color:#9db0c0}
+body.dark .tab-pill.act{background:var(--acc);color:#fff;border-color:var(--acc)}
+body.dark th{background:#141b24;color:#9db0c0;border-bottom-color:#2c3a49}
+body.dark td{border-bottom-color:#24303d}
+body.dark tr:hover td{background:#1d2733}
+body.dark tr.sel td{background:#1d3a3a}
+body.dark .fg input,body.dark .fg select,body.dark .fg textarea,body.dark .inp-sm,body.dark .search-box input,body.dark .pe select,body.dark .pe input,body.dark .mp-row select,body.dark .mp-row input,body.dark .cust-select-trigger{background:#141b24;border-color:#2c3a49;color:#e6edf3}
 body.dark .st2,body.dark .card h3,body.dark .vc .vn,body.dark .sc .vl,body.dark .com-stat .com-stat-value{color:#e6edf3}
 body.dark .sc .lb,body.dark .fg label,body.dark .pw .pl span:first-child,body.dark .com-stat .com-stat-label{color:#9db0c0}
-body.dark .pb,body.dark .tipo-toggle,body.dark .com-accel,body.dark .pe,body.dark .mp-row{background:#232f3b}
-body.dark .weekly-bar,body.dark .com-hero,body.dark .st{background:linear-gradient(135deg,#1e3a44,#2a4a5a)}
-body.dark .btn-a{background:#1e3a44;color:#00a4bd}
-body.dark .btn-d{background:#3a1f22;color:#f2545b}
-body.dark .tipo-toggle button.act{background:#2a3744;color:#00a4bd}
+body.dark .pb,body.dark .tipo-toggle,body.dark .com-accel,body.dark .pe,body.dark .mp-row{background:#141b24}
+body.dark .btn-a{background:#1d3a3a;color:#14b8a6}
+body.dark .btn-d{background:#3a1f22;color:#ef4444}
+body.dark .tipo-toggle button.act{background:#1d2733;color:#14b8a6}
 body.dark .es{color:#7c98b6}
-body.dark .client-info,body.dark .pred-card,body.dark .com-result{background:#1e3a44;border-color:#00a4bd}
-body.dark .pred-item{background:#232f3b;border-color:#3a4a5a}
-body.dark .com-faixa-table tr.ativa td{background:#1e3a44}
-body.dark .com-week{background:#232f3b;border-color:#3a4a5a}
-body.dark .com-week.checked{background:#1e3a44;border-color:#00a4bd}
-body.dark .search-box .ico{color:#7c98b6}
-body.dark .tipo-badge.venda{background:#1e3a44;color:#00a4bd}
+body.dark .client-info,body.dark .pred-card,body.dark .com-result{background:#1d3a3a;border-color:#14b8a6}
+body.dark .pred-item{background:#141b24;border-color:#2c3a49}
+body.dark .com-faixa-table tr.ativa td{background:#1d3a3a}
+body.dark .com-week{background:#141b24;border-color:#2c3a49}
+body.dark .com-week.checked{background:#1d3a3a;border-color:#14b8a6}
+body.dark .tipo-badge.venda{background:#1d3a3a;color:#14b8a6}
 body.dark .tipo-badge.bonificacao{background:#3a2a1e;color:#ffb300}
-body.dark .nivel-badge.sem{background:#3a4a5a;color:#9db0c0}
-@media(max-width:768px){.sidebar{display:none}.content{padding:18px}.sg{grid-template-columns:repeat(2,1fr)}.vg{grid-template-columns:1fr}.fr{grid-template-columns:1fr}.pe{grid-template-columns:1fr;gap:6px}.pc{flex-direction:column;gap:10px;align-items:stretch}.filtros,.date-filter{flex-direction:column}.com-week-grid{grid-template-columns:repeat(2,1fr)}#hd{padding:10px 16px}}
-@media print{.sidebar{display:none}.content{padding:0}.card{box-shadow:none}.icon-btn,.sidebar-toggle{display:none}}
+body.dark .nivel-badge.sem{background:#2c3a49;color:#9db0c0}
+body.dark .edit-note{background:#1d3a3a;border-color:#14b8a6;color:#14b8a6}
+body.dark .bulk-bar{background:#1d3a3a;border-color:#14b8a6}
+body.dark .metrica-dica{background:#3a2f1e;border-color:#f5c542;color:#ffd54f}
+body.dark .metrica-dica strong{color:#ffd54f}
+body.dark .metrica-grupo-titulo{color:#e6edf3}
+body.dark .metrica-grupo-desc{color:#9db0c0}
+@media(max-width:768px){#main{padding:14px}.sg{grid-template-columns:repeat(2,1fr)}.vg{grid-template-columns:1fr}.fr{grid-template-columns:1fr}.pe{grid-template-columns:1fr;gap:6px}.filtros,.date-filter{flex-direction:column}.com-week-grid{grid-template-columns:repeat(2,1fr)}#hd{padding:10px 16px}.tabs-wrap{gap:6px}.tab-pill{padding:8px 12px;font-size:.8rem}.bulk-bar{flex-direction:column;align-items:flex-start}.bulk-bar .bb-actions{margin-left:0}}
+@media print{.content{padding:0}.card{box-shadow:none}.icon-btn,.tabs-wrap{display:none}}
 </style>
 </head>
 <body>
@@ -237,7 +255,7 @@ body.dark .nivel-badge.sem{background:#3a4a5a;color:#9db0c0}
     <label>Senha</label>
     <input type="password" id="lp" placeholder="Sua senha" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()">Entrar</button>
-    <div class="hint">Senhas definidas pela gerente Mariana<br>na tela "Gerenciar Vendedores"</div>
+    <div class="hint">Perfis criados pela gerente Mariana<br>na tela "Gerenciar Perfis"</div>
   </div>
 </div>
 <div id="cs" style="display:none">
@@ -256,7 +274,6 @@ body.dark .nivel-badge.sem{background:#3a4a5a;color:#9db0c0}
 <div id="app">
   <div id="hd">
     <div class="hl">
-      <button class="icon-btn sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="app-mark">MC</div>
       <h2>Magil Clean</h2>
     </div>
@@ -267,7 +284,7 @@ body.dark .nivel-badge.sem{background:#3a4a5a;color:#9db0c0}
     </div>
   </div>
   <div id="main">
-    <div class="sidebar" id="sb"></div>
+    <div class="tabs-wrap" id="tabs"></div>
     <div class="content" id="mc"></div>
   </div>
 </div>
@@ -288,19 +305,24 @@ firebase.firestore().enablePersistence({ synchronizeTabs: true }).catch(function
 });
 
 // ===== USUARIOS =====
+// SOMENTE a gerente Mariana. Ela cria todos os perfis do zero (vendedores e gestores).
 var USU = [
-  { id: 'gerente', nome: 'Mariana', nivel: 'Gerente', isM: true },
-  { id: 'v1', nome: 'Vendedor 1', nivel: 'Junior', isM: false },
-  { id: 'v2', nome: 'Vendedor 2', nivel: 'Junior', isM: false },
-  { id: 'v3', nome: 'Vendedor 3', nivel: 'Junior', isM: false },
-  { id: 'v4', nome: 'Vendedor 4', nivel: 'Pleno', isM: false },
-  { id: 'v5', nome: 'Vendedor 5', nivel: 'Pleno', isM: false },
-  { id: 'v6', nome: 'Vendedor 6', nivel: 'Junior', isM: false },
-  { id: 'v7', nome: 'Vendedor 7', nivel: 'Pleno', isM: false },
-  { id: 'v8', nome: 'Vendedor 8', nivel: 'Junior', isM: false },
-  { id: 'v9', nome: 'Vendedor 9', nivel: 'Pleno', isM: false },
-  { id: 'v10', nome: 'Vendedor 10', nivel: 'Junior', isM: false }
+  { id: 'gerente', nome: 'Mariana', nivel: 'Gerente', isM: true, permissao: 'admin' }
 ];
+
+// ===== PERMISSOES =====
+// 'padrao' = permissao de vendedor | 'admin' = permissao de gerente/gestor
+function getPermissao(id) {
+  var us = cacheDados['usuarios'] || [];
+  var u = us.find(function (x) { return x.id === id; });
+  if (u && u.permissao) { return String(u.permissao); }
+  var usu = USU.find(function (x) { return x.id === id; });
+  return usu ? (usu.permissao || 'padrao') : 'padrao';
+}
+
+function isAdmin(id) {
+  return getPermissao(id) === 'admin';
+}
 
 // ===== VENDEDORES EXCLUIDOS (persistidos no Firestore - compartilhado) =====
 var DELETADOS = [];
@@ -385,9 +407,10 @@ var COM = {
 
 // ===== CONSTANTES =====
 var ACELERADOR_POR_SEMANA = 0.05;
+var DIAS_RODIZIO = 90; // rodizio somente para clientes sem compra ha mais de 90 dias
 var MESES = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 var SEGMENTOS = ['Lojista', 'Industria', 'E-commerce', 'Lavador de caminhao', 'Frota de transporte', 'Auto Pecas', 'Loja de Limpeza', 'Concessionaria', 'Loja de tintas', 'Materiais de construcao', 'Transportadora', 'Distribuidor', 'Agro', 'Ambulante', 'Licitacao', 'Associacao'];
-var CORES = ['#0091ae', '#00a4bd', '#00bda5', '#ff7a59', '#f2545b', '#99acc2', '#7c98b6', '#33475b', '#ffd54f', '#ff8f00', '#5e5ce6', '#64d2ff', '#ac8e68', '#8e8e93', '#ff375f', '#0a84ff'];
+var CORES = ['#0ea5a4', '#14b8a6', '#10b981', '#f59e0b', '#ef4444', '#9aa8b8', '#6b7a8d', '#1f2a36', '#ffd54f', '#ff8f00', '#5e5ce6', '#64d2ff', '#ac8e68', '#8e8e93', '#ff375f', '#0a84ff'];
 var UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 
 // ===== ESTADO GLOBAL =====
@@ -397,11 +420,12 @@ var editingMetaIdx = -1;
 var editingVendaIdx = -1;
 var cacheDados = {};
 var listeners = {};
+var selecionados = {}; // clientes selecionados em massa (chave = cod)
+var _mtDados = null; // guarda os dados calculados das metricas para exportacao
 
 // ===== SENHA PADRAO GERADA DINAMICAMENTE (nao aparece no codigo) =====
 function senhaPadrao() {
-  var base = 'mc' + String(new Date().getFullYear());
-  return base;
+  return 'mc' + String(new Date().getFullYear());
 }
 
 // ===== FUNCOES DE DADOS =====
@@ -469,8 +493,9 @@ function initListener(k) {
           if (usu) {
             usu.nome = String(u.nome || usu.nome);
             usu.nivel = String(u.nivel || usu.nivel);
+            usu.permissao = String(u.permissao || usu.permissao || 'padrao');
           } else if (DELETADOS.indexOf(u.id) === -1) {
-            USU.push({ id: u.id, nome: String(u.nome || u.id), nivel: String(u.nivel || 'Junior'), isM: u.id === 'gerente' });
+            USU.push({ id: u.id, nome: String(u.nome || u.id), nivel: String(u.nivel || 'Junior'), isM: u.id === 'gerente', permissao: String(u.permissao || 'padrao') });
           }
         }
       });
@@ -536,13 +561,17 @@ function getVendedores() {
   return USU.filter(function (u) { return !u.isM; });
 }
 
+function getGestores() {
+  return USU.filter(function (u) { return !u.isM && isAdmin(u.id); });
+}
+
 function syncUsuarios() {
   USU.forEach(function (u) {
     if (DELETADOS.indexOf(u.id) !== -1) { return; }
     db.collection('usuarios').doc(u.id).get().then(function (doc) {
       if (!doc.exists) {
         db.collection('usuarios').doc(u.id).set({
-          id: u.id, nome: u.nome, nivel: u.nivel, senha: senhaPadrao()
+          id: u.id, nome: u.nome, nivel: u.nivel, senha: senhaPadrao(), permissao: u.permissao || 'padrao'
         }).catch(function (e) { console.log('Sync user error:', e); });
       }
     }).catch(function (e) { console.log('Sync check error:', e); });
@@ -589,6 +618,27 @@ function getMinhasVendas() {
   return vendas.filter(function (v) { return v.vendedor === currentUser.id; });
 }
 
+// ===== RODIZIO 90 DIAS =====
+function getUltimaCompraCliente(cod) {
+  var vendas = loadData('vendas');
+  var vCli = vendas.filter(function (v) {
+    var m = v.cliente.match(/COD\s+(\S+)/);
+    return m && m[1] === String(cod).trim();
+  });
+  if (!vCli.length) { return null; }
+  vCli.sort(function (a, b) { return b.data.localeCompare(a.data); });
+  return vCli[0].data;
+}
+
+function clienteElegivelRodizio(cod) {
+  var ultima = getUltimaCompraCliente(cod);
+  if (!ultima) { return true; }
+  var hoje = new Date();
+  var dUlt = new Date(ultima);
+  var diff = Math.floor((hoje.getTime() - dUlt.getTime()) / (1000 * 60 * 60 * 24));
+  return diff > DIAS_RODIZIO;
+}
+
 function toast(msg, type) {
   var t = document.createElement('div');
   t.className = 'tm ' + (type || 'info');
@@ -610,9 +660,13 @@ function progressBar(label, atual, meta, pct) {
   return '<div class="pw"><div class="pl"><span>' + label + '</span><span>' + da + ' / ' + dm + ' (' + Math.round(pct) + '%)</span></div><div class="pb"><div class="pf ' + cls + '" style="width:' + Math.max(2, Math.min(100, pct)) + '%"></div></div></div>';
 }
 
+// ===== CAIXA "EDITADO POR" =====
+function editNoteHTML() {
+  if (!currentUser) { return ''; }
+  return '<div class="edit-note"><span class="ico">✏️</span> Editado por ' + getNome(currentUser.id) + '</div>';
+}
+
 // ===== SISTEMA DE FILTRO DE PERIODO REUTILIZAVEL =====
-// Gera o HTML do seletor de periodo (Semanal/Mensal/Anual/Entre Periodos/Todos)
-// prefix: identificador unico da tela (ex: 'vg', 'mv', 'ra', 'vv', 've', 'vs', 'cr', 'rel')
 function filtroPeriodoHTML(prefix) {
   return '<div class="fg"><label>Periodo</label><select id="' + prefix + '-periodo" onchange="onChangePeriodo(\'' + prefix + '\')">' +
     '<option value="todos">Todos</option>' +
@@ -626,7 +680,6 @@ function filtroPeriodoHTML(prefix) {
     '<div class="fg" id="' + prefix + '-filtro-fim" style="display:none"><label>Data Fim</label><input type="date" id="' + prefix + '-fim" onchange="aplicarFiltroPeriodo(\'' + prefix + '\')"></div>';
 }
 
-// Mostra/esconde os campos conforme o periodo selecionado
 function onChangePeriodo(prefix) {
   var p = document.getElementById(prefix + '-periodo').value;
   var fAnual = document.getElementById(prefix + '-filtro-anual');
@@ -640,7 +693,6 @@ function onChangePeriodo(prefix) {
   aplicarFiltroPeriodo(prefix);
 }
 
-// Aplica o filtro de periodo sobre um array de registros com campo 'data' (YYYY-MM-DD)
 function aplicarFiltroPeriodo(prefix) {
   var p = document.getElementById(prefix + '-periodo').value;
   var ini = document.getElementById(prefix + '-ini') ? document.getElementById(prefix + '-ini').value : '';
@@ -651,7 +703,6 @@ function aplicarFiltroPeriodo(prefix) {
   if (typeof fn === 'function') { fn(p, ini, fim, mes, ano); }
 }
 
-// Limpa os campos de periodo de uma tela
 function limparFiltroPeriodo(prefix) {
   var p = document.getElementById(prefix + '-periodo');
   if (p) { p.value = 'todos'; }
@@ -662,7 +713,7 @@ function limparFiltroPeriodo(prefix) {
   onChangePeriodo(prefix);
 }
 
-// ===== DROPDOWN DE LOGIN (nomes salvos + fecha ao selecionar) =====
+// ===== DROPDOWN DE LOGIN =====
 function updateLoginNomes() {
   var list = document.getElementById('lu-list');
   if (!list) { return; }
@@ -671,7 +722,7 @@ function updateLoginNomes() {
     var nm = getNome(u.id);
     var opt = document.createElement('div');
     opt.className = 'cust-option';
-    opt.textContent = u.isM ? nm + ' (Gerente)' : nm;
+    opt.textContent = u.isM ? nm + ' (Gerente)' : nm + (isAdmin(u.id) ? ' (Gestor)' : '');
     opt.onclick = function (e) {
       e.stopPropagation();
       document.getElementById('lu-wrap').dataset.value = u.id;
@@ -747,7 +798,7 @@ function entrarNoApp(sel) {
   var b = document.getElementById('ub');
   b.textContent = getNome(user.id) + ' - ' + getNivel(user.id);
   b.className = 'badge' + (user.isM ? ' mg' : '');
-  initSidebar();
+  initTabs();
   ['vendas', 'clientes', 'metas', 'atividades', 'usuarios'].forEach(function (k) { initListener(k); });
   syncUsuarios();
   toast('Bem-vindo, ' + getNome(user.id) + '!', 'success');
@@ -757,11 +808,6 @@ function doLogout() {
   currentUser = null;
   localStorage.removeItem('mc_user');
   location.reload();
-}
-
-function toggleSidebar() {
-  var sb = document.getElementById('sb');
-  sb.classList.toggle('collapsed');
 }
 
 // ===== MODO ESCURO =====
@@ -814,7 +860,7 @@ function exportCSV(data, filename) {
 
 function exportPDF(titulo, htmlContent) {
   var w = window.open('', '', 'width=900,height=700');
-  w.document.write('<html><head><title>' + titulo + '</title><style>body{font-family:Segoe UI,sans-serif;padding:40px;color:#33475b}h1{color:#0091ae;font-size:1.8rem;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin:10px 0}th{background:#0091ae;color:#fff;padding:10px;text-align:left}td{padding:8px 10px;border-bottom:1px solid #eee}</style></head><body><h1>' + titulo + '</h1>' + htmlContent + '</body></html>');
+  w.document.write('<html><head><title>' + titulo + '</title><style>body{font-family:Segoe UI,sans-serif;padding:40px;color:#1f2a36}h1{color:#0ea5a4;font-size:1.8rem;margin-bottom:20px}h2{color:#0ea5a4;margin-top:24px}h3{color:#1f2a36;margin-top:20px}table{width:100%;border-collapse:collapse;margin:10px 0}th{background:#0ea5a4;color:#fff;padding:10px;text-align:left}td{padding:8px 10px;border-bottom:1px solid #eee}</style></head><body><h1>' + titulo + '</h1>' + htmlContent + '</body></html>');
   w.document.close();
   w.print();
 }
@@ -880,41 +926,39 @@ function renderProdutosDiscriminados() {
     var pp = metaProd > 0 ? Math.round((prodCount[p] / metaProd) * 100) : 0;
     html += '<tr><td>' + p + '</td><td class="tcc">' + prodCount[p] + '</td><td class="tcc">' + pp + '%</td></tr>';
   });
-  html += '</tbody><tfoot><tr style="font-weight:700;background:#eaf6f8"><td>Total</td><td class="tcc">' + totalVendido + '</td><td class="tcc">' + Math.round(pct) + '%</td></tr></tfoot></table></div>';
+  html += '</tbody><tfoot><tr style="font-weight:700;background:#e6f7f6"><td>Total</td><td class="tcc">' + totalVendido + '</td><td class="tcc">' + Math.round(pct) + '%</td></tr></tfoot></table></div>';
   return html;
 }
 
-// ===== SIDEBAR =====
-function initSidebar() {
-  var sb = document.getElementById('sb');
+// ===== GUIAS RECOLHIVEIS (sem sidebar) =====
+function initTabs() {
+  var tabs = document.getElementById('tabs');
   var mc = document.getElementById('mc');
-  sb.innerHTML = '';
+  tabs.innerHTML = '';
   mc.innerHTML = '';
   var items;
-  if (currentUser.isM) {
+  if (currentUser.isM || isAdmin(currentUser.id)) {
+    // Gerente e Gestores (admin) veem os paineis de gestao
     items = [
-      { sep: 'Gestao' },
       { id: 'overview', label: 'Visao Geral', ico: '📊' },
       { id: 'metas', label: 'Definir Metas', ico: '🎯' },
-      { sep: 'Cadastros' },
-      { id: 'vendedores', label: 'Gerenciar Vendedores', ico: '👥' },
+      { id: 'perfis', label: 'Gerenciar Perfis', ico: '👥' },
       { id: 'clientes', label: 'Clientes', ico: '🏢' },
-      { id: 'rodizio', label: 'Rodizio (3 Meses)', ico: '🔄' },
+      { id: 'rodizio', label: 'Rodizio (90 Dias)', ico: '🔄' },
       { id: 'vendas', label: 'Vendas', ico: '💰' },
-      { sep: 'Analise' },
       { id: 'vendvend', label: 'Vend. por Vendedor', ico: '📈' },
       { id: 'vendestado', label: 'Vend. por Estado', ico: '🗺' },
       { id: 'vendseg', label: 'Vend. por Segmento', ico: '📦' },
       { id: 'cruzamentos', label: 'Cruzamentos', ico: '🔍' },
       { id: 'analisecli', label: 'Analise de Clientes', ico: '🔎' },
-      { sep: 'Relatorios' },
+      { id: 'metricas', label: 'Metricas de Clientes', ico: '📐' },
       { id: 'relatividades', label: 'Rel. Atividades', ico: '📋' },
       { id: 'relatorios', label: 'Relatorios Gerais', ico: '📑' },
-      { sep: 'Config' },
       { id: 'comissao', label: 'Comissao', ico: '🧮' },
       { id: 'catalogo', label: 'Catalogo', ico: '📚' }
     ];
   } else {
+    // Vendedores (permissao padrao)
     items = [
       { id: 'minhas', label: 'Minhas Metas', ico: '🎯' },
       { id: 'venda', label: 'Registrar Venda', ico: '💰' },
@@ -926,25 +970,18 @@ function initSidebar() {
   }
   var firstId = '';
   items.forEach(function (it) {
-    if (it.sep) {
-      var title = document.createElement('div');
-      title.className = 'nav-title';
-      title.textContent = it.sep;
-      sb.appendChild(title);
-      return;
-    }
     if (!firstId) { firstId = it.id; }
-    var el = document.createElement('div');
-    el.className = 'nav-item' + (it.id === firstId ? ' act' : '');
-    el.innerHTML = '<span class="nav-ico">' + (it.ico || '') + '</span> ' + it.label;
-    el.onclick = function () {
-      document.querySelectorAll('.nav-item').forEach(function (x) { x.classList.remove('act'); });
+    var pill = document.createElement('div');
+    pill.className = 'tab-pill' + (it.id === firstId ? ' act' : '');
+    pill.innerHTML = '<span class="ico">' + (it.ico || '') + '</span> ' + it.label;
+    pill.onclick = function () {
+      document.querySelectorAll('.tab-pill').forEach(function (x) { x.classList.remove('act'); });
       document.querySelectorAll('.tc').forEach(function (x) { x.classList.remove('act'); });
-      el.classList.add('act');
+      pill.classList.add('act');
       document.getElementById('tc-' + it.id).classList.add('act');
       renderTab(it.id);
     };
-    sb.appendChild(el);
+    tabs.appendChild(pill);
     var tc = document.createElement('div');
     tc.className = 'tc' + (it.id === firstId ? ' act' : '');
     tc.id = 'tc-' + it.id;
@@ -958,7 +995,7 @@ function renderTab(id) {
   if (!c) { return; }
   if (id === 'overview') { c.innerHTML = renderOverview(); setTimeout(initOverviewChart, 50); }
   else if (id === 'metas') { c.innerHTML = renderMetas(); }
-  else if (id === 'vendedores') { c.innerHTML = renderVendedores(); }
+  else if (id === 'perfis') { c.innerHTML = renderPerfis(); }
   else if (id === 'clientes') { c.innerHTML = renderClientes(true); }
   else if (id === 'meuscli') { c.innerHTML = renderClientes(false); }
   else if (id === 'rodizio') { c.innerHTML = renderRodizio(); }
@@ -970,13 +1007,14 @@ function renderTab(id) {
   else if (id === 'vendseg') { c.innerHTML = renderVendSegmento(); setTimeout(initVendSegmentoChart, 50); }
   else if (id === 'cruzamentos') { c.innerHTML = renderCruzamentos(); setTimeout(initCruzamentos, 50); }
   else if (id === 'analisecli') { c.innerHTML = renderAnaliseCli(); }
-  else if (id === 'comissao') { c.innerHTML = renderComissao(currentUser.isM); setTimeout(function () { renderCompContent(currentUser.id); }, 50); }
+  else if (id === 'metricas') { c.innerHTML = renderMetricas(); setTimeout(initMetricas, 50); }
+  else if (id === 'comissao') { c.innerHTML = renderComissao(currentUser.isM || isAdmin(currentUser.id)); setTimeout(function () { renderCompContent(currentUser.id); }, 50); }
   else if (id === 'catalogo') { c.innerHTML = renderCatalogo(); }
   else if (id === 'relatorios') { c.innerHTML = renderRelatorios(); }
   else if (id === 'minhas') { c.innerHTML = renderMinhas(); }
   else if (id === 'venda') { c.innerHTML = renderVenda(); }
   else if (id === 'atividades') { c.innerHTML = renderAtividades(); }
-}// ===== VISAO GERAL (GERENTE) =====
+}// ===== VISAO GERAL (GERENTE / GESTOR) =====
 function renderOverview() {
   var vendas = loadData('vendas');
   var metas = loadData('metas');
@@ -1042,7 +1080,7 @@ function initOverviewChart() {
         data: vAtivos.map(function (v) {
           return vendas.filter(function (x) { return x.vendedor === v.id; }).reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
         }),
-        backgroundColor: '#0091ae',
+        backgroundColor: '#0ea5a4',
         borderRadius: 6
       }]
     },
@@ -1050,7 +1088,7 @@ function initOverviewChart() {
   });
 }
 
-// ===== METAS (GERENTE) =====
+// ===== METAS (GERENTE / GESTOR) =====
 function renderMetas() {
   var metas = loadData('metas');
   var vAtivos = getVendedores();
@@ -1182,48 +1220,54 @@ function delMeta(i) {
   if (m && m._id) { deleteDoc('metas', m._id); toast('Meta excluida', 'success'); renderTab('metas'); }
 }
 
-// ===== GERENCIAR VENDEDORES (com botao Excluir) =====
-function renderVendedores() {
+// ===== GERENCIAR PERFIS (somente gerente) =====
+function renderPerfis() {
+  if (!currentUser.isM) { return '<div class="card"><div class="es"><div class="ic">🔒</div><p>Somente a gerente pode gerenciar perfis.</p></div></div>'; }
   var vAtivos = getVendedores();
   var rows = vAtivos.map(function (v) {
     var nv = getNivel(v.id);
     var nm = getNome(v.id);
+    var perm = getPermissao(v.id);
     var sn = loadSenhas()[v.id] || senhaPadrao();
+    var permBadge = perm === 'admin' ? '<span class="vlv pleno">Admin</span>' : '<span class="vlv junior">Padrao</span>';
     return '<tr>' +
       '<td>' + nm + '</td>' +
-      '<td><span class="vlv ' + nv.toLowerCase() + '">' + nv + '</span></td>' +
+      '<td>' + permBadge + '</td>' +
       '<td><input type="text" id="nm-' + v.id + '" value="' + nm + '" class="inp-sm" style="width:140px"></td>' +
       '<td><input type="text" id="sn-' + v.id + '" value="' + sn + '" class="inp-sm" style="width:110px"></td>' +
       '<td><div class="action-btns">' +
       '<button class="btn btn-a btn-s" onclick="saveNome(\'' + v.id + '\')">Nome</button>' +
       '<button class="btn btn-a btn-s" onclick="saveSenha(\'' + v.id + '\')">Senha</button>' +
-      '<button class="btn btn-s" style="background:' + (nv === 'Junior' ? '#0091ae' : '#99acc2') + ';color:#fff" onclick="toggleNivel(\'' + v.id + '\')">' + (nv === 'Junior' ? 'Pleno' : 'Junior') + '</button>' +
+      '<button class="btn btn-s" style="background:' + (perm === 'admin' ? '#0ea5a4' : '#9aa8b8') + ';color:#fff" onclick="togglePermissao(\'' + v.id + '\')">' + (perm === 'admin' ? 'Padrao' : 'Admin') + '</button>' +
       '<button class="btn btn-d btn-s" onclick="delVendedor(\'' + v.id + '\')">Excluir</button>' +
       '</div></td></tr>';
   }).join('');
-  return '<h2 class="st2">Gerenciar Vendedores</h2>' +
-    '<div class="card"><h3>Adicionar Novo Vendedor</h3><div class="fr">' +
-    '<div class="fg"><label>Nome</label><input type="text" id="nv-nome" placeholder="Nome do vendedor"></div>' +
+  return '<h2 class="st2">Gerenciar Perfis</h2>' +
+    '<div class="card"><h3>Adicionar Novo Perfil</h3><div class="fr">' +
+    '<div class="fg"><label>Nome</label><input type="text" id="nv-nome" placeholder="Nome do perfil"></div>' +
     '<div class="fg"><label>Nivel</label><select id="nv-nivel"><option value="Junior">Junior</option><option value="Pleno">Pleno</option></select></div>' +
+    '<div class="fg"><label>Permissao</label><select id="nv-perm"><option value="padrao">Padrao (Vendedor)</option><option value="admin">Administrador (Gestor)</option></select></div>' +
     '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p" onclick="addVendedor()">+ Adicionar</button></div>' +
     '</div></div>' +
-    '<div class="card"><h3>Vendedores</h3>' +
-    '<table><thead><tr><th>Nome</th><th>Nivel</th><th>Renomear</th><th>Senha</th><th>Acoes</th></tr></thead><tbody>' +
+    '<div class="card"><h3>Perfis Criados</h3>' +
+    '<table><thead><tr><th>Nome</th><th>Permissao</th><th>Renomear</th><th>Senha</th><th>Acoes</th></tr></thead><tbody>' +
     rows + '</tbody></table></div>';
 }
 
 function addVendedor() {
+  if (!currentUser.isM) { toast('Somente a gerente pode criar perfis', 'error'); return; }
   var nome = document.getElementById('nv-nome').value.trim();
   var nivel = document.getElementById('nv-nivel').value;
-  if (!nome) { toast('Digite o nome do vendedor', 'error'); return; }
+  var perm = document.getElementById('nv-perm').value;
+  if (!nome) { toast('Digite o nome do perfil', 'error'); return; }
   var novoId = 'v' + Date.now().toString().slice(-5);
   DELETADOS = DELETADOS.filter(function (x) { return x !== novoId; });
   salvarDeletados();
-  var novo = { id: novoId, nome: nome, nivel: nivel, isM: false };
+  var novo = { id: novoId, nome: nome, nivel: nivel, isM: false, permissao: perm };
   USU.push(novo);
-  db.collection('usuarios').doc(novoId).set({ id: novoId, nome: nome, nivel: nivel, senha: senhaPadrao() })
-    .then(function () { updateLoginNomes(); toast('Vendedor adicionado: ' + nome + ' (senha inicial definida pela gerente)', 'success'); renderTab('vendedores'); })
-    .catch(function (e) { toast('Erro ao adicionar: ' + e.message, 'error'); });
+  db.collection('usuarios').doc(novoId).set({ id: novoId, nome: nome, nivel: nivel, senha: senhaPadrao(), permissao: perm })
+    .then(function () { updateLoginNomes(); toast('Perfil criado: ' + nome + ' (' + (perm === 'admin' ? 'Admin' : 'Padrao') + ')', 'success'); renderTab('perfis'); })
+    .catch(function (e) { toast('Erro ao criar: ' + e.message, 'error'); });
 }
 
 function saveSenha(id) {
@@ -1243,31 +1287,31 @@ function saveNome(id) {
       if (u) { u.nome = val; }
       updateLoginNomes();
       toast('Nome salvo e sincronizado: ' + val, 'success');
-      renderTab('vendedores');
+      renderTab('perfis');
     })
     .catch(function (e) { toast('Erro ao salvar nome: ' + e.message, 'error'); });
 }
 
-function toggleNivel(id) {
-  var nv = getNivel(id);
-  var novoNivel = nv === 'Junior' ? 'Pleno' : 'Junior';
-  db.collection('usuarios').doc(id).set({ nivel: novoNivel }, { merge: true })
+function togglePermissao(id) {
+  if (!currentUser.isM) { toast('Somente a gerente pode alterar permissoes', 'error'); return; }
+  var perm = getPermissao(id);
+  var novoPerm = perm === 'admin' ? 'padrao' : 'admin';
+  db.collection('usuarios').doc(id).set({ permissao: novoPerm }, { merge: true })
     .then(function () {
       var u = USU.find(function (x) { return x.id === id; });
-      if (u) { u.nivel = novoNivel; }
-      toast('Nivel alterado e sincronizado: ' + getNome(id) + ' -> ' + novoNivel, 'success');
-      renderTab('vendedores');
+      if (u) { u.permissao = novoPerm; }
+      toast('Permissao alterada: ' + getNome(id) + ' -> ' + (novoPerm === 'admin' ? 'Admin' : 'Padrao'), 'success');
+      renderTab('perfis');
     })
-    .catch(function (e) { toast('Erro ao alterar nivel: ' + e.message, 'error'); });
+    .catch(function (e) { toast('Erro ao alterar permissao: ' + e.message, 'error'); });
 }
 
-// ===== EXCLUIR VENDEDOR (transfere carteira + salva no Firestore - nao volta) =====
 function delVendedor(id) {
-  if (!currentUser || !currentUser.isM) { toast('Somente a gerente pode excluir vendedores', 'error'); return; }
+  if (!currentUser || !currentUser.isM) { toast('Somente a gerente pode excluir perfis', 'error'); return; }
   var v = USU.find(function (x) { return x.id === id; });
-  if (!v) { toast('Vendedor nao encontrado', 'error'); return; }
+  if (!v) { toast('Perfil nao encontrado', 'error'); return; }
   var nome = getNome(id);
-  if (!confirm('Excluir o vendedor ' + nome + '? Os clientes da carteira dele serao transferidos para outro vendedor.')) { return; }
+  if (!confirm('Excluir o perfil ' + nome + '? Os clientes da carteira dele serao transferidos para outro perfil.')) { return; }
   var restantes = getVendedores().filter(function (x) { return x.id !== id; });
   var destino = restantes.length ? restantes[0].id : currentUser.id;
   var clientes = loadData('clientes');
@@ -1279,11 +1323,11 @@ function delVendedor(id) {
   salvarDeletados();
   db.collection('usuarios').doc(id).delete().catch(function (e) { console.log('Delete user error:', e); });
   updateLoginNomes();
-  toast('Vendedor excluido: ' + nome + ' (clientes transferidos para ' + getNome(destino) + ')', 'success');
-  renderTab('vendedores');
+  toast('Perfil excluido: ' + nome + ' (clientes transferidos para ' + getNome(destino) + ')', 'success');
+  renderTab('perfis');
 }
 
-// ===== IMPORTACAO DE PLANILHA (com nivel) =====
+// ===== IMPORTACAO DE PLANILHA (gerente e gestores admin) =====
 function importClientes() { document.getElementById('import-file').click(); }
 
 function handleImportFile(event) {
@@ -1332,7 +1376,7 @@ function handleImportFile(event) {
   event.target.value = '';
 }
 
-// ===== CLIENTES (com Nivel + filtro) =====
+// ===== CLIENTES (com Nivel + filtro + selecao em massa + editar em nova aba) =====
 function renderClientes(isGerente) {
   var clientes = isGerente ? loadData('clientes') : getMeusClientes();
   var segOpts = SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
@@ -1340,17 +1384,25 @@ function renderClientes(isGerente) {
   var vendOpts = getVendedores().map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
   var nivelOpts = '<option value="">Todos</option><option value="ouro">Ouro</option><option value="prata">Prata</option><option value="bronze">Bronze</option><option value="sem">Sem Nivel</option>';
   var nivelFormOpts = '<option value="">Sem Nivel</option><option value="ouro">Ouro</option><option value="prata">Prata</option><option value="bronze">Bronze</option>';
+  var bulkBar = isGerente ? '<div class="bulk-bar"><span class="bb-count" id="bb-count">0 selecionados</span>' +
+    '<div class="bb-actions">' +
+    '<select id="bb-dest" class="inp-sm" style="width:160px"><option value="">Mover para...</option>' + vendOpts + '</select>' +
+    '<button class="btn btn-p btn-s" onclick="moverSelecionados()">Mover Selecionados</button>' +
+    '<button class="btn btn-d btn-s" onclick="excluirSelecionados()">Excluir Selecionados</button>' +
+    '<button class="btn btn-a btn-s" onclick="limparSelecao()">Limpar</button>' +
+    '</div></div>' : '';
   var tabela = clientes.length
-    ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th><th>Nivel</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
+    ? '<table><thead><tr>' + (isGerente ? '<th><input type="checkbox" class="chk" id="chk-all" onchange="toggleAllSelecao()"></th>' : '') + '<th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th><th>Nivel</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
       clientes.map(function (c, i) {
         var transferirHtml = isGerente ? '<td><select class="inp-sm" style="width:120px" onchange="transferirCliente(\'' + c.cod + '\',this.value)"><option value="">--</option>' + vendOpts + '</select></td>' : '';
         var nivel = c.nivel || 'sem';
         var nivelHtml = '<span class="nivel-badge ' + nivel + '">' + (nivel === 'sem' ? 'Sem' : nivel.charAt(0).toUpperCase() + nivel.slice(1)) + '</span>';
-        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td><td>' + nivelHtml + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="editCliente(' + i + ',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + i + ',' + isGerente + ')">Excluir</button></div></td></tr>';
+        var chkHtml = isGerente ? '<td><input type="checkbox" class="chk chk-cli" data-cod="' + c.cod + '" onchange="atualizarSelecao()"></td>' : '';
+        return '<tr id="row-' + c.cod + '">' + chkHtml + '<td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td><td>' + nivelHtml + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="abrirEdicaoCliente(\'' + c.cod + '\',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + i + ',' + isGerente + ')">Excluir</button></div></td></tr>';
       }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhum cliente.</p></div>';
   var importCard = '<div class="card"><h3>Importar Planilha</h3>' +
-    '<p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">' + (isGerente ? 'Selecione a planilha .xlsx ou .csv. Os clientes importados entram em <strong>Clientes Existentes</strong> e poderao ser transferidos no rodizio de 3 meses.' : 'Selecione sua planilha .xlsx ou .csv. Os clientes importados serao atribuidos automaticamente a voce.') + '</p>' +
+    '<p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">' + (isGerente ? 'Selecione a planilha .xlsx ou .csv. Os clientes importados entram em <strong>Clientes Existentes</strong> e poderao ser transferidos no rodizio de 90 dias.' : 'Selecione sua planilha .xlsx ou .csv. Os clientes importados serao atribuidos automaticamente a voce.') + '</p>' +
     '<input type="file" id="import-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportFile(event)">' +
     '<button class="btn btn-a" onclick="importClientes()">📥 Importar Planilha</button></div>';
   var formHtml = '<div class="card"><h3>Adicionar Cliente</h3><div class="fr">' +
@@ -1364,11 +1416,72 @@ function renderClientes(isGerente) {
     '<div class="fg"><label>Nivel</label><select id="cl-nivel">' + nivelFormOpts + '</select></div>' +
     (isGerente ? '<div class="fg"><label>Vendedor</label><select id="cl-vend">' + vendOpts + '</select></div>' : '') +
     '</div><button class="btn btn-p" onclick="saveCliente(' + isGerente + ')">Salvar Cliente</button></div>';
-  var rotacaoCard = isGerente ? '<div class="card" style="border-left:4px solid var(--warn)"><h3>🔄 Rodizio de 3 Meses</h3><p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">O rodizio completo (carteiras por vendedor) esta na aba <strong>Rodizio (3 Meses)</strong> no menu.</p><button class="btn btn-a" onclick="renderTab(\'rodizio\')">Ir para o Rodizio</button></div>' : '';
+  var rotacaoCard = isGerente ? '<div class="card" style="border-left:4px solid var(--warn)"><h3>🔄 Rodizio de 90 Dias</h3><p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">O rodizio completo (carteiras por vendedor) esta na aba <strong>Rodizio (90 Dias)</strong> no menu.</p><button class="btn btn-a" onclick="renderTab(\'rodizio\')">Ir para o Rodizio</button></div>' : '';
   var filtroHtml = '<div class="card"><h3>Buscar Cliente</h3><div class="search-box"><span class="ico">🔍</span><input type="text" id="cl-busca" placeholder="Buscar por nome, codigo ou telefone..." oninput="filtrarClientes(' + isGerente + ')"></div>' +
     '<div class="filtros" style="margin-top:12px"><div class="fg"><label>Filtrar por Nivel</label><select id="cl-filtro-nivel" onchange="filtrarClientes(' + isGerente + ')">' + nivelOpts + '</select></div></div>' +
     '<div id="cl-lista">' + tabela + '</div></div>';
-  return '<h2 class="st2">' + (isGerente ? 'Clientes' : 'Meus Clientes') + '</h2>' + importCard + rotacaoCard + formHtml + filtroHtml;
+  return '<h2 class="st2">' + (isGerente ? 'Clientes' : 'Meus Clientes') + '</h2>' + importCard + rotacaoCard + formHtml + bulkBar + filtroHtml;
+}
+
+// ===== SELECAO EM MASSA =====
+function atualizarSelecao() {
+  var count = 0;
+  document.querySelectorAll('.chk-cli').forEach(function (chk) {
+    if (chk.checked) { selecionados[chk.dataset.cod] = true; count++; }
+    else { delete selecionados[chk.dataset.cod]; }
+  });
+  var el = document.getElementById('bb-count');
+  if (el) { el.textContent = count + ' selecionados'; }
+}
+
+function toggleAllSelecao() {
+  var all = document.getElementById('chk-all');
+  var checked = all.checked;
+  document.querySelectorAll('.chk-cli').forEach(function (chk) {
+    chk.checked = checked;
+    if (checked) { selecionados[chk.dataset.cod] = true; }
+    else { delete selecionados[chk.dataset.cod]; }
+  });
+  atualizarSelecao();
+}
+
+function limparSelecao() {
+  selecionados = {};
+  document.querySelectorAll('.chk-cli').forEach(function (chk) { chk.checked = false; });
+  var all = document.getElementById('chk-all'); if (all) { all.checked = false; }
+  atualizarSelecao();
+}
+
+function moverSelecionados() {
+  if (!currentUser.isM && !isAdmin(currentUser.id)) { toast('Somente gerente ou gestor pode mover clientes em massa', 'error'); return; }
+  var destId = document.getElementById('bb-dest').value;
+  if (!destId) { toast('Selecione o vendedor de destino', 'error'); return; }
+  var cods = Object.keys(selecionados);
+  if (!cods.length) { toast('Nenhum cliente selecionado', 'error'); return; }
+  if (!confirm('Mover ' + cods.length + ' clientes para ' + getNome(destId) + '?')) { return; }
+  var clientes = loadData('clientes');
+  cods.forEach(function (cod) {
+    var c = clientes.find(function (x) { return String(x.cod).trim() === String(cod).trim(); });
+    if (c) { c.vendedorId = destId; c.editadoPor = getNome(currentUser.id); c.editadoEm = new Date().toISOString(); saveData('clientes', c); }
+  });
+  toast(cods.length + ' clientes movidos para ' + getNome(destId) + ' por ' + getNome(currentUser.id), 'success');
+  limparSelecao();
+  renderTab('clientes');
+}
+
+function excluirSelecionados() {
+  if (!currentUser.isM) { toast('Somente a gerente pode excluir clientes em massa', 'error'); return; }
+  var cods = Object.keys(selecionados);
+  if (!cods.length) { toast('Nenhum cliente selecionado', 'error'); return; }
+  if (!confirm('Excluir definitivamente ' + cods.length + ' clientes? Esta acao nao pode ser desfeita.')) { return; }
+  var clientes = loadData('clientes');
+  cods.forEach(function (cod) {
+    var c = clientes.find(function (x) { return String(x.cod).trim() === String(cod).trim(); });
+    if (c && c._id) { deleteDoc('clientes', c._id); }
+  });
+  toast(cods.length + ' clientes excluidos por ' + getNome(currentUser.id), 'success');
+  limparSelecao();
+  renderTab('clientes');
 }
 
 function filtrarClientes(isGerente) {
@@ -1388,27 +1501,87 @@ function filtrarClientes(isGerente) {
   });
   var vendOpts = getVendedores().map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
   var html = filtrados.length
-    ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th><th>Nivel</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
+    ? '<table><thead><tr>' + (isGerente ? '<th><input type="checkbox" class="chk" id="chk-all" onchange="toggleAllSelecao()"></th>' : '') + '<th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Segmento</th><th>Nivel</th>' + (isGerente ? '<th>Vendedor</th><th>Transferir</th>' : '') + '<th>Acoes</th></tr></thead><tbody>' +
       filtrados.map(function (c) {
         var transferirHtml = isGerente ? '<td><select class="inp-sm" style="width:120px" onchange="transferirCliente(\'' + c.cod + '\',this.value)"><option value="">--</option>' + vendOpts + '</select></td>' : '';
         var nivel = c.nivel || 'sem';
         var nivelHtml = '<span class="nivel-badge ' + nivel + '">' + (nivel === 'sem' ? 'Sem' : nivel.charAt(0).toUpperCase() + nivel.slice(1)) + '</span>';
-        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td><td>' + nivelHtml + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="editCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Excluir</button></div></td></tr>';
+        var chkHtml = isGerente ? '<td><input type="checkbox" class="chk chk-cli" data-cod="' + c.cod + '" onchange="atualizarSelecao()"' + (selecionados[c.cod] ? ' checked' : '') + '></td>' : '';
+        return '<tr id="row-' + c.cod + '">' + chkHtml + '<td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + (c.segmento || '--') + '</td><td>' + nivelHtml + '</td>' + (isGerente ? '<td>' + getNome(c.vendedorId || '') + '</td>' : '') + transferirHtml + '<td><div class="action-btns"><button class="edit-btn" onclick="abrirEdicaoCliente(\'' + c.cod + '\',' + isGerente + ')">Editar</button><button class="del-btn" onclick="delCliente(' + clientes.indexOf(c) + ',' + isGerente + ')">Excluir</button></div></td></tr>';
       }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhum cliente encontrado.</p></div>';
   var div = document.getElementById('cl-lista');
   if (div) { div.innerHTML = html; }
 }
 
+// ===== EDITAR CLIENTE EM NOVA ABA =====
+function abrirEdicaoCliente(cod, isGerente) {
+  var clientes = loadData('clientes');
+  var cli = clientes.find(function (c) { return String(c.cod).trim() === String(cod).trim(); });
+  if (!cli) { toast('Cliente nao encontrado', 'error'); return; }
+  var segOpts = SEGMENTOS.map(function (s) { return '<option value="' + s + '"' + (s === cli.segmento ? ' selected' : '') + '>' + s + '</option>'; }).join('');
+  var ufOpts = UFS.map(function (u) { return '<option value="' + u + '"' + (u === cli.estado ? ' selected' : '') + '>' + u + '</option>'; }).join('');
+  var nivelFormOpts = '<option value="">Sem Nivel</option><option value="ouro"' + (cli.nivel === 'ouro' ? ' selected' : '') + '>Ouro</option><option value="prata"' + (cli.nivel === 'prata' ? ' selected' : '') + '>Prata</option><option value="bronze"' + (cli.nivel === 'bronze' ? ' selected' : '') + '>Bronze</option>';
+  var vendOpts = getVendedores().map(function (v) { return '<option value="' + v.id + '"' + (v.id === cli.vendedorId ? ' selected' : '') + '>' + getNome(v.id) + '</option>'; }).join('');
+  var html = '<h2 class="st2">Editar Cliente</h2>' +
+    editNoteHTML() +
+    '<div class="card"><h3>' + cli.razao + ' (COD ' + cli.cod + ')</h3><div class="fr">' +
+    '<div class="fg"><label>Codigo</label><input type="text" id="ec-cod" value="' + cli.cod + '"></div>' +
+    '<div class="fg"><label>Razao Social</label><input type="text" id="ec-razao" value="' + cli.razao + '"></div>' +
+    '<div class="fg"><label>Contato</label><input type="text" id="ec-contato" value="' + (cli.contato || '') + '"></div>' +
+    '<div class="fg"><label>Celular</label><input type="text" id="ec-celular" value="' + (cli.celular || '') + '" oninput="maskTelefone(this)" maxlength="15"></div>' +
+    '<div class="fg"><label>Cidade</label><input type="text" id="ec-cidade" value="' + (cli.cidade || '') + '"></div>' +
+    '<div class="fg"><label>Estado</label><select id="ec-estado"><option value="">--</option>' + ufOpts + '</select></div>' +
+    '<div class="fg"><label>Segmento</label><select id="ec-segmento"><option value="">--</option>' + segOpts + '</select></div>' +
+    '<div class="fg"><label>Nivel</label><select id="ec-nivel">' + nivelFormOpts + '</select></div>' +
+    (isGerente ? '<div class="fg"><label>Vendedor</label><select id="ec-vend">' + vendOpts + '</select></div>' : '') +
+    '</div><div class="action-btns"><button class="btn btn-p" onclick="salvarEdicaoCliente(\'' + cli.cod + '\',' + isGerente + ')">Salvar Alteracoes</button>' +
+    '<button class="btn btn-d" onclick="renderTab(\'clientes\')">Cancelar</button></div></div>';
+  var c = document.getElementById('tc-clientes');
+  if (c) { c.innerHTML = html; }
+}
+
+function salvarEdicaoCliente(codOriginal, isGerente) {
+  var clientes = loadData('clientes');
+  var cli = clientes.find(function (c) { return String(c.cod).trim() === String(codOriginal).trim(); });
+  if (!cli) { toast('Cliente nao encontrado', 'error'); return; }
+  var novoCod = document.getElementById('ec-cod').value.trim();
+  var razao = document.getElementById('ec-razao').value.trim();
+  if (!novoCod || !razao) { toast('Codigo e Razao sao obrigatorios', 'error'); return; }
+  var dup = clientes.find(function (c) { return String(c.cod).trim() === novoCod && String(c.cod).trim() !== String(codOriginal).trim(); });
+  if (dup) { toast('Ja existe um cliente com o codigo ' + novoCod, 'error'); return; }
+  var updated = {
+    _id: cli._id,
+    cod: novoCod, razao: razao,
+    contato: document.getElementById('ec-contato').value.trim(),
+    telefone: cli.telefone || '',
+    celular: document.getElementById('ec-celular').value.trim(),
+    email: cli.email || '',
+    cidade: document.getElementById('ec-cidade').value.trim(),
+    estado: document.getElementById('ec-estado').value,
+    segmento: document.getElementById('ec-segmento').value,
+    nivel: document.getElementById('ec-nivel').value,
+    vendedorId: isGerente ? document.getElementById('ec-vend').value : cli.vendedorId,
+    origem: cli.origem || 'importado',
+    editadoPor: getNome(currentUser.id),
+    editadoEm: new Date().toISOString()
+  };
+  saveData('clientes', updated);
+  toast('Cliente atualizado por ' + getNome(currentUser.id), 'success');
+  renderTab(isGerente ? 'clientes' : 'meuscli');
+}
+
 function transferirCliente(cod, novoVendId) {
   if (!novoVendId) { return; }
-  if (!currentUser.isM) { toast('Somente a gerente pode transferir clientes', 'error'); return; }
+  if (!currentUser.isM && !isAdmin(currentUser.id)) { toast('Somente gerente ou gestor pode transferir clientes', 'error'); return; }
   var clientes = loadData('clientes');
   var c = clientes.find(function (x) { return String(x.cod).trim() === String(cod).trim(); });
   if (!c) { toast('Cliente nao encontrado', 'error'); return; }
   c.vendedorId = novoVendId;
+  c.editadoPor = getNome(currentUser.id);
+  c.editadoEm = new Date().toISOString();
   saveData('clientes', c);
-  toast('Cliente ' + c.razao + ' transferido para ' + getNome(novoVendId), 'success');
+  toast('Cliente ' + c.razao + ' transferido para ' + getNome(novoVendId) + ' por ' + getNome(currentUser.id), 'success');
   renderTab('clientes');
 }
 
@@ -1426,7 +1599,9 @@ function saveCliente(isGerente) {
     estado: document.getElementById('cl-estado').value,
     segmento: document.getElementById('cl-segmento').value,
     nivel: document.getElementById('cl-nivel').value,
-    vendedorId: isGerente ? document.getElementById('cl-vend').value : currentUser.id
+    vendedorId: isGerente ? document.getElementById('cl-vend').value : currentUser.id,
+    editadoPor: getNome(currentUser.id),
+    editadoEm: new Date().toISOString()
   };
   var clientes = loadData('clientes');
   var existing = clientes.find(function (x) { return String(x.cod).trim() === cod; });
@@ -1434,11 +1609,11 @@ function saveCliente(isGerente) {
     c._id = existing._id;
     if (existing.origem) { c.origem = existing.origem; }
     saveData('clientes', c);
-    toast('Cliente atualizado: ' + razao, 'success');
+    toast('Cliente atualizado por ' + getNome(currentUser.id), 'success');
   } else {
     c.origem = 'manual';
     saveData('clientes', c);
-    toast('Cliente salvo: ' + razao, 'success');
+    toast('Cliente salvo por ' + getNome(currentUser.id), 'success');
   }
   renderTab(isGerente ? 'clientes' : 'meuscli');
 }
@@ -1455,45 +1630,33 @@ function delCliente(i, isGerente) {
   renderTab(isGerente ? 'clientes' : 'meuscli');
 }
 
-function editCliente(i, isGerente) {
-  var clientes = loadData('clientes');
-  var cli = isGerente ? clientes[i] : getMeusClientes()[i];
-  if (!cli) { return; }
-  document.getElementById('cl-cod').value = cli.cod;
-  document.getElementById('cl-razao').value = cli.razao;
-  document.getElementById('cl-contato').value = cli.contato || '';
-  document.getElementById('cl-celular').value = cli.celular || '';
-  document.getElementById('cl-cidade').value = cli.cidade || '';
-  document.getElementById('cl-estado').value = cli.estado || '';
-  document.getElementById('cl-segmento').value = cli.segmento || '';
-  document.getElementById('cl-nivel').value = cli.nivel || '';
-  if (isGerente && document.getElementById('cl-vend')) { document.getElementById('cl-vend').value = cli.vendedorId || ''; }
-  toast('Editando: ' + cli.razao, 'info');
-}
-
-// ===== RODIZIO (3 MESES) =====
+// ===== RODIZIO (90 DIAS) — inclui gerente e gestores =====
 function renderRodizio() {
-  var vAtivos = getVendedores();
+  if (!currentUser.isM && !isAdmin(currentUser.id)) { return '<div class="card"><div class="es"><div class="ic">🔒</div><p>Somente gerente ou gestor pode acessar o rodizio.</p></div></div>'; }
+  var todos = USU.filter(function (u) { return DELETADOS.indexOf(u.id) === -1; });
   var clientes = loadData('clientes');
   var ultimoRod = localStorage.getItem('mc_ultimo_rodizio');
-  var html = '<h2 class="st2">Rodizio de Clientes (3 Meses)</h2>';
+  var html = '<h2 class="st2">Rodizio de Clientes (90 Dias)</h2>';
   if (ultimoRod) {
     var d = new Date(ultimoRod);
-    html += '<div class="card" style="background:rgba(255,122,89,.08);border-left:4px solid var(--warn)"><h3 style="color:#b25e00">Ultimo rodizio realizado</h3><p style="font-size:.9rem;color:var(--txt2)">' + d.toLocaleDateString('pt-BR') + ' — o proximo rodizio deve ocorrer apos 3 meses.</p></div>';
+    html += '<div class="card" style="background:rgba(245,158,11,.08);border-left:4px solid var(--warn)"><h3 style="color:#b25e00">Ultimo rodizio realizado</h3><p style="font-size:.9rem;color:var(--txt2)">' + d.toLocaleDateString('pt-BR') + ' — o proximo rodizio deve ocorrer apos 90 dias.</p></div>';
   }
-  html += '<div class="card"><h3>Como funciona</h3><p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">Cada vendedor tem sua carteira. Clique no nome do vendedor para <strong>expandir/recolher</strong> a lista. Use o botao <strong>Mover Carteira</strong> para transferir a lista inteira, ou o <strong>Rodizio Automatico</strong> para girar todas (V1 -> V2, V2 -> V3, ..., ultimo -> V1).</p><button class="btn btn-d" onclick="rodizioAutomatico()">🔄 Rodizio Automatico (3 Meses)</button></div>';
-  vAtivos.forEach(function (v) {
+  html += '<div class="card"><h3>Como funciona</h3><p style="font-size:.82rem;color:var(--txt2);margin-bottom:12px">O rodizio considera <strong>somente clientes que nao compraram ha mais de 90 dias</strong>. Clientes que compraram ha menos de 90 dias <strong>ficam com o responsavel atual</strong> (nao entram no rodizio). <strong>Gerente, gestores e vendedores</strong> participam: cada um pode mover <strong>todos os seus clientes de uma vez</strong>. Clique no nome para <strong>expandir/recolher</strong> a lista. Use o <strong>Rodizio Automatico</strong> para girar as carteiras (V1 -> V2, V2 -> V3, ..., ultimo -> V1).</p><button class="btn btn-d" onclick="rodizioAutomatico()">🔄 Rodizio Automatico (90 Dias)</button></div>';
+  todos.forEach(function (v) {
     var meus = clientes.filter(function (c) { return c.vendedorId === v.id; });
-    var destOpts = vAtivos.filter(function (d) { return d.id !== v.id; }).map(function (d) { return '<option value="' + d.id + '">' + getNome(d.id) + '</option>'; }).join('');
+    var elegiveis = meus.filter(function (c) { return clienteElegivelRodizio(c.cod); });
+    var destOpts = todos.filter(function (d) { return d.id !== v.id; }).map(function (d) { return '<option value="' + d.id + '">' + getNome(d.id) + '</option>'; }).join('');
     var corpo = meus.length
-      ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Nivel</th></tr></thead><tbody>' + meus.map(function (c) {
+      ? '<table><thead><tr><th>Cod</th><th>Razao Social</th><th>Contato</th><th>Celular</th><th>Cidade</th><th>UF</th><th>Nivel</th><th>Rodizio</th></tr></thead><tbody>' + meus.map(function (c) {
         var nivel = c.nivel || 'sem';
         var nivelHtml = '<span class="nivel-badge ' + nivel + '">' + (nivel === 'sem' ? 'Sem' : nivel.charAt(0).toUpperCase() + nivel.slice(1)) + '</span>';
-        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + nivelHtml + '</td></tr>';
+        var elegivel = clienteElegivelRodizio(c.cod);
+        var rodHtml = elegivel ? '<span class="tipo-badge venda">Elegivel</span>' : '<span class="tipo-badge bonificacao">Ativo</span>';
+        return '<tr><td>' + c.cod + '</td><td>' + c.razao + '</td><td>' + (c.contato || '--') + '</td><td>' + (c.celular || '--') + '</td><td>' + c.cidade + '</td><td>' + c.estado + '</td><td>' + nivelHtml + '</td><td class="tcc">' + rodHtml + '</td></tr>';
       }).join('') + '</tbody></table>'
-      : '<div class="es"><div class="ic">SEM</div><p>Sem clientes atribuidos a este vendedor.</p></div>';
+      : '<div class="es"><div class="ic">SEM</div><p>Sem clientes atribuidos a este perfil.</p></div>';
     html += '<div class="card"><div class="com-hero" style="margin-bottom:12px;cursor:pointer" onclick="toggleCarteira(\'' + v.id + '\')">' +
-      '<div><div class="com-name">' + getNome(v.id) + ' <span id="rd-arrow-' + v.id + '" style="font-size:.9rem;opacity:.7">▾</span></div><div class="com-nivel">' + getNivel(v.id) + ' — ' + meus.length + ' clientes</div></div>' +
+      '<div><div class="com-name">' + getNome(v.id) + ' <span id="rd-arrow-' + v.id + '" style="font-size:.9rem;opacity:.7">▾</span></div><div class="com-nivel">' + (v.isM ? 'Gerente' : (isAdmin(v.id) ? 'Gestor' : getNivel(v.id))) + ' — ' + meus.length + ' clientes (' + elegiveis.length + ' elegiveis)</div></div>' +
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" onclick="event.stopPropagation()">' +
       '<select id="rd-dest-' + v.id + '" class="inp-sm" style="width:150px"><option value="">Destino...</option>' + destOpts + '</select>' +
       '<button class="btn btn-a btn-s" onclick="transferirCarteira(\'' + v.id + '\')">Mover Carteira</button></div></div>' +
@@ -1513,35 +1676,36 @@ function toggleCarteira(vid) {
 
 function transferirCarteira(origemId) {
   var destId = document.getElementById('rd-dest-' + origemId).value;
-  if (!destId) { toast('Selecione o vendedor de destino', 'error'); return; }
-  if (!currentUser.isM) { toast('Somente a gerente pode transferir carteiras', 'error'); return; }
+  if (!destId) { toast('Selecione o perfil de destino', 'error'); return; }
+  if (!currentUser.isM && !isAdmin(currentUser.id)) { toast('Somente gerente ou gestor pode transferir carteiras', 'error'); return; }
   var clientes = loadData('clientes');
-  var daCarteira = clientes.filter(function (c) { return c.vendedorId === origemId; });
-  if (!daCarteira.length) { toast(getNome(origemId) + ' nao possui clientes na carteira', 'error'); return; }
-  if (!confirm('Mover a carteira de ' + getNome(origemId) + ' (' + daCarteira.length + ' clientes) para ' + getNome(destId) + '?')) { return; }
-  daCarteira.forEach(function (c) { c.vendedorId = destId; saveData('clientes', c); });
+  var daCarteira = clientes.filter(function (c) { return c.vendedorId === origemId && clienteElegivelRodizio(c.cod); });
+  if (!daCarteira.length) { toast(getNome(origemId) + ' nao possui clientes elegiveis para rodizio', 'error'); return; }
+  if (!confirm('Mover a carteira elegivel de ' + getNome(origemId) + ' (' + daCarteira.length + ' clientes) para ' + getNome(destId) + '?')) { return; }
+  daCarteira.forEach(function (c) { c.vendedorId = destId; c.editadoPor = getNome(currentUser.id); c.editadoEm = new Date().toISOString(); saveData('clientes', c); });
   toast('Carteira de ' + getNome(origemId) + ' movida para ' + getNome(destId), 'success');
   renderTab('rodizio');
 }
 
 function rodizioAutomatico() {
-  if (!currentUser.isM) { toast('Somente a gerente pode fazer o rodizio', 'error'); return; }
-  var vAtivos = getVendedores();
+  if (!currentUser.isM && !isAdmin(currentUser.id)) { toast('Somente gerente ou gestor pode fazer o rodizio', 'error'); return; }
+  var todos = USU.filter(function (u) { return DELETADOS.indexOf(u.id) === -1; });
   var clientes = loadData('clientes');
-  if (!clientes.length) { toast('Nenhum cliente para rodizio', 'error'); return; }
-  if (!confirm('Rodizio automatico: a carteira de TODOS os vendedores sera movida para o proximo da lista (V1 -> V2, V2 -> V3, ..., ultimo -> V1). Continuar?')) { return; }
+  var elegiveis = clientes.filter(function (c) { return clienteElegivelRodizio(c.cod); });
+  if (!elegiveis.length) { toast('Nenhum cliente elegivel para rodizio (todos compraram ha menos de 90 dias)', 'error'); return; }
+  if (!confirm('Rodizio automatico: a carteira ELEGIVEL (sem compra ha mais de 90 dias) de TODOS os perfis sera movida para o proximo da lista (V1 -> V2, V2 -> V3, ..., ultimo -> V1). Clientes ativos ficam com o responsavel atual. Continuar?')) { return; }
   var mapa = {};
-  vAtivos.forEach(function (v, i) { mapa[v.id] = vAtivos[(i + 1) % vAtivos.length].id; });
-  clientes.forEach(function (c) {
+  todos.forEach(function (v, i) { mapa[v.id] = todos[(i + 1) % todos.length].id; });
+  elegiveis.forEach(function (c) {
     var novo = mapa[c.vendedorId];
-    if (novo) { c.vendedorId = novo; saveData('clientes', c); }
+    if (novo) { c.vendedorId = novo; c.editadoPor = getNome(currentUser.id); c.editadoEm = new Date().toISOString(); saveData('clientes', c); }
   });
   localStorage.setItem('mc_ultimo_rodizio', new Date().toISOString());
-  toast('Rodizio concluido: todas as carteiras movidas para o proximo vendedor', 'success');
+  toast('Rodizio concluido: ' + elegiveis.length + ' clientes elegiveis movidos para o proximo perfil', 'success');
   renderTab('rodizio');
 }
 
-// ===== VENDAS (GERENTE) — com filtro de periodo dinamico =====
+// ===== VENDAS (GERENTE / GESTOR) — filtro de periodo dinamico =====
 function renderVendasGer() {
   var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' + filtroPeriodoHTML('vg') +
     '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'vg\')">Limpar</button></div></div></div>';
@@ -1611,7 +1775,8 @@ function editVenda(i) {
     });
   }
   var tipoSel = v.tipo || 'venda';
-  var html = '<div class="card"><h3>Editar Venda</h3><div class="tipo-toggle">' +
+  var html = '<h2 class="st2">Editar Venda</h2>' + editNoteHTML() +
+    '<div class="card"><h3>Editar Venda</h3><div class="tipo-toggle">' +
     '<button id="tt-venda" class="' + (tipoSel === 'venda' ? 'act' : '') + '" onclick="setTipoLanc(\'venda\')">Venda</button>' +
     '<button id="tt-bonif" class="' + (tipoSel === 'bonificacao' ? 'act' : '') + '" onclick="setTipoLanc(\'bonificacao\')">Bonificacao</button></div>' +
     '<div class="fr"><div class="fg"><label>Data</label><input type="date" id="vd-data" value="' + v.data + '"></div>' +
@@ -1621,7 +1786,7 @@ function editVenda(i) {
     '<div class="dv"></div><div class="st" id="vd-total">Total: R$ ' + fmtBRL(v.total) + '</div>' +
     '<div class="dv"></div><button class="btn btn-p btn-f" onclick="salvarEdicaoVenda()">Salvar Alteracoes</button> <button class="btn btn-d" onclick="cancelarEdicaoVenda()">Cancelar</button></div>';
   var c = document.getElementById('tc-vendas');
-  if (c) { c.innerHTML = '<h2 class="st2">Editar Venda</h2>' + html; }
+  if (c) { c.innerHTML = html; }
   var cliSel = document.getElementById('vd-cli');
   if (cliSel) { var m = v.cliente.match(/COD\s+(\S+)/); if (m) { cliSel.value = m[1]; } }
   calcVendaTotal();
@@ -1649,10 +1814,10 @@ function salvarEdicaoVenda() {
   var nomeCli = cliente ? cliente.razao : 'COD ' + cod;
   var estado = cliente ? cliente.estado : '--';
   var segmento = cliente ? cliente.segmento : 'Outros';
-  var updated = { _id: v._id, data: data, cliente: nomeCli + ' (COD ' + cod + ' / ' + estado + ')', vendedor: v.vendedor, itens: itens, qtdProdutos: qtdProdutos, total: total, estado: estado, segmento: segmento, tipo: tipo };
+  var updated = { _id: v._id, data: data, cliente: nomeCli + ' (COD ' + cod + ' / ' + estado + ')', vendedor: v.vendedor, itens: itens, qtdProdutos: qtdProdutos, total: total, estado: estado, segmento: segmento, tipo: tipo, editadoPor: getNome(currentUser.id), editadoEm: new Date().toISOString() };
   saveData('vendas', updated);
   editingVendaIdx = -1;
-  toast('Venda atualizada!', 'success');
+  toast('Venda atualizada por ' + getNome(currentUser.id), 'success');
   renderTab('vendas');
 }
 
@@ -1665,7 +1830,7 @@ function delVenda(i) {
   if (v && v._id) { deleteDoc('vendas', v._id); toast('Venda excluida', 'success'); renderTab('vendas'); }
 }
 
-// ===== MINHAS VENDAS (VENDEDOR) — filtro tipo + periodo dinamico =====
+// ===== MINHAS VENDAS (VENDEDOR) =====
 function renderMinhasVendas() {
   var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
     '<div class="fg"><label>Tipo</label><select id="mv-tipo" onchange="aplicarFiltroPeriodo(\'mv\')"><option value="todos">Todos</option><option value="venda">Venda</option><option value="bonificacao">Bonificacao</option></select></div>' +
@@ -1714,7 +1879,7 @@ function renderMinhasVendas() {
     '<div class="card"><h3>Vendas Lancadas</h3><div id="mv-tabela"></div></div>';
 }
 
-// ===== RELATORIO DE ATIVIDADES — filtro periodo dinamico =====
+// ===== RELATORIO DE ATIVIDADES =====
 function renderRelAtividades() {
   var vAtivos = getVendedores();
   var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
@@ -1759,7 +1924,7 @@ function renderRelAtividades() {
     '<div class="card"><h3>Resultados</h3><div id="ra-result"></div></div>';
 }
 
-// ===== VENDAS POR VENDEDOR — filtro vendedor + periodo dinamico =====
+// ===== VENDAS POR VENDEDOR =====
 function renderVendVendedor() {
   var vAtivos = getVendedores();
   var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
@@ -1815,7 +1980,7 @@ function exportVendVendedorPDF() {
   exportPDF('Vendas por Vendedor', html);
 }
 
-// ===== VENDAS POR ESTADO — filtro estado + periodo dinamico =====
+// ===== VENDAS POR ESTADO =====
 function renderVendEstado() {
   var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
     '<div class="fg"><label>Estado</label><select id="ve-uf" onchange="aplicarFiltroPeriodo(\'ve\')"><option value="">Todos</option>' + UFS.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('') + '</select></div>' +
@@ -1873,7 +2038,7 @@ function exportVendEstadoPDF() {
   exportPDF('Vendas por Estado', html);
 }
 
-// ===== VENDAS POR SEGMENTO — filtro segmento + periodo dinamico =====
+// ===== VENDAS POR SEGMENTO =====
 function renderVendSegmento() {
   var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
     '<div class="fg"><label>Segmento</label><select id="vs-seg" onchange="aplicarFiltroPeriodo(\'vs\')"><option value="">Todos</option>' + SEGMENTOS.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('') + '</select></div>' +
@@ -1931,7 +2096,7 @@ function exportVendSegmentoPDF() {
   exportPDF('Vendas por Segmento', html);
 }
 
-// ===== CRUZAMENTOS — filtro vendedor/segmento/estado + periodo dinamico =====
+// ===== CRUZAMENTOS =====
 function renderCruzamentos() {
   var vAtivos = getVendedores();
   var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
@@ -1975,30 +2140,56 @@ function renderCruzamentos() {
 
 function initCruzamentos() { aplicarFiltroPeriodo('cr'); }
 
-// ===== ANALISE DE CLIENTES =====
+// ===== ANALISE DE CLIENTES (pesquisa via codigo + filtro dinamico de datas) =====
 function renderAnaliseCli() {
-  var clientes = loadData('clientes');
-  var cliOpts = clientes.map(function (c) { return '<option value="' + c.cod + '">' + c.cod + ' - ' + c.razao + '</option>'; }).join('');
-  return '<h2 class="st2">Analise de Clientes</h2>' +
-    '<div class="card"><h3>Selecionar Cliente</h3><div class="fr"><div class="fg"><label>Cliente</label><select id="ac-cli" onchange="analisaCliente()"><option value="">Selecione...</option>' + cliOpts + '</select></div></div></div><div id="ac-result"></div>';
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
+    '<div class="fg" style="min-width:280px"><label>Codigo(s) do Cliente</label><input type="text" id="ac-cod" placeholder="Digite o codigo. Ex: 001 ou 001, 002, 003" onkeydown="if(event.key===\'Enter\')analisaClientes()"></div>' +
+    filtroPeriodoHTML('ac') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="analisaClientes()">Analisar</button>' +
+    '<button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'ac\')">Limpar</button></div></div></div>' +
+    '<div class="card" style="border-left:4px solid var(--acc)"><h3>Como usar</h3><p style="font-size:.82rem;color:var(--txt2);margin-bottom:8px">Digite o <strong>codigo</strong> do cliente no campo acima. Para analisar <strong>varios clientes de uma vez</strong>, separe os codigos por <strong>virgula</strong> (ex: <code>001, 002, 003</code>).</p><p style="font-size:.82rem;color:var(--txt2)">Dica: se nao souber o codigo, consulte a aba <strong>Clientes</strong> para encontrar.</p></div>';
+  return '<h2 class="st2">Analise de Clientes</h2>' + filtro + '<div id="ac-result"></div>';
 }
 
-function analisaCliente() {
-  var selCod = document.getElementById('ac-cli').value;
-  if (!selCod) { var r0 = document.getElementById('ac-result'); if (r0) { r0.innerHTML = ''; } return; }
+function analisaClientes() {
+  var input = document.getElementById('ac-cod').value.trim();
+  if (!input) { toast('Digite o codigo do cliente', 'error'); return; }
+  var cods = input.split(',').map(function (c) { return c.trim(); }).filter(function (c) { return c.length > 0; });
+  if (!cods.length) { toast('Digite pelo menos um codigo valido', 'error'); return; }
+  var p = document.getElementById('ac-periodo').value;
+  var ini = document.getElementById('ac-ini') ? document.getElementById('ac-ini').value : '';
+  var fim = document.getElementById('ac-fim') ? document.getElementById('ac-fim').value : '';
+  var mes = document.getElementById('ac-mes') ? document.getElementById('ac-mes').value : '';
+  var ano = document.getElementById('ac-ano') ? document.getElementById('ac-ano').value : '';
   var vendas = loadData('vendas');
-  var cliente = getClienteByCod(selCod);
-  var vCli = vendas.filter(function (v) { var m = v.cliente.match(/COD\s+(\S+)/); return m && m[1] === selCod; });
-  vCli.sort(function (a, b) { return a.data.localeCompare(b.data); });
   var html = '';
-  if (vCli.length === 0) {
-    html = '<div class="card"><div class="es"><div class="ic">SEM</div><p>Nenhuma compra registrada para este cliente.</p></div></div>';
-  } else {
+  var encontrados = 0;
+  cods.forEach(function (cod) {
+    var cliente = getClienteByCod(cod);
+    if (!cliente) {
+      html += '<div class="card" style="border-left:4px solid var(--err)"><h3>Cliente ' + cod + '</h3><div class="es"><div class="ic">SEM</div><p>Nenhum cliente encontrado com o codigo <strong>' + cod + '</strong>.</p></div></div>';
+      return;
+    }
+    encontrados++;
+    var vCli = vendas.filter(function (v) { var m = v.cliente.match(/COD\s+(\S+)/); return m && m[1] === cod; });
+    vCli = vCli.filter(function (v) {
+      if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+      if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+      if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+      if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+      return true;
+    });
+    vCli.sort(function (a, b) { return a.data.localeCompare(b.data); });
+    html += '<div class="card"><h3>' + cliente.razao + ' (COD ' + cod + ')</h3>';
+    if (vCli.length === 0) {
+      html += '<div class="es"><div class="ic">SEM</div><p>Nenhuma compra no periodo.</p></div></div>';
+      return;
+    }
     var totGeral = vCli.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
     var qtdProd = vCli.reduce(function (s, v) { return s + (parseInt(v.qtdProdutos) || 0); }, 0);
     var mediaTicket = totGeral / vCli.length;
     var intervalos = [];
-    for (var i = 1; i < vCli.length; i++) { var d1 = new Date(vCli[i - 1].data); var d2 = new Date(vCli[i].data); intervalos.push(Math.floor((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24))); }
+    for (var j = 1; j < vCli.length; j++) { var d1 = new Date(vCli[j - 1].data); var d2 = new Date(vCli[j].data); intervalos.push(Math.floor((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24))); }
     var intervaloMedio = intervalos.length ? Math.round(intervalos.reduce(function (s, x) { return s + x; }, 0) / intervalos.length) : 0;
     var produtosFreq = {};
     vCli.forEach(function (v) {
@@ -2007,26 +2198,307 @@ function analisaCliente() {
     var prodsOrdenados = Object.keys(produtosFreq).sort(function (a, b) { return produtosFreq[b].vezes - produtosFreq[a].vezes; });
     var dataPrevista = '--';
     if (intervaloMedio > 0 && vCli.length > 1) { var dUlt = new Date(vCli[vCli.length - 1].data); dUlt.setDate(dUlt.getDate() + intervaloMedio); dataPrevista = dUlt.toISOString().split('T')[0]; }
-    var valorPrevisto = mediaTicket;
-    html = '<div class="card"><h3>' + (cliente ? cliente.razao : 'Cliente ' + selCod) + '</h3><div class="sg">' +
+    html += '<div class="sg">' +
       '<div class="sc s"><div class="lb">Total Compras</div><div class="vl">' + vCli.length + '</div></div>' +
-      '<div class="sc"><div class="lb">Faturamento Total</div><div class="vl">R$ ' + fmtBRL(totGeral) + '</div></div>' +
+      '<div class="sc"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(totGeral) + '</div></div>' +
       '<div class="sc"><div class="lb">Ticket Medio</div><div class="vl">R$ ' + fmtBRL(mediaTicket) + '</div></div>' +
-      '<div class="sc"><div class="lb">Produtos Comprados</div><div class="vl">' + qtdProd + '</div></div>' +
-      '<div class="sc"><div class="lb">Intervalo Medio</div><div class="vl">' + intervaloMedio + ' dias</div></div></div></div>';
-    html += '<div class="card"><h3>Historico de Compras</h3><table><thead><tr><th>Data</th><th>Itens</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
+      '<div class="sc"><div class="lb">Produtos</div><div class="vl">' + qtdProd + '</div></div>' +
+      '<div class="sc"><div class="lb">Intervalo Medio</div><div class="vl">' + intervaloMedio + ' dias</div></div></div>';
+    html += '<table><thead><tr><th>Data</th><th>Itens</th><th>Qtd</th><th>Total</th></tr></thead><tbody>';
     vCli.forEach(function (v) { var itensStr = (v.itens && v.itens.length) ? v.itens.map(function (it) { return it.qtd + 'x ' + it.nome; }).join(', ') : '--'; html += '<tr><td>' + v.data + '</td><td style="font-size:.78rem">' + itensStr + '</td><td class="tcc">' + (v.qtdProdutos || 0) + '</td><td class="tcr">R$ ' + fmtBRL(v.total) + '</td></tr>'; });
-    html += '</tbody></table></div>';
-    html += '<div class="card"><h3>Produtos Mais Comprados</h3><table><thead><tr><th>Produto</th><th>Qtd Total</th><th>Frequencia</th></tr></thead><tbody>';
-    prodsOrdenados.forEach(function (p) { html += '<tr><td>' + p + '</td><td class="tcc">' + produtosFreq[p].qtd + '</td><td class="tcc">' + produtosFreq[p].vezes + 'x</td></tr>'; });
-    html += '</tbody></table></div>';
+    html += '</tbody></table>';
     html += '<div class="pred-card"><h4>Previsao do Proximo Pedido</h4><div class="pred-grid">' +
       '<div class="pred-item"><div class="pred-label">Data Estimada</div><div class="pred-value">' + dataPrevista + '</div></div>' +
-      '<div class="pred-item"><div class="pred-label">Valor Estimado</div><div class="pred-value">R$ ' + fmtBRL(valorPrevisto) + '</div></div>' +
+      '<div class="pred-item"><div class="pred-label">Valor Estimado</div><div class="pred-value">R$ ' + fmtBRL(mediaTicket) + '</div></div>' +
       '<div class="pred-item"><div class="pred-label">Intervalo</div><div class="pred-value">' + intervaloMedio + ' dias</div></div></div></div>';
+    html += '</div>';
+  });
+  if (encontrados === 0) {
+    html = '<div class="card"><div class="es"><div class="ic">SEM</div><p>Nenhum cliente encontrado com os codigos informados.</p></div></div>';
   }
   var div = document.getElementById('ac-result');
   if (div) { div.innerHTML = html; }
+}
+
+// ===== METRICAS DE CLIENTES (em termos leigos + 3 novos blocos + exportacao PDF/CSV) =====
+var _mtDados = null; // guarda os dados calculados para exportacao
+
+function renderMetricas() {
+  var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' + filtroPeriodoHTML('mt') +
+    '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-a btn-s" onclick="limparFiltroPeriodo(\'mt\')">Limpar</button></div></div></div>';
+  window['_filtro_mt'] = function (p, ini, fim, mes, ano) { renderMetricasConteudo(p, ini, fim, mes, ano); };
+  setTimeout(function () { aplicarFiltroPeriodo('mt'); }, 50);
+  return '<h2 class="st2">Metricas de Clientes</h2>' + filtro +
+    '<div class="card" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><h3 style="margin:0;flex:1">Exportar</h3>' +
+    '<button class="btn btn-a btn-s" onclick="exportMetricasCSV()">📄 Exportar CSV</button>' +
+    '<button class="btn btn-p btn-s" onclick="exportMetricasPDF()">📑 Exportar PDF</button></div>' +
+    '<div id="mt-result"></div>';
+}
+
+function initMetricas() { aplicarFiltroPeriodo('mt'); }
+
+function renderMetricasConteudo(p, ini, fim, mes, ano) {
+  var vendas = loadData('vendas');
+  var clientes = loadData('clientes');
+  var filtradas = vendas.filter(function (v) {
+    if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
+    if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
+    if ((p === 'semanal' || p === 'periodo') && ini && v.data < ini) { return false; }
+    if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
+    return true;
+  });
+  var html = '<div class="metrica-dica"><strong>Como ler esta tela:</strong> aqui voce ve a saude financeira e o comportamento dos seus clientes em linguagem simples. Use os filtros de periodo acima para focar em um mes, um ano ou um intervalo especifico.</div>';
+  // ===== 1. METRICAS FINANCEIRAS =====
+  var totalVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totalClientes = clientes.length || 1;
+  var arpu = totalVendas / totalClientes;
+  var ltv = arpu * 3;
+  var cac = 0;
+  var ltvCac = cac > 0 ? (ltv / cac) : 0;
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">💰 1. Dinheiro e Valor dos Clientes</div>' +
+    '<div class="metrica-grupo-desc">Quanto cada cliente vale e quanto custa conquistar um novo.</div>' +
+    '<div class="sg">' +
+    '<div class="sc s"><div class="lb">LTV (valor do cliente)</div><div class="vl">R$ ' + fmtBRL(ltv) + '</div><div class="sb">Quanto um cliente gera em media no periodo</div></div>' +
+    '<div class="sc"><div class="lb">ARPU (media por cliente)</div><div class="vl">R$ ' + fmtBRL(arpu) + '</div><div class="sb">Faturamento medio por cliente</div></div>' +
+    '<div class="sc w"><div class="lb">CAC (custo p/ conquistar)</div><div class="vl">R$ ' + fmtBRL(cac) + '</div><div class="sb">Cadastre gastos de marketing/vendas para calcular</div></div>' +
+    '<div class="sc ' + (ltvCac >= 3 ? 's' : 'w') + '"><div class="lb">LTV / CAC</div><div class="vl">' + (cac > 0 ? ltvCac.toFixed(1) : '—') + '</div><div class="sb">Ideal: 3 ou mais (cada R$1 gasto volta 3x)</div></div>' +
+    '</div></div>';
+  // ===== 2. RETENCAO E CHURN =====
+  var clientesComCompra = {};
+  filtradas.forEach(function (v) { var m = v.cliente.match(/COD\s+(\S+)/); if (m) { clientesComCompra[m[1]] = true; } });
+  var ativos = Object.keys(clientesComCompra).length;
+  var churn = totalClientes > 0 ? Math.max(0, (1 - (ativos / totalClientes)) * 100) : 0;
+  var recompra = 0;
+  var compradoresMultiplas = 0;
+  var porCliente = {};
+  filtradas.forEach(function (v) { var m = v.cliente.match(/COD\s+(\S+)/); if (m) { if (!porCliente[m[1]]) { porCliente[m[1]] = 0; } porCliente[m[1]]++; } });
+  Object.keys(porCliente).forEach(function (c) { if (porCliente[c] > 1) { compradoresMultiplas++; } });
+  recompra = ativos > 0 ? (compradoresMultiplas / ativos) * 100 : 0;
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">🛡️ 2. Clientes que Ficam</div>' +
+    '<div class="metrica-grupo-desc">Quantos clientes continuam comprando e quantos pararam.</div>' +
+    '<div class="sg">' +
+    '<div class="sc ' + (churn < 20 ? 's' : (churn < 40 ? 'w' : 'd')) + '"><div class="lb">Churn (perda)</div><div class="vl">' + churn.toFixed(1) + '%</div><div class="sb">% de clientes que nao compraram no periodo</div></div>' +
+    '<div class="sc s"><div class="lb">Retencao</div><div class="vl">' + (100 - churn).toFixed(1) + '%</div><div class="sb">% de clientes que continuam comprando</div></div>' +
+    '<div class="sc"><div class="lb">Recompra</div><div class="vl">' + recompra.toFixed(1) + '%</div><div class="sb">% de clientes que compraram mais de 1x</div></div>' +
+    '<div class="sc"><div class="lb">Clientes Ativos</div><div class="vl">' + ativos + '</div><div class="sb">Compraram no periodo</div></div>' +
+    '</div></div>';
+  // ===== 3. COMPORTAMENTO E ENGAJAMENTO =====
+  var ticketMedio = filtradas.length > 0 ? totalVendas / filtradas.length : 0;
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">📊 3. Como os Clientes Compram</div>' +
+    '<div class="metrica-grupo-desc">Frequencia, valor por compra e classificacao dos clientes.</div>' +
+    '<div class="sg">' +
+    '<div class="sc"><div class="lb">Ticket Medio</div><div class="vl">R$ ' + fmtBRL(ticketMedio) + '</div><div class="sb">Valor medio gasto por compra</div></div>' +
+    '<div class="sc"><div class="lb">Total de Vendas</div><div class="vl">' + filtradas.length + '</div><div class="sb">No periodo selecionado</div></div>' +
+    '<div class="sc s"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(totalVendas) + '</div><div class="sb">Total vendido no periodo</div></div>' +
+    '</div></div>';
+  // ===== RFM =====
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">🏆 4. Classificacao dos Clientes (RFM)</div>' +
+    '<div class="metrica-grupo-desc">Agrupa os clientes por: quando compraram (Recencia), quantas vezes (Frequencia) e quanto gastaram (Valor).</div>';
+  var hoje = new Date();
+  var rfm = [];
+  Object.keys(porCliente).forEach(function (cod) {
+    var vCli = filtradas.filter(function (v) { var m = v.cliente.match(/COD\s+(\S+)/); return m && m[1] === cod; });
+    vCli.sort(function (a, b) { return b.data.localeCompare(a.data); });
+    var dUlt = new Date(vCli[0].data);
+    var dias = Math.floor((hoje.getTime() - dUlt.getTime()) / (1000 * 60 * 60 * 24));
+    var total = vCli.reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+    var freq = vCli.length;
+    var classe = 'perdido';
+    if (dias <= 30 && freq >= 3 && total >= 1000) { classe = 'campeao'; }
+    else if (dias <= 60 && freq >= 2) { classe = 'leal'; }
+    else if (dias <= 90 && freq >= 1) { classe = 'promissor'; }
+    else if (dias <= 180) { classe = 'risco'; }
+    var nome = getClienteByCod(cod);
+    rfm.push({ cod: cod, nome: nome ? nome.razao : cod, dias: dias, freq: freq, total: total, classe: classe });
+  });
+  rfm.sort(function (a, b) { return b.total - a.total; });
+  var rfmLabels = { campeao: 'Campeao', leal: 'Leal', promissor: 'Promissor', risco: 'Em Risco', perdido: 'Perdido' };
+  if (rfm.length) {
+    html += '<table><thead><tr><th>Cliente</th><th>Ultima Compra</th><th>Vezes</th><th>Total</th><th>Classificacao</th></tr></thead><tbody>';
+    rfm.forEach(function (r) {
+      html += '<tr><td>' + r.nome + '</td><td>' + r.dias + ' dias atras</td><td class="tcc">' + r.freq + '</td><td class="tcr">R$ ' + fmtBRL(r.total) + '</td><td><span class="rfm-badge ' + r.classe + '">' + rfmLabels[r.classe] + '</span></td></tr>';
+    });
+    html += '</tbody></table>';
+  } else {
+    html += '<div class="es"><div class="ic">SEM</div><p>Sem dados no periodo.</p></div>';
+  }
+  html += '</div>';
+  // ===== 5. DISTRIBUICAO POR NIVEL (NOVO) =====
+  var nivelCount = { ouro: 0, prata: 0, bronze: 0, sem: 0 };
+  var nivelFaturamento = { ouro: 0, prata: 0, bronze: 0, sem: 0 };
+  clientes.forEach(function (c) {
+    var nv = c.nivel || 'sem';
+    if (!nivelCount[nv]) { nivelCount[nv] = 0; }
+    nivelCount[nv]++;
+  });
+  filtradas.forEach(function (v) {
+    var m = v.cliente.match(/COD\s+(\S+)/);
+    if (m) {
+      var cli = getClienteByCod(m[1]);
+      var nv = cli ? (cli.nivel || 'sem') : 'sem';
+      if (!nivelFaturamento[nv]) { nivelFaturamento[nv] = 0; }
+      nivelFaturamento[nv] += parseFloat(v.total) || 0;
+    }
+  });
+  var nivelLabels = { ouro: 'Ouro', prata: 'Prata', bronze: 'Bronze', sem: 'Sem Nivel' };
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">🥇 5. Distribuicao por Nivel</div>' +
+    '<div class="metrica-grupo-desc">Quantos clientes em cada nivel e quanto cada nivel fatura.</div>' +
+    '<table><thead><tr><th>Nivel</th><th>Clientes</th><th>% da Base</th><th>Faturamento</th></tr></thead><tbody>';
+  ['ouro', 'prata', 'bronze', 'sem'].forEach(function (nv) {
+    var pctBase = totalClientes > 0 ? (nivelCount[nv] / totalClientes) * 100 : 0;
+    html += '<tr><td><span class="nivel-badge ' + nv + '">' + nivelLabels[nv] + '</span></td><td class="tcc">' + nivelCount[nv] + '</td><td class="tcc">' + pctBase.toFixed(1) + '%</td><td class="tcr">R$ ' + fmtBRL(nivelFaturamento[nv]) + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  // ===== 6. CLIENTES EM RISCO (NOVO) =====
+  var emRisco = rfm.filter(function (r) { return r.classe === 'risco' || r.classe === 'perdido'; });
+  var totalRisco = emRisco.reduce(function (s, r) { return s + r.total; }, 0);
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">⚠️ 6. Clientes em Risco</div>' +
+    '<div class="metrica-grupo-desc">Clientes que pararam de comprar ou estao prestes a parar. Priorize o contato com eles.</div>' +
+    '<div class="sg">' +
+    '<div class="sc d"><div class="lb">Em Risco / Perdidos</div><div class="vl">' + emRisco.length + '</div><div class="sb">Clientes que precisam de atencao</div></div>' +
+    '<div class="sc w"><div class="lb">Faturamento em Risco</div><div class="vl">R$ ' + fmtBRL(totalRisco) + '</div><div class="sb">Valor que pode ser perdido</div></div>' +
+    '</div>';
+  if (emRisco.length) {
+    html += '<table><thead><tr><th>Cliente</th><th>Ultima Compra</th><th>Vezes</th><th>Total</th><th>Classificacao</th></tr></thead><tbody>';
+    emRisco.forEach(function (r) {
+      html += '<tr><td>' + r.nome + '</td><td>' + r.dias + ' dias atras</td><td class="tcc">' + r.freq + '</td><td class="tcr">R$ ' + fmtBRL(r.total) + '</td><td><span class="rfm-badge ' + r.classe + '">' + rfmLabels[r.classe] + '</span></td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+  html += '</div>';
+  // ===== 7. PARETO 80/20 (NOVO) =====
+  var pareto = rfm.slice().sort(function (a, b) { return b.total - a.total; });
+  var receitaTotal = pareto.reduce(function (s, r) { return s + r.total; }, 0);
+  var acumulado = 0;
+  var qtd80 = 0;
+  for (var i = 0; i < pareto.length; i++) {
+    acumulado += pareto[i].total;
+    qtd80++;
+    if (receitaTotal > 0 && (acumulado / receitaTotal) >= 0.8) { break; }
+  }
+  var pctClientes80 = pareto.length > 0 ? (qtd80 / pareto.length) * 100 : 0;
+  var pctReceita80 = receitaTotal > 0 ? (acumulado / receitaTotal) * 100 : 0;
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">📈 7. Concentracao de Receita (Pareto 80/20)</div>' +
+    '<div class="metrica-grupo-desc">Quantos clientes geram a maior parte do faturamento. Use para priorizar quem cuidar.</div>' +
+    '<div class="sg">' +
+    '<div class="sc s"><div class="lb">Clientes que geram 80%</div><div class="vl">' + qtd80 + '</div><div class="sb">' + pctClientes80.toFixed(1) + '% da base</div></div>' +
+    '<div class="sc"><div class="lb">Receita desses clientes</div><div class="vl">' + pctReceita80.toFixed(1) + '%</div><div class="sb">Do total faturado no periodo</div></div>' +
+    '<div class="sc"><div class="lb">Faturamento Total</div><div class="vl">R$ ' + fmtBRL(receitaTotal) + '</div><div class="sb">Somente clientes com compra</div></div>' +
+    '</div></div>';
+  // ===== 8. SATISFACAO =====
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">😊 8. Satisfacao dos Clientes</div>' +
+    '<div class="metrica-grupo-desc">Como os clientes se sentem em relacao a sua empresa. Preencha as notas abaixo para acompanhar.</div>' +
+    '<div class="sg">' +
+    '<div class="sc"><div class="lb">NPS (recomendaria?)</div><div class="vl">—</div><div class="sb">Nota 0-10: quantos recomendariam</div></div>' +
+    '<div class="sc"><div class="lb">CSAT (satisfacao)</div><div class="vl">—</div><div class="sb">Nota apos compra/suporte</div></div>' +
+    '<div class="sc"><div class="lb">CES (esforco)</div><div class="vl">—</div><div class="sb">Quanto esforco o cliente teve</div></div>' +
+    '</div><p style="font-size:.8rem;color:var(--txt2)">Estas metricas dependem de pesquisas com os clientes. Registre as notas em uma planilha e elas aparecerao aqui.</p></div>';
+  var div = document.getElementById('mt-result');
+  if (div) { div.innerHTML = html; }
+  // Guarda os dados para exportacao
+  _mtDados = {
+    periodo: p, ini: ini, fim: fim, mes: mes, ano: ano,
+    totalVendas: totalVendas, totalClientes: totalClientes, arpu: arpu, ltv: ltv, cac: cac, ltvCac: ltvCac,
+    ativos: ativos, churn: churn, recompra: recompra, ticketMedio: ticketMedio, totalRegistros: filtradas.length,
+    rfm: rfm, rfmLabels: rfmLabels,
+    nivelCount: nivelCount, nivelFaturamento: nivelFaturamento, nivelLabels: nivelLabels,
+    emRisco: emRisco, totalRisco: totalRisco,
+    qtd80: qtd80, pctClientes80: pctClientes80, pctReceita80: pctReceita80, receitaTotal: receitaTotal
+  };
+}
+
+// ===== EXPORTACAO DAS METRICAS =====
+function exportMetricasCSV() {
+  if (!_mtDados) { toast('Calcule as metricas primeiro (abra a aba Metricas)', 'error'); return; }
+  var d = _mtDados;
+  var linhas = [];
+  linhas.push(['Metrica', 'Valor']);
+  linhas.push(['LTV (valor do cliente)', 'R$ ' + fmtBRL(d.ltv)]);
+  linhas.push(['ARPU (media por cliente)', 'R$ ' + fmtBRL(d.arpu)]);
+  linhas.push(['CAC (custo p/ conquistar)', 'R$ ' + fmtBRL(d.cac)]);
+  linhas.push(['LTV / CAC', d.cac > 0 ? d.ltvCac.toFixed(1) : '—']);
+  linhas.push(['Churn (perda)', d.churn.toFixed(1) + '%']);
+  linhas.push(['Retencao', (100 - d.churn).toFixed(1) + '%']);
+  linhas.push(['Recompra', d.recompra.toFixed(1) + '%']);
+  linhas.push(['Clientes Ativos', d.ativos]);
+  linhas.push(['Ticket Medio', 'R$ ' + fmtBRL(d.ticketMedio)]);
+  linhas.push(['Total de Vendas', d.totalRegistros]);
+  linhas.push(['Faturamento', 'R$ ' + fmtBRL(d.totalVendas)]);
+  linhas.push([]);
+  linhas.push(['Distribuicao por Nivel', 'Clientes', 'Faturamento']);
+  ['ouro', 'prata', 'bronze', 'sem'].forEach(function (nv) {
+    linhas.push([d.nivelLabels[nv], d.nivelCount[nv], 'R$ ' + fmtBRL(d.nivelFaturamento[nv])]);
+  });
+  linhas.push([]);
+  linhas.push(['Clientes em Risco', 'Ultima Compra', 'Vezes', 'Total', 'Classificacao']);
+  d.emRisco.forEach(function (r) {
+    linhas.push([r.nome, r.dias + ' dias atras', r.freq, 'R$ ' + fmtBRL(r.total), d.rfmLabels[r.classe]]);
+  });
+  linhas.push([]);
+  linhas.push(['Pareto 80/20', 'Valor']);
+  linhas.push(['Clientes que geram 80%', d.qtd80 + ' (' + d.pctClientes80.toFixed(1) + '% da base)']);
+  linhas.push(['Receita desses clientes', d.pctReceita80.toFixed(1) + '%']);
+  linhas.push(['Faturamento Total', 'R$ ' + fmtBRL(d.receitaTotal)]);
+  linhas.push([]);
+  linhas.push(['RFM - Cliente', 'Ultima Compra', 'Vezes', 'Total', 'Classificacao']);
+  d.rfm.forEach(function (r) {
+    linhas.push([r.nome, r.dias + ' dias atras', r.freq, 'R$ ' + fmtBRL(r.total), d.rfmLabels[r.classe]]);
+  });
+  var csv = linhas.map(function (l) { return l.map(function (c) { return String(c).replace(/;/g, ','); }).join(';'); }).join('\n');
+  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'metricas-clientes.csv';
+  a.click();
+  toast('Metricas exportadas em CSV', 'success');
+}
+
+function exportMetricasPDF() {
+  if (!_mtDados) { toast('Calcule as metricas primeiro (abra a aba Metricas)', 'error'); return; }
+  var d = _mtDados;
+  var html = '<h2>Metricas de Clientes</h2>' +
+    '<p style="color:#666;font-size:.85rem">Periodo: ' + (d.periodo === 'todos' ? 'Todos' : d.periodo) + (d.ini ? ' | ' + d.ini + ' a ' + d.fim : '') + (d.mes ? ' | ' + d.mes : '') + (d.ano ? ' | Ano ' + d.ano : '') + '</p>' +
+    '<h3>1. Dinheiro e Valor dos Clientes</h3>' +
+    '<table><tr><th>Metrica</th><th>Valor</th></tr>' +
+    '<tr><td>LTV (valor do cliente)</td><td>R$ ' + fmtBRL(d.ltv) + '</td></tr>' +
+    '<tr><td>ARPU (media por cliente)</td><td>R$ ' + fmtBRL(d.arpu) + '</td></tr>' +
+    '<tr><td>CAC (custo p/ conquistar)</td><td>R$ ' + fmtBRL(d.cac) + '</td></tr>' +
+    '<tr><td>LTV / CAC</td><td>' + (d.cac > 0 ? d.ltvCac.toFixed(1) : '—') + '</td></tr></table>' +
+    '<h3>2. Clientes que Ficam</h3>' +
+    '<table><tr><th>Metrica</th><th>Valor</th></tr>' +
+    '<tr><td>Churn (perda)</td><td>' + d.churn.toFixed(1) + '%</td></tr>' +
+    '<tr><td>Retencao</td><td>' + (100 - d.churn).toFixed(1) + '%</td></tr>' +
+    '<tr><td>Recompra</td><td>' + d.recompra.toFixed(1) + '%</td></tr>' +
+    '<tr><td>Clientes Ativos</td><td>' + d.ativos + '</td></tr></table>' +
+    '<h3>3. Como os Clientes Compram</h3>' +
+    '<table><tr><th>Metrica</th><th>Valor</th></tr>' +
+    '<tr><td>Ticket Medio</td><td>R$ ' + fmtBRL(d.ticketMedio) + '</td></tr>' +
+    '<tr><td>Total de Vendas</td><td>' + d.totalRegistros + '</td></tr>' +
+    '<tr><td>Faturamento</td><td>R$ ' + fmtBRL(d.totalVendas) + '</td></tr></table>' +
+    '<h3>4. Classificacao dos Clientes (RFM)</h3>' +
+    '<table><tr><th>Cliente</th><th>Ultima Compra</th><th>Vezes</th><th>Total</th><th>Classificacao</th></tr>';
+  d.rfm.forEach(function (r) {
+    html += '<tr><td>' + r.nome + '</td><td>' + r.dias + ' dias atras</td><td>' + r.freq + '</td><td>R$ ' + fmtBRL(r.total) + '</td><td>' + d.rfmLabels[r.classe] + '</td></tr>';
+  });
+  html += '</table>' +
+    '<h3>5. Distribuicao por Nivel</h3>' +
+    '<table><tr><th>Nivel</th><th>Clientes</th><th>Faturamento</th></tr>';
+  ['ouro', 'prata', 'bronze', 'sem'].forEach(function (nv) {
+    html += '<tr><td>' + d.nivelLabels[nv] + '</td><td>' + d.nivelCount[nv] + '</td><td>R$ ' + fmtBRL(d.nivelFaturamento[nv]) + '</td></tr>';
+  });
+  html += '</table>' +
+    '<h3>6. Clientes em Risco</h3>' +
+    '<table><tr><th>Cliente</th><th>Ultima Compra</th><th>Vezes</th><th>Total</th><th>Classificacao</th></tr>';
+  d.emRisco.forEach(function (r) {
+    html += '<tr><td>' + r.nome + '</td><td>' + r.dias + ' dias atras</td><td>' + r.freq + '</td><td>R$ ' + fmtBRL(r.total) + '</td><td>' + d.rfmLabels[r.classe] + '</td></tr>';
+  });
+  html += '</table>' +
+    '<h3>7. Concentracao de Receita (Pareto 80/20)</h3>' +
+    '<table><tr><th>Metrica</th><th>Valor</th></tr>' +
+    '<tr><td>Clientes que geram 80%</td><td>' + d.qtd80 + ' (' + d.pctClientes80.toFixed(1) + '% da base)</td></tr>' +
+    '<tr><td>Receita desses clientes</td><td>' + d.pctReceita80.toFixed(1) + '%</td></tr>' +
+    '<tr><td>Faturamento Total</td><td>R$ ' + fmtBRL(d.receitaTotal) + '</td></tr></table>';
+  exportPDF('Metricas de Clientes', html);
 }
 
 // ===== COMISSAO =====
@@ -2126,7 +2598,7 @@ function renderCatalogo() {
   return html;
 }
 
-// ===== RELATORIOS GERAIS — filtro tipo + periodo dinamico =====
+// ===== RELATORIOS GERAIS =====
 function renderRelatorios() {
   var mesOpts = MESES.map(function (m, i) { return '<option value="' + (i + 1) + '">' + m + '</option>'; }).join('');
   var anoAtual = new Date().getFullYear();
@@ -2227,7 +2699,7 @@ function renderMinhas() {
     progressBar('Clientes Novos', vCN, m.clientesNovos || 0, pCN) + '</div>';
 }
 
-// ===== REGISTRAR VENDA (VENDEDOR) — permite varias vendas por cliente =====
+// ===== REGISTRAR VENDA (VENDEDOR) =====
 function renderVenda() {
   return renderWeeklyBar() +
     '<h2 class="st2">Registrar Venda</h2>' +
@@ -2316,9 +2788,9 @@ function saveVenda() {
   var nomeCli = cliente ? cliente.razao : 'COD ' + cod;
   var estado = cliente ? cliente.estado : '--';
   var segmento = cliente ? cliente.segmento : 'Outros';
-  var venda = { data: data, cliente: nomeCli + ' (COD ' + cod + ' / ' + estado + ')', vendedor: currentUser.id, itens: itens, qtdProdutos: qtdProdutos, total: total, estado: estado, segmento: segmento, tipo: tipo };
+  var venda = { data: data, cliente: nomeCli + ' (COD ' + cod + ' / ' + estado + ')', vendedor: currentUser.id, itens: itens, qtdProdutos: qtdProdutos, total: total, estado: estado, segmento: segmento, tipo: tipo, editadoPor: getNome(currentUser.id), editadoEm: new Date().toISOString() };
   saveData('vendas', venda);
-  toast((tipo === 'venda' ? 'Venda' : 'Bonificacao') + ' salva: R$ ' + fmtBRL(total), 'success');
+  toast((tipo === 'venda' ? 'Venda' : 'Bonificacao') + ' salva por ' + getNome(currentUser.id) + ': R$ ' + fmtBRL(total), 'success');
   renderTab('venda');
 }
 
@@ -2347,9 +2819,9 @@ function saveAtividade() {
   var qtd = parseInt(document.getElementById('at-qtd').value) || 0;
   var obs = document.getElementById('at-obs').value.trim();
   if (!data || !tipo) { toast('Preencha data e tipo', 'error'); return; }
-  var atividade = { data: data, tipo: tipo, qtd: qtd, obs: obs, vendedor: currentUser.id };
+  var atividade = { data: data, tipo: tipo, qtd: qtd, obs: obs, vendedor: currentUser.id, editadoPor: getNome(currentUser.id), editadoEm: new Date().toISOString() };
   saveData('atividades', atividade);
-  toast('Atividade salva', 'success');
+  toast('Atividade salva por ' + getNome(currentUser.id), 'success');
   renderTab('atividades');
 }
 
@@ -2377,7 +2849,7 @@ function delAtividade(i) {
     var b = document.getElementById('ub');
     b.textContent = getNome(user.id) + ' - ' + getNivel(user.id);
     b.className = 'badge' + (user.isM ? ' mg' : '');
-    initSidebar();
+    initTabs();
     ['vendas', 'clientes', 'metas', 'atividades', 'usuarios'].forEach(function (k) { initListener(k); });
     syncUsuarios();
   } catch (e) { localStorage.removeItem('mc_user'); }
