@@ -1879,11 +1879,11 @@ function renderMinhasVendas() {
     '<div class="card"><h3>Vendas Lancadas</h3><div id="mv-tabela"></div></div>';
 }
 
-// ===== RELATORIO DE ATIVIDADES =====
+// ===== RELATORIO DE ATIVIDADES (com Ligacao detalhada + exportacao XLSX/PDF) =====
 function renderRelAtividades() {
   var vAtivos = getVendedores();
   var vendOpts = vAtivos.map(function (v) { return '<option value="' + v.id + '">' + getNome(v.id) + '</option>'; }).join('');
-  var tipoOpts = '<option value="">Todos</option><option value="ligacao">Ligacao</option><option value="prospeccao">Prospeccao</option><option value="visita">Visita</option><option value="email">E-mail</option><option value="whatsapp">WhatsApp</option>';
+  var tipoOpts = '<option value="">Todos</option><option value="ligacao">Ligacao</option><option value="prospeccao">Prospeccao</option><option value="visita">Visita</option><option value="email">E-mail</option>';
   var filtro = '<div class="card"><h3>Filtros</h3><div class="filtros">' +
     '<div class="fg"><label>Vendedor</label><select id="ra-vend" onchange="aplicarFiltroPeriodo(\'ra\')"><option value="">Todos</option>' + vendOpts + '</select></div>' +
     '<div class="fg"><label>Tipo</label><select id="ra-tipo" onchange="aplicarFiltroPeriodo(\'ra\')">' + tipoOpts + '</select></div>' +
@@ -1910,18 +1910,79 @@ function renderRelAtividades() {
       var totPro = filtradas.filter(function (a) { return a.tipo === 'prospeccao'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
       var totVis = filtradas.filter(function (a) { return a.tipo === 'visita'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
       var totEm = filtradas.filter(function (a) { return a.tipo === 'email'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-      var totWh = filtradas.filter(function (a) { return a.tipo === 'whatsapp'; }).reduce(function (s, a) { return s + (parseInt(a.qtd) || 0); }, 0);
-      html = '<div class="sg"><div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totLig + '</div></div><div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totPro + '</div></div><div class="sc"><div class="lb">Visitas</div><div class="vl">' + totVis + '</div></div><div class="sc"><div class="lb">E-mails</div><div class="vl">' + totEm + '</div></div><div class="sc"><div class="lb">WhatsApp</div><div class="vl">' + totWh + '</div></div></div>';
-      html += '<table><thead><tr><th>Data</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr></thead><tbody>';
-      filtradas.forEach(function (a) { html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td><td>' + (a.tipo || '--') + '</td><td class="tcc">' + (a.qtd || 0) + '</td><td>' + (a.obs || '') + '</td></tr>'; });
-      html += '</tbody></table>';
+      html = '<div class="sg"><div class="sc"><div class="lb">Ligacoes</div><div class="vl">' + totLig + '</div></div><div class="sc"><div class="lb">Prospeccao</div><div class="vl">' + totPro + '</div></div><div class="sc"><div class="lb">Visitas</div><div class="vl">' + totVis + '</div></div><div class="sc"><div class="lb">E-mails</div><div class="vl">' + totEm + '</div></div></div>';
+      if (tipo === 'ligacao') {
+        html += '<table><thead><tr><th>Data</th><th>Vendedor</th><th>Qtd</th><th>Horario</th><th>Telefone</th><th>Cliente</th><th>Obs</th></tr></thead><tbody>';
+        filtradas.forEach(function (a) {
+          html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td><td class="tcc">' + (a.qtd || 0) + '</td><td>' + (a.horario || '--') + '</td><td>' + (a.telefone || '--') + '</td><td>' + truncarNome(a.clienteNome) + '</td><td>' + (a.obs || '') + '</td></tr>';
+        });
+        html += '</tbody></table>';
+      } else {
+        html += '<table><thead><tr><th>Data</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr></thead><tbody>';
+        filtradas.forEach(function (a) { html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td><td>' + (a.tipo || '--') + '</td><td class="tcc">' + (a.qtd || 0) + '</td><td>' + (a.obs || '') + '</td></tr>'; });
+        html += '</tbody></table>';
+      }
     }
     var div = document.getElementById('ra-result');
     if (div) { div.innerHTML = html; }
+    window._raFiltradas = filtradas;
+    window._raTipo = tipo;
   };
   setTimeout(function () { aplicarFiltroPeriodo('ra'); }, 50);
   return '<h2 class="st2">Relatorio de Atividades</h2>' + filtro +
-    '<div class="card"><h3>Resultados</h3><div id="ra-result"></div></div>';
+    '<div class="card"><h3>Resultados</h3><div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button class="btn btn-a btn-s" onclick="exportAtividadesXLSX()">📊 Exportar XLSX</button>' +
+    '<button class="btn btn-p btn-s" onclick="exportAtividadesPDF()">📑 Exportar PDF</button></div><div id="ra-result"></div></div>';
+}
+
+function truncarNome(nome) {
+  if (!nome) { return '--'; }
+  var palavras = String(nome).trim().split(/\s+/);
+  if (palavras.length <= 2) { return String(nome).trim(); }
+  return palavras.slice(0, 2).join(' ') + ' ...';
+}
+
+function exportAtividadesXLSX() {
+  var dados = window._raFiltradas || [];
+  if (!dados.length) { toast('Nenhum dado para exportar', 'error'); return; }
+  var tipo = window._raTipo || '';
+  var linhas = [];
+  if (tipo === 'ligacao') {
+    linhas.push(['Data', 'Vendedor', 'Qtd', 'Horario', 'Telefone', 'Cliente', 'Obs']);
+    dados.forEach(function (a) {
+      linhas.push([a.data, getNome(a.vendedor), a.qtd || 0, a.horario || '', a.telefone || '', a.clienteNome || '', a.obs || '']);
+    });
+  } else {
+    linhas.push(['Data', 'Vendedor', 'Tipo', 'Qtd', 'Obs']);
+    dados.forEach(function (a) {
+      linhas.push([a.data, getNome(a.vendedor), a.tipo || '', a.qtd || 0, a.obs || '']);
+    });
+  }
+  var ws = XLSX.utils.aoa_to_sheet(linhas);
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Atividades');
+  XLSX.writeFile(wb, 'relatorio-atividades.xlsx');
+  toast('Relatorio exportado em XLSX', 'success');
+}
+
+function exportAtividadesPDF() {
+  var dados = window._raFiltradas || [];
+  if (!dados.length) { toast('Nenhum dado para exportar', 'error'); return; }
+  var tipo = window._raTipo || '';
+  var html = '<h2>Relatorio de Atividades</h2>';
+  if (tipo === 'ligacao') {
+    html += '<table><tr><th>Data</th><th>Vendedor</th><th>Qtd</th><th>Horario</th><th>Telefone</th><th>Cliente</th><th>Obs</th></tr>';
+    dados.forEach(function (a) {
+      html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td><td>' + (a.qtd || 0) + '</td><td>' + (a.horario || '') + '</td><td>' + (a.telefone || '') + '</td><td>' + truncarNome(a.clienteNome) + '</td><td>' + (a.obs || '') + '</td></tr>';
+    });
+  } else {
+    html += '<table><tr><th>Data</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr>';
+    dados.forEach(function (a) {
+      html += '<tr><td>' + a.data + '</td><td>' + getNome(a.vendedor) + '</td><td>' + (a.tipo || '') + '</td><td>' + (a.qtd || 0) + '</td><td>' + (a.obs || '') + '</td></tr>';
+    });
+  }
+  html += '</table>';
+  exportPDF('Relatorio de Atividades', html);
 }
 
 // ===== VENDAS POR VENDEDOR =====
@@ -2220,7 +2281,7 @@ function analisaClientes() {
   if (div) { div.innerHTML = html; }
 }
 
-// ===== METRICAS DE CLIENTES (em termos leigos + 3 novos blocos + exportacao PDF/CSV) =====
+// ===== METRICAS DE CLIENTES (foco comercial: sem CAC/LTV/Satisfacao) =====
 var _mtDados = null; // guarda os dados calculados para exportacao
 
 function renderMetricas() {
@@ -2240,6 +2301,8 @@ function initMetricas() { aplicarFiltroPeriodo('mt'); }
 function renderMetricasConteudo(p, ini, fim, mes, ano) {
   var vendas = loadData('vendas');
   var clientes = loadData('clientes');
+  var metas = loadData('metas');
+  var vAtivos = getVendedores();
   var filtradas = vendas.filter(function (v) {
     if (p === 'anual' && ano) { var d = new Date(v.data); if (d.getFullYear() !== parseInt(ano)) { return false; } }
     if (p === 'mensal' && mes) { var d2 = new Date(v.data); var ym = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0'); if (ym !== mes) { return false; } }
@@ -2247,21 +2310,20 @@ function renderMetricasConteudo(p, ini, fim, mes, ano) {
     if ((p === 'semanal' || p === 'periodo') && fim && v.data > fim) { return false; }
     return true;
   });
-  var html = '<div class="metrica-dica"><strong>Como ler esta tela:</strong> aqui voce ve a saude financeira e o comportamento dos seus clientes em linguagem simples. Use os filtros de periodo acima para focar em um mes, um ano ou um intervalo especifico.</div>';
-  // ===== 1. METRICAS FINANCEIRAS =====
+  var html = '<div class="metrica-dica"><strong>Como ler esta tela:</strong> aqui voce ve a performance comercial em linguagem simples. Use os filtros de periodo acima para focar em um mes, um ano ou um intervalo especifico.</div>';
+  // ===== 1. FATURAMENTO =====
   var totalVendas = filtradas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var totalBonif = filtradas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
   var totalClientes = clientes.length || 1;
-  var arpu = totalVendas / totalClientes;
-  var ltv = arpu * 3;
-  var cac = 0;
-  var ltvCac = cac > 0 ? (ltv / cac) : 0;
-  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">💰 1. Dinheiro e Valor dos Clientes</div>' +
-    '<div class="metrica-grupo-desc">Quanto cada cliente vale e quanto custa conquistar um novo.</div>' +
+  var ticketMedio = filtradas.length > 0 ? totalVendas / filtradas.length : 0;
+  var clientesNovosPeriodo = clientes.filter(function (c) { return c.origem === 'manual'; }).length;
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">💰 1. Faturamento</div>' +
+    '<div class="metrica-grupo-desc">Quanto a operacao vendeu no periodo e a composicao do resultado.</div>' +
     '<div class="sg">' +
-    '<div class="sc s"><div class="lb">LTV (valor do cliente)</div><div class="vl">R$ ' + fmtBRL(ltv) + '</div><div class="sb">Quanto um cliente gera em media no periodo</div></div>' +
-    '<div class="sc"><div class="lb">ARPU (media por cliente)</div><div class="vl">R$ ' + fmtBRL(arpu) + '</div><div class="sb">Faturamento medio por cliente</div></div>' +
-    '<div class="sc w"><div class="lb">CAC (custo p/ conquistar)</div><div class="vl">R$ ' + fmtBRL(cac) + '</div><div class="sb">Cadastre gastos de marketing/vendas para calcular</div></div>' +
-    '<div class="sc ' + (ltvCac >= 3 ? 's' : 'w') + '"><div class="lb">LTV / CAC</div><div class="vl">' + (cac > 0 ? ltvCac.toFixed(1) : '—') + '</div><div class="sb">Ideal: 3 ou mais (cada R$1 gasto volta 3x)</div></div>' +
+    '<div class="sc s"><div class="lb">Total Vendido</div><div class="vl">R$ ' + fmtBRL(totalVendas) + '</div><div class="sb">Somente vendas (sem bonificacoes)</div></div>' +
+    '<div class="sc w"><div class="lb">Bonificacoes</div><div class="vl">R$ ' + fmtBRL(totalBonif) + '</div><div class="sb">Valor distribuido em bonificacoes</div></div>' +
+    '<div class="sc"><div class="lb">Ticket Medio</div><div class="vl">R$ ' + fmtBRL(ticketMedio) + '</div><div class="sb">Valor medio por venda</div></div>' +
+    '<div class="sc"><div class="lb">Novos Clientes</div><div class="vl">' + clientesNovosPeriodo + '</div><div class="sb">Clientes cadastrados manualmente</div></div>' +
     '</div></div>';
   // ===== 2. RETENCAO E CHURN =====
   var clientesComCompra = {};
@@ -2282,16 +2344,24 @@ function renderMetricasConteudo(p, ini, fim, mes, ano) {
     '<div class="sc"><div class="lb">Recompra</div><div class="vl">' + recompra.toFixed(1) + '%</div><div class="sb">% de clientes que compraram mais de 1x</div></div>' +
     '<div class="sc"><div class="lb">Clientes Ativos</div><div class="vl">' + ativos + '</div><div class="sb">Compraram no periodo</div></div>' +
     '</div></div>';
-  // ===== 3. COMPORTAMENTO E ENGAJAMENTO =====
-  var ticketMedio = filtradas.length > 0 ? totalVendas / filtradas.length : 0;
-  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">📊 3. Como os Clientes Compram</div>' +
-    '<div class="metrica-grupo-desc">Frequencia, valor por compra e classificacao dos clientes.</div>' +
-    '<div class="sg">' +
-    '<div class="sc"><div class="lb">Ticket Medio</div><div class="vl">R$ ' + fmtBRL(ticketMedio) + '</div><div class="sb">Valor medio gasto por compra</div></div>' +
-    '<div class="sc"><div class="lb">Total de Vendas</div><div class="vl">' + filtradas.length + '</div><div class="sb">No periodo selecionado</div></div>' +
-    '<div class="sc s"><div class="lb">Faturamento</div><div class="vl">R$ ' + fmtBRL(totalVendas) + '</div><div class="sb">Total vendido no periodo</div></div>' +
-    '</div></div>';
-  // ===== RFM =====
+  // ===== 3. PERFORMANCE POR VENDEDOR (ranking + meta vs realizado) =====
+  var perfVendedor = vAtivos.map(function (v) {
+    var vV = filtradas.filter(function (x) { return x.vendedor === v.id && (x.tipo || 'venda') === 'venda'; });
+    var tot = vV.reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
+    var vM = metas.filter(function (m) { return m.vendedor === v.id; });
+    var meta = vM.length ? (parseFloat(vM[vM.length - 1].valorVenda) || 0) : 0;
+    var pct = meta > 0 ? Math.min(100, (tot / meta) * 100) : 0;
+    return { id: v.id, nome: getNome(v.id), tot: tot, meta: meta, pct: pct };
+  });
+  perfVendedor.sort(function (a, b) { return b.tot - a.tot; });
+  var perfRows = perfVendedor.map(function (v) {
+    var pctCls = v.pct >= 80 ? 'hi' : (v.pct >= 50 ? 'mi' : 'lo');
+    return '<tr><td>' + v.nome + '</td><td class="tcr">R$ ' + fmtBRL(v.tot) + '</td><td class="tcr">R$ ' + fmtBRL(v.meta) + '</td><td class="tcc">' + Math.round(v.pct) + '%</td><td><div class="pb"><div class="pf ' + pctCls + '" style="width:' + Math.max(2, v.pct) + '%"></div></div></td></tr>';
+  }).join('');
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">📈 3. Performance por Vendedor</div>' +
+    '<div class="metrica-grupo-desc">Ranking de faturamento e quanto cada vendedor esta batendo da meta.</div>' +
+    '<table><thead><tr><th>Vendedor</th><th>Faturamento</th><th>Meta</th><th>% da Meta</th><th>Progresso</th></tr></thead><tbody>' + perfRows + '</tbody></table></div>';
+  // ===== 4. RFM =====
   html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">🏆 4. Classificacao dos Clientes (RFM)</div>' +
     '<div class="metrica-grupo-desc">Agrupa os clientes por: quando compraram (Recencia), quantas vezes (Frequencia) e quanto gastaram (Valor).</div>';
   var hoje = new Date();
@@ -2323,7 +2393,7 @@ function renderMetricasConteudo(p, ini, fim, mes, ano) {
     html += '<div class="es"><div class="ic">SEM</div><p>Sem dados no periodo.</p></div>';
   }
   html += '</div>';
-  // ===== 5. DISTRIBUICAO POR NIVEL (NOVO) =====
+  // ===== 5. DISTRIBUICAO POR NIVEL =====
   var nivelCount = { ouro: 0, prata: 0, bronze: 0, sem: 0 };
   var nivelFaturamento = { ouro: 0, prata: 0, bronze: 0, sem: 0 };
   clientes.forEach(function (c) {
@@ -2349,7 +2419,7 @@ function renderMetricasConteudo(p, ini, fim, mes, ano) {
     html += '<tr><td><span class="nivel-badge ' + nv + '">' + nivelLabels[nv] + '</span></td><td class="tcc">' + nivelCount[nv] + '</td><td class="tcc">' + pctBase.toFixed(1) + '%</td><td class="tcr">R$ ' + fmtBRL(nivelFaturamento[nv]) + '</td></tr>';
   });
   html += '</tbody></table></div>';
-  // ===== 6. CLIENTES EM RISCO (NOVO) =====
+  // ===== 6. CLIENTES EM RISCO =====
   var emRisco = rfm.filter(function (r) { return r.classe === 'risco' || r.classe === 'perdido'; });
   var totalRisco = emRisco.reduce(function (s, r) { return s + r.total; }, 0);
   html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">⚠️ 6. Clientes em Risco</div>' +
@@ -2366,7 +2436,7 @@ function renderMetricasConteudo(p, ini, fim, mes, ano) {
     html += '</tbody></table>';
   }
   html += '</div>';
-  // ===== 7. PARETO 80/20 (NOVO) =====
+  // ===== 7. PARETO 80/20 =====
   var pareto = rfm.slice().sort(function (a, b) { return b.total - a.total; });
   var receitaTotal = pareto.reduce(function (s, r) { return s + r.total; }, 0);
   var acumulado = 0;
@@ -2378,32 +2448,62 @@ function renderMetricasConteudo(p, ini, fim, mes, ano) {
   }
   var pctClientes80 = pareto.length > 0 ? (qtd80 / pareto.length) * 100 : 0;
   var pctReceita80 = receitaTotal > 0 ? (acumulado / receitaTotal) * 100 : 0;
-  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">📈 7. Concentracao de Receita (Pareto 80/20)</div>' +
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">📊 7. Concentracao de Receita (Pareto 80/20)</div>' +
     '<div class="metrica-grupo-desc">Quantos clientes geram a maior parte do faturamento. Use para priorizar quem cuidar.</div>' +
     '<div class="sg">' +
     '<div class="sc s"><div class="lb">Clientes que geram 80%</div><div class="vl">' + qtd80 + '</div><div class="sb">' + pctClientes80.toFixed(1) + '% da base</div></div>' +
     '<div class="sc"><div class="lb">Receita desses clientes</div><div class="vl">' + pctReceita80.toFixed(1) + '%</div><div class="sb">Do total faturado no periodo</div></div>' +
     '<div class="sc"><div class="lb">Faturamento Total</div><div class="vl">R$ ' + fmtBRL(receitaTotal) + '</div><div class="sb">Somente clientes com compra</div></div>' +
     '</div></div>';
-  // ===== 8. SATISFACAO =====
-  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">😊 8. Satisfacao dos Clientes</div>' +
-    '<div class="metrica-grupo-desc">Como os clientes se sentem em relacao a sua empresa. Preencha as notas abaixo para acompanhar.</div>' +
+  // ===== 8. PRODUTOS E INATIVIDADE =====
+  var prodCount = {};
+  var prodReceita = {};
+  filtradas.forEach(function (v) {
+    if (v.itens) {
+      v.itens.forEach(function (it) {
+        var nome = it.nome || it.cod;
+        if (!prodCount[nome]) { prodCount[nome] = 0; prodReceita[nome] = 0; }
+        prodCount[nome] += parseInt(it.qtd) || 0;
+        prodReceita[nome] += (parseFloat(it.preco) || 0) * (parseInt(it.qtd) || 0);
+      });
+    }
+  });
+  var topProds = Object.keys(prodCount).sort(function (a, b) { return prodReceita[b] - prodReceita[a]; }).slice(0, 10);
+  var inativos90 = clientes.filter(function (c) {
+    var ult = getUltimaCompraCliente(c.cod);
+    if (!ult) { return false; }
+    var dUlt = new Date(ult);
+    var diff = Math.floor((hoje.getTime() - dUlt.getTime()) / (1000 * 60 * 60 * 24));
+    return diff > 90;
+  });
+  var freqMedia = ativos > 0 ? (filtradas.length / ativos) : 0;
+  html += '<div class="metrica-grupo"><div class="metrica-grupo-titulo">📦 8. Produtos e Inatividade</div>' +
+    '<div class="metrica-grupo-desc">Quais produtos mais vendem e quais clientes pararam de comprar ha mais de 90 dias.</div>' +
     '<div class="sg">' +
-    '<div class="sc"><div class="lb">NPS (recomendaria?)</div><div class="vl">—</div><div class="sb">Nota 0-10: quantos recomendariam</div></div>' +
-    '<div class="sc"><div class="lb">CSAT (satisfacao)</div><div class="vl">—</div><div class="sb">Nota apos compra/suporte</div></div>' +
-    '<div class="sc"><div class="lb">CES (esforco)</div><div class="vl">—</div><div class="sb">Quanto esforco o cliente teve</div></div>' +
-    '</div><p style="font-size:.8rem;color:var(--txt2)">Estas metricas dependem de pesquisas com os clientes. Registre as notas em uma planilha e elas aparecerao aqui.</p></div>';
+    '<div class="sc"><div class="lb">Frequencia Media</div><div class="vl">' + freqMedia.toFixed(1) + 'x</div><div class="sb">Compras por cliente ativo no periodo</div></div>' +
+    '<div class="sc d"><div class="lb">Inativos 90+ dias</div><div class="vl">' + inativos90.length + '</div><div class="sb">Clientes que pararam de comprar</div></div>' +
+    '</div>';
+  if (topProds.length) {
+    html += '<table><thead><tr><th>Produto</th><th>Qtd Vendida</th><th>Faturamento</th></tr></thead><tbody>';
+    topProds.forEach(function (p) {
+      html += '<tr><td>' + p + '</td><td class="tcc">' + prodCount[p] + '</td><td class="tcr">R$ ' + fmtBRL(prodReceita[p]) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+  html += '</div>';
   var div = document.getElementById('mt-result');
   if (div) { div.innerHTML = html; }
   // Guarda os dados para exportacao
   _mtDados = {
     periodo: p, ini: ini, fim: fim, mes: mes, ano: ano,
-    totalVendas: totalVendas, totalClientes: totalClientes, arpu: arpu, ltv: ltv, cac: cac, ltvCac: ltvCac,
-    ativos: ativos, churn: churn, recompra: recompra, ticketMedio: ticketMedio, totalRegistros: filtradas.length,
+    totalVendas: totalVendas, totalBonif: totalBonif, ticketMedio: ticketMedio, clientesNovosPeriodo: clientesNovosPeriodo,
+    ativos: ativos, churn: churn, recompra: recompra, totalRegistros: filtradas.length,
+    perfVendedor: perfVendedor,
     rfm: rfm, rfmLabels: rfmLabels,
     nivelCount: nivelCount, nivelFaturamento: nivelFaturamento, nivelLabels: nivelLabels,
     emRisco: emRisco, totalRisco: totalRisco,
-    qtd80: qtd80, pctClientes80: pctClientes80, pctReceita80: pctReceita80, receitaTotal: receitaTotal
+    qtd80: qtd80, pctClientes80: pctClientes80, pctReceita80: pctReceita80, receitaTotal: receitaTotal,
+    topProds: topProds, prodCount: prodCount, prodReceita: prodReceita, inativos90: inativos90.length, freqMedia: freqMedia
   };
 }
 
@@ -2413,17 +2513,21 @@ function exportMetricasCSV() {
   var d = _mtDados;
   var linhas = [];
   linhas.push(['Metrica', 'Valor']);
-  linhas.push(['LTV (valor do cliente)', 'R$ ' + fmtBRL(d.ltv)]);
-  linhas.push(['ARPU (media por cliente)', 'R$ ' + fmtBRL(d.arpu)]);
-  linhas.push(['CAC (custo p/ conquistar)', 'R$ ' + fmtBRL(d.cac)]);
-  linhas.push(['LTV / CAC', d.cac > 0 ? d.ltvCac.toFixed(1) : '—']);
+  linhas.push(['Total Vendido', 'R$ ' + fmtBRL(d.totalVendas)]);
+  linhas.push(['Bonificacoes', 'R$ ' + fmtBRL(d.totalBonif)]);
+  linhas.push(['Ticket Medio', 'R$ ' + fmtBRL(d.ticketMedio)]);
+  linhas.push(['Novos Clientes', d.clientesNovosPeriodo]);
   linhas.push(['Churn (perda)', d.churn.toFixed(1) + '%']);
   linhas.push(['Retencao', (100 - d.churn).toFixed(1) + '%']);
   linhas.push(['Recompra', d.recompra.toFixed(1) + '%']);
   linhas.push(['Clientes Ativos', d.ativos]);
-  linhas.push(['Ticket Medio', 'R$ ' + fmtBRL(d.ticketMedio)]);
-  linhas.push(['Total de Vendas', d.totalRegistros]);
-  linhas.push(['Faturamento', 'R$ ' + fmtBRL(d.totalVendas)]);
+  linhas.push(['Frequencia Media', d.freqMedia.toFixed(1) + 'x']);
+  linhas.push(['Inativos 90+ dias', d.inativos90]);
+  linhas.push([]);
+  linhas.push(['Performance por Vendedor', 'Faturamento', 'Meta', '% da Meta']);
+  d.perfVendedor.forEach(function (v) {
+    linhas.push([v.nome, 'R$ ' + fmtBRL(v.tot), 'R$ ' + fmtBRL(v.meta), Math.round(v.pct) + '%']);
+  });
   linhas.push([]);
   linhas.push(['Distribuicao por Nivel', 'Clientes', 'Faturamento']);
   ['ouro', 'prata', 'bronze', 'sem'].forEach(function (nv) {
@@ -2439,6 +2543,11 @@ function exportMetricasCSV() {
   linhas.push(['Clientes que geram 80%', d.qtd80 + ' (' + d.pctClientes80.toFixed(1) + '% da base)']);
   linhas.push(['Receita desses clientes', d.pctReceita80.toFixed(1) + '%']);
   linhas.push(['Faturamento Total', 'R$ ' + fmtBRL(d.receitaTotal)]);
+  linhas.push([]);
+  linhas.push(['Top Produtos', 'Qtd', 'Faturamento']);
+  d.topProds.forEach(function (p) {
+    linhas.push([p, d.prodCount[p], 'R$ ' + fmtBRL(d.prodReceita[p])]);
+  });
   linhas.push([]);
   linhas.push(['RFM - Cliente', 'Ultima Compra', 'Vezes', 'Total', 'Classificacao']);
   d.rfm.forEach(function (r) {
@@ -2458,23 +2567,26 @@ function exportMetricasPDF() {
   var d = _mtDados;
   var html = '<h2>Metricas de Clientes</h2>' +
     '<p style="color:#666;font-size:.85rem">Periodo: ' + (d.periodo === 'todos' ? 'Todos' : d.periodo) + (d.ini ? ' | ' + d.ini + ' a ' + d.fim : '') + (d.mes ? ' | ' + d.mes : '') + (d.ano ? ' | Ano ' + d.ano : '') + '</p>' +
-    '<h3>1. Dinheiro e Valor dos Clientes</h3>' +
+    '<h3>1. Faturamento</h3>' +
     '<table><tr><th>Metrica</th><th>Valor</th></tr>' +
-    '<tr><td>LTV (valor do cliente)</td><td>R$ ' + fmtBRL(d.ltv) + '</td></tr>' +
-    '<tr><td>ARPU (media por cliente)</td><td>R$ ' + fmtBRL(d.arpu) + '</td></tr>' +
-    '<tr><td>CAC (custo p/ conquistar)</td><td>R$ ' + fmtBRL(d.cac) + '</td></tr>' +
-    '<tr><td>LTV / CAC</td><td>' + (d.cac > 0 ? d.ltvCac.toFixed(1) : '—') + '</td></tr></table>' +
+    '<tr><td>Total Vendido</td><td>R$ ' + fmtBRL(d.totalVendas) + '</td></tr>' +
+    '<tr><td>Bonificacoes</td><td>R$ ' + fmtBRL(d.totalBonif) + '</td></tr>' +
+    '<tr><td>Ticket Medio</td><td>R$ ' + fmtBRL(d.ticketMedio) + '</td></tr>' +
+    '<tr><td>Novos Clientes</td><td>' + d.clientesNovosPeriodo + '</td></tr></table>' +
     '<h3>2. Clientes que Ficam</h3>' +
     '<table><tr><th>Metrica</th><th>Valor</th></tr>' +
     '<tr><td>Churn (perda)</td><td>' + d.churn.toFixed(1) + '%</td></tr>' +
     '<tr><td>Retencao</td><td>' + (100 - d.churn).toFixed(1) + '%</td></tr>' +
     '<tr><td>Recompra</td><td>' + d.recompra.toFixed(1) + '%</td></tr>' +
-    '<tr><td>Clientes Ativos</td><td>' + d.ativos + '</td></tr></table>' +
-    '<h3>3. Como os Clientes Compram</h3>' +
-    '<table><tr><th>Metrica</th><th>Valor</th></tr>' +
-    '<tr><td>Ticket Medio</td><td>R$ ' + fmtBRL(d.ticketMedio) + '</td></tr>' +
-    '<tr><td>Total de Vendas</td><td>' + d.totalRegistros + '</td></tr>' +
-    '<tr><td>Faturamento</td><td>R$ ' + fmtBRL(d.totalVendas) + '</td></tr></table>' +
+    '<tr><td>Clientes Ativos</td><td>' + d.ativos + '</td></tr>' +
+    '<tr><td>Frequencia Media</td><td>' + d.freqMedia.toFixed(1) + 'x</td></tr>' +
+    '<tr><td>Inativos 90+ dias</td><td>' + d.inativos90 + '</td></tr></table>' +
+    '<h3>3. Performance por Vendedor</h3>' +
+    '<table><tr><th>Vendedor</th><th>Faturamento</th><th>Meta</th><th>% da Meta</th></tr>';
+  d.perfVendedor.forEach(function (v) {
+    html += '<tr><td>' + v.nome + '</td><td>R$ ' + fmtBRL(v.tot) + '</td><td>R$ ' + fmtBRL(v.meta) + '</td><td>' + Math.round(v.pct) + '%</td></tr>';
+  });
+  html += '</table>' +
     '<h3>4. Classificacao dos Clientes (RFM)</h3>' +
     '<table><tr><th>Cliente</th><th>Ultima Compra</th><th>Vezes</th><th>Total</th><th>Classificacao</th></tr>';
   d.rfm.forEach(function (r) {
@@ -2497,7 +2609,13 @@ function exportMetricasPDF() {
     '<table><tr><th>Metrica</th><th>Valor</th></tr>' +
     '<tr><td>Clientes que geram 80%</td><td>' + d.qtd80 + ' (' + d.pctClientes80.toFixed(1) + '% da base)</td></tr>' +
     '<tr><td>Receita desses clientes</td><td>' + d.pctReceita80.toFixed(1) + '%</td></tr>' +
-    '<tr><td>Faturamento Total</td><td>R$ ' + fmtBRL(d.receitaTotal) + '</td></tr></table>';
+    '<tr><td>Faturamento Total</td><td>R$ ' + fmtBRL(d.receitaTotal) + '</td></tr></table>' +
+    '<h3>8. Produtos e Inatividade</h3>' +
+    '<table><tr><th>Produto</th><th>Qtd</th><th>Faturamento</th></tr>';
+  d.topProds.forEach(function (p) {
+    html += '<tr><td>' + p + '</td><td>' + d.prodCount[p] + '</td><td>R$ ' + fmtBRL(d.prodReceita[p]) + '</td></tr>';
+  });
+  html += '</table>';
   exportPDF('Metricas de Clientes', html);
 }
 
@@ -2794,23 +2912,34 @@ function saveVenda() {
   renderTab('venda');
 }
 
-// ===== ATIVIDADES (VENDEDOR) =====
+// ===== ATIVIDADES (VENDEDOR) — com Telefone/Nome/Horario para Ligacao =====
 function renderAtividades() {
   var atividades = loadData('atividades');
-  var tipoOpts = '<option value="ligacao">Ligacao</option><option value="prospeccao">Prospeccao</option><option value="visita">Visita</option><option value="email">E-mail</option><option value="whatsapp">WhatsApp</option>';
+  var tipoOpts = '<option value="ligacao">Ligacao</option><option value="prospeccao">Prospeccao</option><option value="visita">Visita</option><option value="email">E-mail</option>';
   var minhas = atividades.filter(function (a) { return a.vendedor === currentUser.id; });
   var tabela = minhas.length
-    ? '<table><thead><tr><th>Data</th><th>Tipo</th><th>Qtd</th><th>Obs</th><th>Acoes</th></tr></thead><tbody>' +
-      minhas.map(function (a) { var idx = atividades.indexOf(a); return '<tr><td>' + a.data + '</td><td>' + a.tipo + '</td><td class="tcc">' + a.qtd + '</td><td>' + (a.obs || '') + '</td><td><button class="del-btn" onclick="delAtividade(' + idx + ')">Excluir</button></td></tr>'; }).join('') + '</tbody></table>'
+    ? '<table><thead><tr><th>Data</th><th>Tipo</th><th>Qtd</th><th>Telefone</th><th>Cliente</th><th>Horario</th><th>Obs</th><th>Acoes</th></tr></thead><tbody>' +
+      minhas.map(function (a) { var idx = atividades.indexOf(a); return '<tr><td>' + a.data + '</td><td>' + a.tipo + '</td><td class="tcc">' + a.qtd + '</td><td>' + (a.telefone || '--') + '</td><td>' + (a.clienteNome || '--') + '</td><td>' + (a.horario || '--') + '</td><td>' + (a.obs || '') + '</td><td><button class="del-btn" onclick="delAtividade(' + idx + ')">Excluir</button></td></tr>'; }).join('') + '</tbody></table>'
     : '<div class="es"><div class="ic">SEM</div><p>Nenhuma atividade.</p></div>';
   return '<h2 class="st2">Atividades</h2>' +
     '<div class="card"><h3>Registrar Atividade</h3><div class="fr">' +
     '<div class="fg"><label>Data</label><input type="date" id="at-data" value="' + new Date().toISOString().split('T')[0] + '"></div>' +
-    '<div class="fg"><label>Tipo</label><select id="at-tipo">' + tipoOpts + '</select></div>' +
+    '<div class="fg"><label>Tipo</label><select id="at-tipo" onchange="toggleCamposLigacao()">' + tipoOpts + '</select></div>' +
     '<div class="fg"><label>Quantidade</label><input type="number" id="at-qtd" value="1" min="1"></div></div>' +
+    '<div id="at-ligacao-campos" style="display:none"><div class="fr">' +
+    '<div class="fg"><label>Telefone</label><input type="text" id="at-telefone" placeholder="(00) 00000-0000" oninput="maskTelefone(this)" maxlength="15"></div>' +
+    '<div class="fg"><label>Nome do Cliente</label><input type="text" id="at-cliente" placeholder="Nome do cliente"></div>' +
+    '<div class="fg"><label>Horario</label><input type="time" id="at-horario"></div>' +
+    '</div></div>' +
     '<div class="fg"><label>Observacao</label><textarea id="at-obs" rows="2" placeholder="Opcional"></textarea></div>' +
     '<button class="btn btn-p" onclick="saveAtividade()">Salvar Atividade</button></div>' +
     '<div class="card"><h3>Minhas Atividades</h3>' + tabela + '</div>';
+}
+
+function toggleCamposLigacao() {
+  var tipo = document.getElementById('at-tipo').value;
+  var div = document.getElementById('at-ligacao-campos');
+  if (div) { div.style.display = (tipo === 'ligacao') ? 'block' : 'none'; }
 }
 
 function saveAtividade() {
@@ -2820,6 +2949,11 @@ function saveAtividade() {
   var obs = document.getElementById('at-obs').value.trim();
   if (!data || !tipo) { toast('Preencha data e tipo', 'error'); return; }
   var atividade = { data: data, tipo: tipo, qtd: qtd, obs: obs, vendedor: currentUser.id, editadoPor: getNome(currentUser.id), editadoEm: new Date().toISOString() };
+  if (tipo === 'ligacao') {
+    atividade.telefone = document.getElementById('at-telefone').value.trim();
+    atividade.clienteNome = document.getElementById('at-cliente').value.trim();
+    atividade.horario = document.getElementById('at-horario').value;
+  }
   saveData('atividades', atividade);
   toast('Atividade salva por ' + getNome(currentUser.id), 'success');
   renderTab('atividades');
