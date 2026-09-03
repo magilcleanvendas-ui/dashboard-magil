@@ -1614,6 +1614,17 @@ body.dark .lc .hint {
   height: 28px;
   object-fit: contain;
 }
+/* Mantem a logo pequena e contida no header, sem sobrepor o conteudo */
+#hd .hl img,
+.app-mark img {
+  height: 34px !important;
+  width: auto !important;
+  max-width: 160px !important;
+  position: static !important;
+  display: inline-block !important;
+  object-fit: contain !important;
+  z-index: auto !important;
+}
 </style>
 </head>
 <body>
