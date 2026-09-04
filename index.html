@@ -1595,16 +1595,24 @@ body.dark .lc .hint {
     display: none;
   }
 }
-/* Mantem a logo pequena e contida no header, sem sobrepor o conteudo */
-#hd .hl img,
+/* Remove o quadrado azul do container da logo no header */
+.app-mark {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
 .app-mark img {
-  height: 34px !important;
-  width: auto !important;
-  max-width: 160px !important;
-  position: static !important;
-  display: inline-block !important;
-  object-fit: contain !important;
-  z-index: auto !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 </style>
 </head>
@@ -1642,17 +1650,12 @@ body.dark .lc .hint {
   </div>
 </div>
 <div id="app">
- <div id="hd">
-  <div class="hl">
-    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-    <h2>Gestão Comercial</h2>
-  </div>
-  <div class="hr">
-    <span id="ub" class="badge"></span>
-    <button class="bl" onclick="abrirCalc()">🧮</button>
-    <button class="bl" onclick="doLogout()">Sair</button>
-  </div>
-</div>
+  <div id="hd">
+    <div class="hl">
+      <button class="icon-btn" onclick="toggleSidebar()" style="padding:7px 9px">☰</button>
+      <img src="Logomagil.png" alt="Magil Clean"></div>
+      <img src="Logomagil.png" alt="Magil Clean" style="height:34px;width:auto;display:block;background:transparent;border:none;box-shadow:none;padding:0">
+    </div>
     <div class="hr">
       <span id="ub" class="badge"></span>
       <button class="icon-btn" onclick="abrirCalc()">🧮</button>
