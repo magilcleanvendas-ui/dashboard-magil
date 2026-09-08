@@ -1845,6 +1845,19 @@ function getNivel(id) {
   var usu = USU.find(function (x) { return x.id === id; });
   return usu ? usu.nivel : 'Junior';
 }
+// Monta as opcoes de vendedor a partir de uma lista (atividades ou vendas)
+function opcoesVendedores(lista) {
+  var vistos = {};
+  var opts = '<option value="">Todos os vendedores</option>';
+  (lista || []).forEach(function (x) {
+    var v = x.vendedor;
+    if (v === undefined || v === null || v === '') { return; }
+    if (vistos[v]) { return; }
+    vistos[v] = true;
+    opts += '<option value="' + v + '">' + getNome(v) + '</option>';
+  });
+  return opts;
+}
 function getNome(id) {
   var us = cacheDados['usuarios'] || [];
   var u = us.find(function (x) { return x.id === id; });
@@ -2239,7 +2252,6 @@ document.addEventListener('keydown', function (e) {
   // Limpar (Esc ou C)
   if (tecla === 'Escape' || tecla === 'c' || tecla === 'C') { e.preventDefault(); calcClear(); return; }
 });
-
 // ===== SIDEBAR =====
 function toggleSidebar() {
   var sb = document.getElementById('sidebar');
@@ -4762,6 +4774,7 @@ function renderRelAtividades() {
     '<p class="st3">Ligacoes com status Conectada / Sem resposta e demais atividades.</p>' +
     '<div class="card"><h3>Filtros</h3><div class="filtros">' +
     '<div class="fg"><label>Tipo</label><select id="ra-tipo">' + tipoOpts + '</select></div>' +
+    '<div class="fg"><label>Vendedor</label><select id="ra-vendedor">' + opcoesVendedores(loadData('atividades')) + '</select></div>' +
     filtroPeriodoHTML('ra') +
     '<div class="fg" style="display:flex;align-items:flex-end">' +
     '<button class="btn btn-p btn-s" onclick="aplicarFiltroPeriodo(\'ra\')">OK</button>' +
@@ -4778,8 +4791,10 @@ window['_filtro_ra'] = function (p, ini, fim, mes, ano) {
   var div = document.getElementById('ra-conteudo');
   if (!div) { return; }
   var tipo = document.getElementById('ra-tipo').value;
+  var vendedor = document.getElementById('ra-vendedor').value;
   var vF = loadData('atividades').filter(function (a) {
     if (tipo !== 'todos' && a.tipo !== tipo) { return false; }
+    if (vendedor && a.vendedor !== vendedor) { return false; }
     return passaFiltroPeriodo(a.data, p, ini, fim, mes, ano);
   });
   var ligs = vF.filter(function (a) { return a.tipo === 'ligacao'; });
@@ -4826,6 +4841,7 @@ window['_filtro_ra'] = function (p, ini, fim, mes, ano) {
 };
 function ativParaExport() {
   var tipo = document.getElementById('ra-tipo').value;
+  var vendedor = document.getElementById('ra-vendedor').value;
   var p = document.getElementById('ra-periodo').value;
   var ini = document.getElementById('ra-ini') ? document.getElementById('ra-ini').value : '';
   var fim = document.getElementById('ra-fim') ? document.getElementById('ra-fim').value : '';
@@ -4833,6 +4849,7 @@ function ativParaExport() {
   var ano = document.getElementById('ra-ano') ? document.getElementById('ra-ano').value : '';
   return loadData('atividades').filter(function (a) {
     if (tipo !== 'todos' && a.tipo !== tipo) { return false; }
+    if (vendedor && a.vendedor !== vendedor) { return false; }
     return passaFiltroPeriodo(a.data, p, ini, fim, mes, ano);
   }).map(function (a) {
     return {
@@ -4878,6 +4895,7 @@ function renderRelatorios() {
     '<div class="fg"><label>Tipo de Registro</label><select id="rg-tipo">' +
     '<option value="todos">Todos</option><option value="venda">Somente Vendas</option>' +
     '<option value="bonificacao">Somente Bonificacoes</option><option value="venda+bonif">Vendas + Bonificacoes</option></select></div>' +
+    '<div class="fg"><label>Vendedor</label><select id="rg-vendedor">' + opcoesVendedores(loadData('vendas')) + '</select></div>' +
     filtroPeriodoHTML('rg') +
     '<div class="fg" style="display:flex;align-items:flex-end">' +
     '<button class="btn btn-p btn-s" onclick="aplicarFiltroPeriodo(\'rg\')">OK</button>' +
@@ -4892,9 +4910,11 @@ function renderRelatorios() {
 }
 window['_filtro_rg'] = function (p, ini, fim, mes, ano) {
   var tipo = document.getElementById('rg-tipo').value;
+  var vendedor = document.getElementById('rg-vendedor').value;
   var vF = loadData('vendas').filter(function (v) {
     if (tipo === 'venda' && (v.tipo || 'venda') !== 'venda') { return false; }
     if (tipo === 'bonificacao' && v.tipo !== 'bonificacao') { return false; }
+    if (vendedor && v.vendedor !== vendedor) { return false; }
     return passaFiltroPeriodo(v.data, p, ini, fim, mes, ano);
   });
   var vendaT = vF.filter(function (v) { return (v.tipo || 'venda') === 'venda'; })
@@ -4929,6 +4949,7 @@ window['_filtro_rg'] = function (p, ini, fim, mes, ano) {
 };
 function relParaExport() {
   var tipo = document.getElementById('rg-tipo').value;
+  var vendedor = document.getElementById('rg-vendedor').value;
   var p = document.getElementById('rg-periodo').value;
   var ini = document.getElementById('rg-ini') ? document.getElementById('rg-ini').value : '';
   var fim = document.getElementById('rg-fim') ? document.getElementById('rg-fim').value : '';
@@ -4937,6 +4958,7 @@ function relParaExport() {
   return loadData('vendas').filter(function (v) {
     if (tipo === 'venda' && (v.tipo || 'venda') !== 'venda') { return false; }
     if (tipo === 'bonificacao' && v.tipo !== 'bonificacao') { return false; }
+    if (vendedor && v.vendedor !== vendedor) { return false; }
     return passaFiltroPeriodo(v.data, p, ini, fim, mes, ano);
   }).map(function (v) {
     return {
