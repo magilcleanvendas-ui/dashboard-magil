@@ -2516,9 +2516,18 @@ function exportPDF(titulo, htmlContent) {
     '<div class="pdf-foot">Documento gerado pelo sistema Magil Clean</div>' +
     '</body></html>');
   w.document.close();
-  w.print();
-}
 
+  // Espera as imagens (gráficos) carregarem ANTES de imprimir
+  var imgs = w.document.images;
+  var pend = imgs.length;
+  function imprimir() { try { w.focus(); w.print(); } catch (e) {} }
+  if (pend === 0) { imprimir(); return; }
+  for (var i = 0; i < imgs.length; i++) {
+    imgs[i].onload = function () { pend--; if (pend <= 0) { imprimir(); } };
+    imgs[i].onerror = function () { pend--; if (pend <= 0) { imprimir(); } };
+  }
+  setTimeout(imprimir, 2500);
+}
 // ===== CONFIRMACAO DE EXCLUSAO (com "nao perguntar novamente") =====
 function getPrefExcluirSemPerguntar() {
   return localStorage.getItem('mc_confirm_delete') === '1';
@@ -3187,7 +3196,7 @@ function renderClientes(isGerente) {
     bulk +
     '<div class="card"><h3>Buscar Cliente</h3>' +
     '<div class="search-box"><span class="ico">🔍</span>' +
-    '<input type="text" id="cl-busca" placeholder="Buscar por nome, codigo, CNPJ ou telefone..." oninput="filtrarClientes(' + isGerente + ')" onkeydown="if(event.key===\'Enter\')filtrarClientes(' + isGerente + ')"></div>' +
+    '<input type="text" id="cl-busca" placeholder="Buscar por nome, codigo, CNPJ, cidade ou telefone..." oninput="filtrarClientes(' + isGerente + ')" onkeydown="if(event.key===\'Enter\')filtrarClientes(' + isGerente + ')"></div>' +
     '<div class="filtros"><div class="fg"><label>Nivel</label><select id="cl-filtro-nivel">' + nivelFiltro + '</select></div>' +
     '<div class="fg" style="display:flex;align-items:flex-end"><button class="btn btn-p btn-s" onclick="filtrarClientes(' + isGerente + ')">OK</button></div></div>' +
     '<div id="cl-lista">' + renderTabelaClientes(clientes, isGerente) + '</div></div>';
@@ -3272,7 +3281,8 @@ function filtrarClientes(isGerente) {
       return (c.razao || '').toLowerCase().indexOf(termo) >= 0 ||
         (c.cod || '').indexOf(termo) >= 0 ||
         (c.celular || '').indexOf(termo) >= 0 ||
-        (c.cnpj || '').indexOf(termo) >= 0;
+        (c.cnpj || '').indexOf(termo) >= 0 ||
+        (c.cidade || c.municipio || '').toLowerCase().indexOf(termo) >= 0;   // ← NOVO
     }
     return true;
   });
@@ -4174,6 +4184,36 @@ function exportVendasCSV() {
 }
 function exportVendasPDF() {
   if (!_vgFiltradas.length) { toast('Nenhum dado filtrado para exportar', 'error'); return; }
+
+  // 1) Captura TODOS os gráficos <canvas> visíveis na tela
+  var imgsHtml = '';
+  var canvases = document.querySelectorAll('canvas');
+  for (var i = 0; i < canvases.length; i++) {
+    var cv = canvases[i];
+    var visivel = false;
+    try { visivel = cv.offsetWidth > 0 && cv.offsetHeight > 0; } catch (e) { visivel = false; }
+    if (!visivel) { continue; }
+
+    var src = '';
+    // a) Via instância do Chart.js (v2 e v3) — mais confiável
+    try {
+      var ch = null;
+      if (typeof Chart !== 'undefined') {
+        if (typeof Chart.getChart === 'function') { ch = Chart.getChart(cv); }
+        else if (Chart.instances) {
+          for (var k in Chart.instances) { if (Chart.instances[k].canvas === cv) { ch = Chart.instances[k]; break; } }
+        }
+      }
+      if (ch && typeof ch.toBase64Image === 'function') { src = ch.toBase64Image('image/png'); }
+    } catch (e) { src = ''; }
+    // b) Fallback: captura direta do canvas
+    if (!src || src.length < 500) { try { src = cv.toDataURL('image/png'); } catch (e2) { src = ''; } }
+    if (!src || src.length < 500) { continue; }
+
+    imgsHtml += '<img src="' + src + '" style="width:100%;max-width:680px;display:block;margin:16px auto;page-break-inside:avoid" />';
+  }
+
+  // 2) Monta a tabela (igual à sua versão original)
   var linhas = _vgFiltradas.slice().sort(function (a, b) { return b.data.localeCompare(a.data); })
     .map(function (v) {
       return '<tr><td>' + v.data + '</td>' +
@@ -4184,9 +4224,13 @@ function exportVendasPDF() {
         '<td>' + (v.qtdProdutos || 0) + '</td>' +
         '<td>R$ ' + fmtBRL(v.total) + '</td></tr>';
     }).join('');
-  exportPDF('Relatorio de Vendas - Magil Clean',
+
+  // 3) Gráficos primeiro, tabela depois
+  var html = imgsHtml +
     '<table><thead><tr><th>Data</th><th>Cliente</th><th>Cod</th><th>Vendedor</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody>' +
-    linhas + '</tbody></table>');
+    linhas + '</tbody></table>';
+
+  exportPDF('Relatorio de Vendas - Magil Clean', html);
 }
 function editVenda(i) {
   var vendas = loadData('vendas');
@@ -4417,7 +4461,23 @@ function exportEstadoCSV() {
 function exportEstadoPDF() {
   var el = document.getElementById('ve-conteudo');
   if (!el || !el.innerHTML.trim()) { toast('Nenhum dado para exportar', 'error'); return; }
-  exportPDF('Vendas por Estado', el.innerHTML);
+  var clone = el.cloneNode(true);
+  var orig = el.querySelectorAll('canvas');
+  var copia = clone.querySelectorAll('canvas');
+  for (var i = 0; i < orig.length; i++) {
+    try {
+      var src = orig[i].toDataURL('image/png');
+      if (!src || src.length < 500) { continue; }
+      var img = document.createElement('img');
+      img.src = src;
+      img.style.width = '100%';
+      img.style.maxWidth = '680px';
+      img.style.display = 'block';
+      img.style.margin = '12px auto';
+      copia[i].parentNode.replaceChild(img, copia[i]);
+    } catch (e) {}
+  }
+  exportPDF('Vendas por Estado', clone.innerHTML);
 }
 
 // ===== VENDAS POR SEGMENTO (filtro + exportacao) =====
@@ -4515,7 +4575,23 @@ function exportSegCSV() {
 function exportSegPDF() {
   var el = document.getElementById('vs-conteudo');
   if (!el || !el.innerHTML.trim()) { toast('Nenhum dado para exportar', 'error'); return; }
-  exportPDF('Vendas por Segmento', el.innerHTML);
+  var clone = el.cloneNode(true);
+  var orig = el.querySelectorAll('canvas');
+  var copia = clone.querySelectorAll('canvas');
+  for (var i = 0; i < orig.length; i++) {
+    try {
+      var src = orig[i].toDataURL('image/png');
+      if (!src || src.length < 500) { continue; }
+      var img = document.createElement('img');
+      img.src = src;
+      img.style.width = '100%';
+      img.style.maxWidth = '680px';
+      img.style.display = 'block';
+      img.style.margin = '12px auto';
+      copia[i].parentNode.replaceChild(img, copia[i]);
+    } catch (e) {}
+  }
+  exportPDF('Vendas por Segmento', clone.innerHTML);
 }// ===== CRUZAMENTOS =====
 var _crDados = [];
 function renderCruzamentos() {
