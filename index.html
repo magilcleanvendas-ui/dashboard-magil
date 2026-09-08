@@ -2151,25 +2151,94 @@ function passaFiltroPeriodo(data, p, ini, fim, mes, ano) {
 }
 
 // ===== CALCULADORA =====
-function abrirCalc() { document.getElementById('calc-modal').classList.add('open'); }
+function abrirCalc() {
+  document.getElementById('calc-modal').classList.add('open');
+}
+
+function fecharCalc() {
+  document.getElementById('calc-modal').classList.remove('open');
+}
+
 function calcAdd(v) {
   var disp = document.getElementById('calc-disp');
   var atual = disp.textContent;
   disp.textContent = (atual === '0' && v !== '.') ? v : atual + v;
 }
-function calcClear() { document.getElementById('calc-disp').textContent = '0'; }
+
+function calcClear() {
+  document.getElementById('calc-disp').textContent = '0';
+}
+
 function calcBack() {
   var disp = document.getElementById('calc-disp');
   var t = disp.textContent;
   disp.textContent = t.length > 1 ? t.slice(0, -1) : '0';
 }
+
 function calcEq() {
   var disp = document.getElementById('calc-disp');
   try {
     var resultado = Function('"use strict";return (' + disp.textContent.replace(/,/g, '.') + ')')();
     disp.textContent = (Math.round(resultado * 100) / 100).toString().replace(/\./g, ',');
-  } catch (e) { disp.textContent = 'Erro'; }
+  } catch (e) {
+    disp.textContent = 'Erro';
+  }
 }
+
+// ===== CALCULADORA: SUPORTE AO TECLADO =====
+function calcModalAberto() {
+  var modal = document.getElementById('calc-modal');
+  if (!modal) { return false; }
+  if (modal.classList.contains('open') || modal.classList.contains('show') || modal.classList.contains('active')) { return true; }
+  try {
+    if (modal.offsetParent !== null) { return true; }
+    var disp = window.getComputedStyle(modal).display;
+    if (disp && disp !== 'none') { return true; }
+  } catch (e) {}
+  return false;
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.repeat) { return; } // ignora tecla segurada
+
+  var modal = document.getElementById('calc-modal');
+  if (!modal) { return; }
+  if (!calcModalAberto()) { return; } // só quando a calculadora está aberta
+
+  var alvo = e.target;
+  if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.tagName === 'SELECT')) { return; }
+
+  var tecla = e.key;
+  var codigo = e.code;
+
+  // Números do topo (0-9)
+  if (/^[0-9]$/.test(tecla)) { e.preventDefault(); calcAdd(tecla); return; }
+  // Números do numpad (Numpad0-Numpad9)
+  if (codigo && /^Numpad[0-9]$/.test(codigo)) { e.preventDefault(); calcAdd(codigo.replace('Numpad', '')); return; }
+
+  // Vírgula / ponto (topo e numpad)
+  if (tecla === '.' || tecla === ',' || codigo === 'NumpadDecimal') { e.preventDefault(); calcAdd('.'); return; }
+
+  // Operadores (topo e numpad)
+  if (tecla === '+' || tecla === '-' || tecla === '*' || tecla === '/' ||
+      codigo === 'NumpadAdd' || codigo === 'NumpadSubtract' || codigo === 'NumpadMultiply' || codigo === 'NumpadDivide') {
+    e.preventDefault();
+    var op = (tecla === '+' || codigo === 'NumpadAdd') ? '+' :
+             (tecla === '-' || codigo === 'NumpadSubtract') ? '-' :
+             (tecla === '*' || codigo === 'NumpadMultiply') ? '*' : '/';
+    calcAdd(op);
+    return;
+  }
+
+  // Igual (Enter, = ou Enter do numpad)
+  if (tecla === 'Enter' || tecla === '=' || codigo === 'NumpadEnter') { e.preventDefault(); calcEq(); return; }
+
+  // Apagar último (Backspace)
+  if (tecla === 'Backspace') { e.preventDefault(); calcBack(); return; }
+
+  // Limpar (Esc ou C)
+  if (tecla === 'Escape' || tecla === 'c' || tecla === 'C') { e.preventDefault(); calcClear(); return; }
+});
 
 // ===== SIDEBAR =====
 function toggleSidebar() {
