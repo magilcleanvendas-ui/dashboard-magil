@@ -3800,11 +3800,212 @@ window['_filtro_mc2'] = function (p, ini, fim, mes, ano) {
     '</div></div></div>';
   div.innerHTML = html;
 };
-function exportMetricasCSV() { toast('Exportacao CSV gerada para Metricas de Clientes.', 'info'); }
 function exportMetricasPDF() {
-  var el = document.getElementById('mc2-conteudo');
-  if (!el) { toast('Nenhum dado', 'error'); return; }
-  exportPDF('Metricas de Clientes', el.innerHTML);
+  // ----- Lê os filtros de período ativos -----
+  var p = document.getElementById('mc2-periodo') ? document.getElementById('mc2-periodo').value : '';
+  var ini = document.getElementById('mc2-ini') ? document.getElementById('mc2-ini').value : '';
+  var fim = document.getElementById('mc2-fim') ? document.getElementById('mc2-fim').value : '';
+  var mes = document.getElementById('mc2-mes') ? document.getElementById('mc2-mes').value : '';
+  var ano = document.getElementById('mc2-ano') ? document.getElementById('mc2-ano').value : '';
+
+  // ----- Recalcula os dados (mesma lógica do relatório) -----
+  var vendas = loadData('vendas').filter(function (v) { return passaFiltroPeriodo(v.data, p, ini, fim, mes, ano); });
+  if (!vendas.length) { toast('Nenhum dado no período para exportar', 'error'); return; }
+  var clientes = loadData('clientes');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  var vendaT = vendas.filter(function (v) { return (v.tipo || 'venda') === 'venda'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var bonifT = vendas.filter(function (v) { return v.tipo === 'bonificacao'; }).reduce(function (s, v) { return s + (parseFloat(v.total) || 0); }, 0);
+  var ticket = vendas.length ? vendaT / vendas.length : 0;
+
+  var ativos = {};
+  vendas.forEach(function (v) { var c = codVenda(v); if (c) { ativos[c] = true; } });
+  var nAtivos = Object.keys(ativos).length;
+
+  var hoje = new Date();
+  var rfm = { campeao: 0, leal: 0, promissor: 0, risco: 0, perdido: 0 };
+  var recompra = 0;
+  Object.keys(ativos).forEach(function (cod) {
+    var vC = vendas.filter(function (v) { return codVenda(v) === cod; });
+    if (!vC.length) { return; }
+    vC.sort(function (a, b) { return b.data.localeCompare(a.data); });
+    var dias = Math.floor((hoje.getTime() - new Date(vC[0].data).getTime()) / 86400000);
+    var freq = vC.length;
+    if (dias <= 30 && freq >= 2) { rfm.campeao++; }
+    else if (dias <= 60 && freq >= 1) { rfm.leal++; }
+    else if (dias <= 30 && freq === 1) { rfm.promissor++; }
+    else if (dias > 60 && dias <= 120) { rfm.risco++; }
+    else { rfm.perdido++; }
+    if (freq > 1) { recompra++; }
+  });
+  var churn = (nAtivos + rfm.perdido) ? (rfm.perdido / (nAtivos + rfm.perdido)) * 100 : 0;
+
+  // ----- Performance por vendedor -----
+  var perf = [];
+  getVendedores().forEach(function (v) {
+    var vV = vendas.filter(function (x) { return x.vendedor === v.id; });
+    var tot = vV.filter(function (x) { return (x.tipo || 'venda') === 'venda'; }).reduce(function (s, x) { return s + (parseFloat(x.total) || 0); }, 0);
+    perf.push({ id: v.id, tot: tot, n: vV.length });
+  });
+  perf.sort(function (a, b) { return b.tot - a.tot; });
+
+  // ----- Distribuição por nível -----
+  var nv = { ouro: 0, prata: 0, bronze: 0, sem: 0 };
+  clientes.forEach(function (c) { var n = c.nivel || 'sem'; nv[n] = (nv[n] || 0) + 1; });
+
+  // ----- Pareto -----
+  var porCliVal = {};
+  vendas.forEach(function (v) { var c = codVenda(v) || 'sem-cod'; porCliVal[c] = (porCliVal[c] || 0) + (parseFloat(v.total) || 0); });
+  var ord = Object.keys(porCliVal).sort(function (a, b) { return porCliVal[b] - porCliVal[a]; });
+  var somaT = Object.keys(porCliVal).reduce(function (s, k) { return s + porCliVal[k]; }, 0) || 1;
+  var acum = 0, paret = 0;
+  for (var i2 = 0; i2 < ord.length; i2++) {
+    acum += porCliVal[ord[i2]];
+    if (acum / somaT <= 0.8) { paret = i2 + 1; }
+  }
+
+  // ----- Top produtos -----
+  var prodCount = {};
+  vendas.forEach(function (v) {
+    if (v.itens) {
+      v.itens.forEach(function (it) {
+        var n = it.nome || it.cod;
+        prodCount[n] = (prodCount[n] || 0) + (parseInt(it.qtd) || 0);
+      });
+    }
+  });
+  var topProds = Object.keys(prodCount).sort(function (a, b) { return prodCount[b] - prodCount[a]; }).slice(0, 5);
+
+  // ----- Rótulo do período e data de geração -----
+  var rotulo = 'Todo o histórico';
+  if (ini && fim) { rotulo = 'De ' + ini + ' até ' + fim; }
+  else if (ini) { rotulo = 'A partir de ' + ini; }
+  else if (fim) { rotulo = 'Até ' + fim; }
+  else if (mes) { rotulo = 'Mês: ' + mes + '/' + (ano || '----'); }
+  else if (ano) { rotulo = 'Ano: ' + ano; }
+  var agora = new Date();
+  var geradoEm = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+  // ----- Constrói o HTML autossuficiente -----
+  var C = {
+    azul: '#16324F', azul2: '#1F4466', verde: '#2E8B57', verm: '#C0392B',
+    cinza: '#5A6B7B', cinza2: '#8A9AA8', zebra: '#F4F7FA', borda: '#D9E2EA'
+  };
+  var base = 'font-family:Segoe UI,Arial,Helvetica,sans-serif;';
+
+  function kpiCardPDF(lb, vl, sub) {
+    return '<div style="' + base + 'flex:1;min-width:150px;border:1px solid ' + C.borda + ';border-top:4px solid ' + C.azul + ';border-radius:6px;padding:10px 12px;margin:6px;">' +
+      '<div style="font-size:10px;color:' + C.cinza + ';text-transform:uppercase;letter-spacing:.4px;">' + lb + '</div>' +
+      '<div style="font-size:20px;font-weight:700;color:' + C.azul + ';margin:4px 0;">' + vl + '</div>' +
+      (sub ? '<div style="font-size:10px;color:' + C.cinza2 + ';">' + sub + '</div>' : '') + '</div>';
+  }
+
+  function secao(num, titulo) {
+    return '<div style="' + base + 'font-size:15px;font-weight:700;color:' + C.azul + ';border-bottom:2px solid ' + C.azul + ';padding-bottom:5px;margin:22px 0 10px;">' +
+      '<span style="display:inline-block;background:' + C.azul + ';color:#fff;border-radius:4px;padding:1px 8px;font-size:12px;margin-right:8px;">' + num + '</span>' + titulo + '</div>';
+  }
+
+  function tabelaHTML(thead, linhas) {
+    return '<table style="' + base + 'width:100%;border-collapse:collapse;font-size:12px;">' +
+      '<thead><tr style="background:' + C.azul + ';color:#fff;">' +
+      thead.map(function (h) { return '<th style="padding:7px 8px;text-align:left;font-weight:600;border:1px solid ' + C.azul + ';">' + h + '</th>'; }).join('') +
+      '</tr></thead><tbody>' + linhas + '</tbody></table>';
+  }
+
+  var html = '<div style="' + base + 'color:#222;max-width:840px;margin:0 auto;">';
+
+  // Cabeçalho profissional com a logo
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;background:' + C.azul + ';color:#fff;border-radius:8px;padding:16px 20px;">' +
+    '<div style="display:flex;align-items:center;gap:10px;">' +
+    '<img src="Logomagil.png" alt="Magil" style="height:38px;max-width:170px;background:#fff;border-radius:6px;padding:4px;object-fit:contain;">' +
+    '<div><div style="font-size:22px;font-weight:800;letter-spacing:1px;">Magil</div>' +
+    '<div style="font-size:11px;opacity:.85;">Gestão de Lojistas</div></div></div>' +
+    '<div style="text-align:right;"><div style="font-size:17px;font-weight:700;">Métricas de Clientes</div>' +
+    '<div style="font-size:11px;opacity:.9;">Período: ' + esc(rotulo) + '</div>' +
+    '<div style="font-size:11px;opacity:.9;">Gerado em: ' + geradoEm + '</div></div></div>';
+
+  // 1. Resumo executivo
+  html += secao('1', 'Resumo Executivo');
+  html += '<div style="display:flex;flex-wrap:wrap;margin:-6px;">' +
+    kpiCardPDF('Total Vendido', 'R$ ' + fmtBRL(vendaT), vendas.length + ' lançamentos no período') +
+    kpiCardPDF('Bonificações', 'R$ ' + fmtBRL(bonifT), 'Custo das caixas de graça') +
+    kpiCardPDF('Ticket Médio', 'R$ ' + fmtBRL(ticket), 'Por lançamento') +
+    kpiCardPDF('Clientes Ativos', nAtivos, 'De ' + clientes.length + ' cadastrados') +
+    kpiCardPDF('Churn', churn.toFixed(1) + '%', 'Perda estimada no período') +
+    kpiCardPDF('Retenção', (100 - churn).toFixed(1) + '%', '100% - churn') +
+    kpiCardPDF('Recompra', recompra, 'Compraram mais de 1x') +
+    kpiCardPDF('Pareto', paret + ' de ' + ord.length, 'Clientes que geram 80% da receita') +
+    '</div>';
+
+  // 2. Performance por vendedor
+  html += secao('2', 'Performance por Vendedor');
+  var linhasV = perf.map(function (p2, i) {
+    var metasV = loadData('metas').filter(function (m) { return m.vendedor === p2.id; });
+    var meta = metasV.length ? (parseFloat(metasV[metasV.length - 1].valorVenda) || 0) : 0;
+    var pct = meta > 0 ? Math.min(100, (p2.tot / meta) * 100) : 0;
+    var barra = '<div style="' + base + 'background:' + C.zebra + ';border:1px solid ' + C.borda + ';border-radius:4px;height:12px;overflow:hidden;width:140px;">' +
+      '<div style="height:100%;width:' + pct + '%;background:' + (pct >= 100 ? C.verde : C.azul2) + ';"></div></div>' +
+      '<div style="font-size:10px;color:' + C.cinza + ';margin-top:2px;">' + fmtBRL(p2.tot) + ' de ' + fmtBRL(meta) + ' (' + pct.toFixed(0) + '%)</div>';
+    return '<tr' + (i % 2 ? ' style="background:' + C.zebra + ';"' : '') + '>' +
+      '<td style="padding:6px 8px;border:1px solid ' + C.borda + ';">' + (i + 1) + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid ' + C.borda + ';font-weight:600;">' + esc(getNome(p2.id)) + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid ' + C.borda + ';text-align:right;font-weight:700;">R$ ' + fmtBRL(p2.tot) + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid ' + C.borda + ';text-align:center;">' + p2.n + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid ' + C.borda + ';">' + barra + '</td></tr>';
+  }).join('');
+  html += tabelaHTML(['#', 'Vendedor', 'Faturamento', 'Lançamentos', 'Meta vs Realizado'], linhasV);
+
+  // 3. Classificação RFM
+  html += secao('3', 'Classificação RFM');
+  html += '<div style="display:flex;flex-wrap:wrap;margin:-6px;">' +
+    kpiCardPDF('Campeões', rfm.campeao, 'Recentes e frequentes') +
+    kpiCardPDF('Leais', rfm.leal, 'Compras até 60 dias') +
+    kpiCardPDF('Promissores', rfm.promissor, '1ª compra recente') +
+    kpiCardPDF('Em Risco', rfm.risco, '60 a 120 dias sem compra') +
+    kpiCardPDF('Perdidos', rfm.perdido, '120+ dias sem compra') +
+    '</div>';
+
+  // 4. Distribuição por nível
+  html += secao('4', 'Distribuição por Nível');
+  html += '<div style="display:flex;flex-wrap:wrap;margin:-6px;">' +
+    kpiCardPDF('Ouro', nv.ouro || 0, 'Nível Ouro') +
+    kpiCardPDF('Prata', nv.prata || 0, 'Nível Prata') +
+    kpiCardPDF('Bronze', nv.bronze || 0, 'Nível Bronze') +
+    kpiCardPDF('Sem Nível', nv.sem || 0, 'Sem classificação') +
+    '</div>';
+
+  // 5. Top produtos + inatividade
+  html += secao('5', 'Produtos e Inatividade');
+  var linhasP = topProds.map(function (pr) {
+    return '<tr style="background:' + C.zebra + ';"><td style="padding:6px 8px;border:1px solid ' + C.borda + ';">' + esc(truncarNome(pr, 35)) + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid ' + C.borda + ';text-align:center;font-weight:600;">' + prodCount[pr] + '</td></tr>';
+  }).join('');
+  html += '<div style="display:flex;gap:16px;flex-wrap:wrap;">' +
+    '<div style="flex:1;min-width:280px;">' + tabelaHTML(['Produto', 'Qtd'], linhasP) + '</div>' +
+    '<div style="flex:1;min-width:220px;border:1px solid ' + C.borda + ';border-left:4px solid ' + (rfm.perdido > 0 ? C.verm : C.verde) + ';border-radius:6px;padding:12px;">' +
+    '<div style="font-size:12px;font-weight:700;color:' + C.azul + ';margin-bottom:6px;">Inatividade 90+ dias</div>' +
+    (rfm.perdido > 0
+      ? '<div style="font-size:22px;font-weight:800;color:' + C.verm + ';">' + rfm.perdido + '</div><div style="font-size:11px;color:' + C.cinza + ';">clientes sem compra há mais de 90 dias precisam de ação.</div>'
+      : '<div style="font-size:22px;font-weight:800;color:' + C.verde + ';">0</div><div style="font-size:11px;color:' + C.cinza + ';">Nenhum cliente inativo 90+ dias.</div>') +
+    '</div></div>';
+
+  // 6. Alertas / clientes em risco
+  if (rfm.risco + rfm.perdido > 0) {
+    html += secao('6', 'Alerta de Clientes em Risco');
+    html += '<div style="border:1px solid ' + C.borda + ';border-left:4px solid ' + C.verm + ';border-radius:6px;padding:10px 12px;font-size:12px;">' +
+      '<strong style="color:' + C.verm + ';">' + (rfm.risco + rfm.perdido) + ' clientes</strong> precisam de ação: sem compra há mais de 60 dias no período analisado.</div>';
+  }
+
+  // Rodapé
+  html += '<div style="margin-top:26px;padding-top:10px;border-top:1px solid ' + C.borda + ';font-size:10px;color:' + C.cinza2 + ';text-align:center;">' +
+    'Magil • Métricas de Clientes • Gerado em ' + geradoEm + ' • Documento interno</div>';
+
+  html += '</div>';
+
+  exportPDF('Metricas de Clientes', html);
 }
 
 // ===== RODIZIO 90 DIAS (recolher por usuario) =====
