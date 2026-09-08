@@ -30,7 +30,7 @@
   --row: rgba(0,0,0,.05);
   --r: 14px;
   --s: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
-  --sb: #1D1D1F;
+  --sb: #ffffff;
   --sb2: #2C2C2E;
   --sb3: #3A3A3C;
   --font: -apple-system, 'SF Pro Display', 'Inter', 'Segoe UI', system-ui, sans-serif;
@@ -1402,6 +1402,7 @@ tr:hover td {
 }
 body.dark {
   --bg: #1C1C1E;
+  --sb: #1D1D1F;
   --card: #2C2C2E;
   --txt: #F5F5F7;
   --txt2: #AEAEB2;
@@ -1595,7 +1596,33 @@ body.dark .lc .hint {
     display: none;
   }
 }
-</style>
+/* ===== CORREÇÃO: sidebar acompanha o modo claro ===== */
+[data-theme="light"] .sidebar,
+[data-theme="light"] .sb-brand,
+[data-theme="light"] .sb-user,
+[data-theme="light"] .sb-foot {
+  background: #ffffff !important;
+  color: #3a4557 !important;
+  border-color: #e3e8ef !important;
+}
+[data-theme="light"] .sb-item {
+  color: #3a4557 !important;
+}
+[data-theme="light"] .sb-item:hover {
+  background: rgba(0, 113, 227, 0.08) !important;
+  color: #005bb5 !important;
+}
+[data-theme="light"] .sb-item.act {
+  background: rgba(0, 113, 227, 0.14) !important;
+  color: #005bb5 !important;
+}
+[data-theme="light"] .sb-brand {
+  color: #005bb5 !important;
+}
+[data-theme="light"] .sb-user,
+[data-theme="light"] .sb-foot {
+  color: #5a6478 !important;
+}</style>
 </head>
 <body>
 <div id="ls">
@@ -4868,13 +4895,70 @@ function renderCompContent(vid) {
   var div = document.getElementById('cm-result');
   if (div) { div.innerHTML = html; }
 }
+// ===== ACELERADOR AUTOMÁTICO (por metas batidas) =====
+var MC_MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function getDataVenda(v) {
+  var d = v.data || v.dataVenda || v.criadoEm || v.createdAt || v.timestamp || v.dt;
+  if (!d) return null;
+  if (d && typeof d.toDate === 'function') { d = d.toDate(); }
+  if (typeof d === 'string') {
+    d = d.replace('T', ' ').slice(0, 19).replace(/-/g, '/');
+    d = new Date(d);
+  }
+  if (!d || isNaN(d.getTime())) return null;
+  return d;
+}
+
+function getSemanaDaData(d) {
+  var dia = d.getDate();
+  if (dia <= 7) return 1;
+  if (dia <= 14) return 2;
+  if (dia <= 21) return 3;
+  return 4;
+}
+
+function getMetaSemana(vid, s) {
+  var metas = loadData('metas') || [];
+  var agora = new Date();
+  var mesAtual = MC_MESES[agora.getMonth()].toLowerCase();
+  var anoAtual = String(agora.getFullYear());
+  var fallback = null;
+  for (var i = 0; i < metas.length; i++) {
+    var m = metas[i];
+    if (m.vendedor !== vid || String(m.semana) !== String(s)) continue;
+    if (!fallback) fallback = m;
+    if ((m.mes || '').toLowerCase() === mesAtual && String(m.ano) === anoAtual) return m;
+  }
+  return fallback;
+}
+
+function contarSemanasBatidas(vid) {
+  var vendas = loadData('vendas') || [];
+  var vV = vendas.filter(function (v) {
+    return v.vendedor === vid && ((v.tipo || 'venda') !== 'bonificacao');
+  });
+  var sem = 0;
+  for (var s = 1; s <= 4; s++) {
+    var meta = getMetaSemana(vid, s);
+    if (!meta) continue;
+    var alvo = parseFloat(meta.valorVenda) || 0;
+    if (alvo <= 0) continue;
+    var totalSemana = 0;
+    for (var i = 0; i < vV.length; i++) {
+      var d = getDataVenda(vV[i]);
+      if (d && getSemanaDaData(d) === s) totalSemana += parseFloat(vV[i].total) || 0;
+    }
+    if (totalSemana >= alvo) sem++;
+  }
+  return sem;
+}
+
 function toggleWeek(s, vid) {
-  var w = document.getElementById('cm-week-' + s);
-  if (!w) { return; }
-  w.classList.toggle('checked');
-  w.querySelector('.com-week-icon').innerHTML = w.classList.contains('checked') ? '&#9745;' : '&#9744;';
+  // Acelerador agora é automático (por metas batidas). O clique não marca mais.
   updateComStats(vid);
 }
+
 function updateComStats(vid) {
   var vendas = loadData('vendas').filter(function (v) { return (v.tipo || 'venda') !== 'bonificacao'; });
   var vV = vendas.filter(function (v) { return v.vendedor === vid; });
@@ -4885,11 +4969,7 @@ function updateComStats(vid) {
   for (var i = 0; i < faixas.length; i++) {
     if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; }
   }
-  var sem = 0;
-  for (var s = 1; s <= 4; s++) {
-    var w = document.getElementById('cm-week-' + s);
-    if (w && w.classList.contains('checked')) { sem++; }
-  }
+  var sem = contarSemanasBatidas(vid);
   var acc = sem * ACELERADOR_POR_SEMANA;
   var taxaFinal = taxa + acc;
   var com = (total * taxaFinal) / 100;
@@ -4902,6 +4982,7 @@ function updateComStats(vid) {
   var cv = document.getElementById('cm-comissao-val');
   if (cv) { cv.textContent = 'R$ ' + fmtBRL(com); }
 }
+
 function calcComissaoFinal(vid) {
   var vendas = loadData('vendas').filter(function (v) { return (v.tipo || 'venda') !== 'bonificacao'; });
   var vV = vendas.filter(function (v) { return v.vendedor === vid; });
@@ -4912,11 +4993,7 @@ function calcComissaoFinal(vid) {
   for (var i = 0; i < faixas.length; i++) {
     if (total >= faixas[i].min && total <= faixas[i].max) { taxa = faixas[i].taxa; break; }
   }
-  var sem = 0;
-  for (var s = 1; s <= 4; s++) {
-    var w = document.getElementById('cm-week-' + s);
-    if (w && w.classList.contains('checked')) { sem++; }
-  }
+  var sem = contarSemanasBatidas(vid);
   var acc = sem * ACELERADOR_POR_SEMANA;
   var taxaFinal = taxa + acc;
   var com = (total * taxaFinal) / 100;
@@ -4925,7 +5002,7 @@ function calcComissaoFinal(vid) {
     '<div class="com-result-value num">R$ ' + fmtBRL(com) + '</div>' +
     '<div class="com-result-detail">Base: R$ ' + fmtBRL(total) + ' | Aliquota base: ' + taxa.toFixed(2) +
     '% | Acelerador: +' + acc.toFixed(2).replace('.', ',') + ' | Final: ' + taxaFinal.toFixed(2) + '%</div>' +
-    '<div class="com-result-badge">' + sem + ' de 4 semanas batidas</div></div>';
+    '<div class="com-result-badge">' + sem + ' de 4 semanas batidas (automático)</div></div>';
   var div = document.getElementById('cm-resultado');
   if (div) { div.innerHTML = html; }
 }
